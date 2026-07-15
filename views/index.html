@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopPOS — ระบบขายหน้าร้านฟรีสำหรับร้านค้าไทย</title>
+<link rel="stylesheet" href="/css/output.css">
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+  <!-- Nav -->
+  <header class="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur z-50">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-semibold text-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.984-4.804 2.545-7.4.088-.407-.22-.788-.635-.788H5.106M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        ShopPOS
+      </a>
+      <nav class="hidden md:flex items-center gap-8 text-sm text-gray-600">
+        <a href="#features" class="hover:text-gray-900">ฟีเจอร์</a>
+        <a href="#pricing" class="hover:text-gray-900">ราคา</a>
+        <a href="#about" class="hover:text-gray-900">เกี่ยวกับเรา</a>
+        <a href="#support" class="hover:text-gray-900">ช่วยเหลือ</a>
+      </nav>
+      <a href="/signup" class="text-sm font-medium border border-brand-600 text-brand-700 rounded-md px-4 py-2 hover:bg-brand-50">เริ่มใช้ฟรี</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-3xl mx-auto px-6 pt-16 pb-14 text-center">
+    <span class="inline-block bg-brand-100 text-brand-700 text-xs font-medium px-3 py-1 rounded-full mb-5">ใช้งานฟรี ไม่มีค่าใช้จ่าย</span>
+    <h1 class="text-3xl md:text-4xl font-semibold leading-tight mb-4">ระบบขายหน้าร้าน (POS) ที่ร้านเล็กก็ใช้ได้ฟรี</h1>
+    <p class="text-gray-600 text-base md:text-lg mb-8">จัดการยอดขาย สต๊อก พนักงาน และโปรโมชั่น ครบในที่เดียว ไม่ต้องแบกรับต้นทุนซอฟต์แวร์</p>
+    <div class="flex items-center justify-center gap-3">
+      <a href="/signup" class="bg-brand-600 text-white text-sm font-medium rounded-md px-6 py-3 hover:bg-brand-700">สมัครใช้งานฟรี</a>
+      <a href="#demo" class="border border-gray-300 text-sm font-medium rounded-md px-6 py-3 hover:bg-gray-50">ดูตัวอย่างระบบ</a>
+    </div>
+    <div id="demo" class="mt-10 rounded-xl bg-gray-50 border border-gray-100 h-64 flex items-center justify-center text-gray-400 text-sm">
+      ภาพหน้าจอระบบ POS
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="max-w-6xl mx-auto px-6 py-16 border-t border-gray-100">
+    <p class="text-center text-sm text-gray-400 mb-10">ฟีเจอร์หลักที่ร้านค้าต้องการ</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <div class="rounded-xl border border-gray-100 p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600 mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.984-4.804 2.545-7.4.088-.407-.22-.788-.635-.788H5.106M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        <h3 class="font-medium mb-1">ขายหน้าร้านไว</h3>
+        <p class="text-sm text-gray-500">เปิดหลายบิลพร้อมกัน สแกนบาร์โค้ด รองรับสินค้าเป็นเซ็ต</p>
+      </div>
+
+      <div class="rounded-xl border border-gray-100 p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600 mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+        <h3 class="font-medium mb-1">จัดการสต๊อกอัตโนมัติ</h3>
+        <p class="text-sm text-gray-500">แจ้งเตือนของใกล้หมด นับสต๊อกจริงด้วยบาร์โค้ด</p>
+      </div>
+
+      <div class="rounded-xl border border-gray-100 p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600 mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+        </svg>
+        <h3 class="font-medium mb-1">สร้างโปรโมชั่นได้หลากหลาย</h3>
+        <p class="text-sm text-gray-500">ลดราคาตามช่วงเวลา ซื้อ X แถม Y แถมของขวัญเมื่อครบยอด ระบบเลือกโปรที่คุ้มสุดให้อัตโนมัติ</p>
+      </div>
+
+      <div class="rounded-xl border border-gray-100 p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600 mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+        </svg>
+        <h3 class="font-medium mb-1">ระบบสมาชิกและแต้มสะสม</h3>
+        <p class="text-sm text-gray-500">ระดับสมาชิกอัตโนมัติ แต้มสะสมแลกส่วนลด ของขวัญวันเกิด</p>
+      </div>
+
+      <div class="rounded-xl border border-gray-100 p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600 mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.653v-.443c0-1.09-.542-2.106-1.44-2.708a23.848 23.848 0 00-4.062-2.166m5.502 6.97c-.94.203-1.905.377-2.889.516m0 0a24.29 24.29 0 01-8.925 0m8.925 0c-1.29.184-2.61.284-3.928.284s-2.638-.1-3.928-.284m0 0a2.18 2.18 0 01-1.44-2.708v-.443c0-1.09.542-2.106 1.44-2.708a23.848 23.848 0 014.062-2.166m0 0V2.984c0-.606.44-1.13 1.055-1.199a24.79 24.79 0 015.436.005c.615.07 1.055.593 1.055 1.199v.55" />
+        </svg>
+        <h3 class="font-medium mb-1">จัดการพนักงานครบวงจร</h3>
+        <p class="text-sm text-gray-500">ลงเวลาเข้า-ออกงาน จัดตารางกะ ขอลา คำนวณเงินเดือนและ OT อัตโนมัติ</p>
+      </div>
+
+      <div class="rounded-xl border border-gray-100 p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600 mb-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+        <h3 class="font-medium mb-1">ใบกำกับภาษีถูกกฎหมาย</h3>
+        <p class="text-sm text-gray-500">ออกใบเสร็จและใบกำกับภาษีตามข้อกำหนดกรมสรรพากรอัตโนมัติ</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Why free -->
+  <section class="border-t border-gray-100 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
+      <div class="rounded-xl bg-white border border-gray-100 h-56 flex items-center justify-center text-gray-400 text-sm">
+        ภาพประกอบใช้งานหลายอุปกรณ์
+      </div>
+      <div>
+        <h2 class="text-xl font-semibold mb-3">ทำไมต้องฟรี</h2>
+        <p class="text-gray-600 text-sm leading-relaxed">เราเข้าใจว่าร้านค้าขนาดเล็กและขนาดกลางแบกรับต้นทุนทุกด้านอยู่แล้ว จึงเปิดให้ใช้ระบบฟรีเต็มรูปแบบ ไม่มีค่าธรรมเนียมแอบแฝง เพื่อให้เจ้าของร้านเข้าถึงเทคโนโลยีที่ช่วยบริหารร้านได้โดยไม่ต้องกังวลเรื่องค่าใช้จ่าย</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="max-w-6xl mx-auto px-6 py-16 border-t border-gray-100">
+    <p class="text-center text-sm text-gray-400 mb-10">เสียงจากร้านค้าที่ใช้งานจริง</p>
+    <div class="grid sm:grid-cols-3 gap-6">
+      <div class="rounded-xl border border-gray-100 p-5 text-sm text-gray-500">"..." — เจ้าของร้านอาหาร</div>
+      <div class="rounded-xl border border-gray-100 p-5 text-sm text-gray-500">"..." — เจ้าของร้านค้าปลีก</div>
+      <div class="rounded-xl border border-gray-100 p-5 text-sm text-gray-500">"..." — เจ้าของร้านกาแฟ</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-t border-gray-100 bg-brand-700 text-white text-center">
+    <div class="max-w-2xl mx-auto px-6 py-16">
+      <h2 class="text-2xl font-semibold mb-3">พร้อมเริ่มใช้งานฟรีวันนี้</h2>
+      <p class="text-brand-100 text-sm mb-8">สมัครใน 2 นาที ไม่ต้องใช้บัตรเครดิต</p>
+      <a href="/signup" class="inline-block bg-white text-brand-700 text-sm font-medium rounded-md px-6 py-3 hover:bg-brand-50">สมัครใช้งานฟรี</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+    <span>ShopPOS &copy; 2026</span>
+    <span class="flex gap-4"><a href="#" class="hover:text-gray-600">เงื่อนไข</a><a href="#" class="hover:text-gray-600">ความเป็นส่วนตัว</a><a href="#" class="hover:text-gray-600">ติดต่อเรา</a></span>
+  </footer>
+
+</body>
+</html>
