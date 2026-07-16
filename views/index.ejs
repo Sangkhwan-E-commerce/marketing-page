@@ -125,5 +125,42 @@
   </div>
 </div>
 
+<!-- Footer Section -->
+<footer class="bg-white border-t border-gray-200 py-12">
+    <div class="mx-auto max-w-7xl px-6 md:flex md:items-center md:justify-between lg:px-8">
+        
+        <!-- Social Media Icons -->
+        <div class="flex justify-center space-x-6 md:order-2">
+            
+            <!-- Facebook -->
+            <% if(settings.facebook_url) { %>
+            <a href="<%= settings.facebook_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
+                <span class="sr-only">Facebook</span>
+                <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                </svg>
+            </a>
+            <% } %>
+
+            <!-- LINE -->
+            <% if(settings.line_url) { %>
+            <a href="<%= settings.line_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
+                <span class="sr-only">LINE</span>
+                <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M22.5 10.362c0-4.354-4.577-7.892-10.222-7.892-5.646 0-10.222 3.538-10.222 7.892 0 3.916 3.633 7.228 8.468 7.804.331.039.78.118 1.134.347.354.23.473.666.425 1.047l-.196 1.196c-.05.293.265.518.514.341 2.378-1.706 6.55-4.717 8.163-7.252 1.258-2.025 1.936-3.791 1.936-5.483zM9.544 12.87H7.316c-.361 0-.655-.294-.655-.655V8.508c0-.361.294-.655.655-.655.361 0 .655.294.655.655v3.051h1.573c.361 0 .655.294.655.655 0 .361-.294.655-.655.655zm3.178-.655c0 .361-.294.655-.655.655-.361 0-.655-.294-.655-.655V8.508c0-.361.294-.655.655-.655.361 0 .655.294.655.655v3.707zm3.111 0c0 .361-.294.655-.655.655h-2.126c-.361 0-.655-.294-.655-.655V8.508c0-.361.294-.655.655-.655.361 0 .655.294.655.655v1.282h1.471c.361 0 .655.294.655.655 0 .361-.294.655-.655.655h-1.471v1.124h1.471c.361 0 .655.294.655.655zM20.211 8.508c0 .361-.294.655-.655.655-.361 0-.655-.294-.655-.655v1.282h-1.471c-.361 0-.655-.294-.655-.655 0-.361.294-.655.655-.655h1.471V8.508c0-.361.294-.655.655-.655.361 0 .655.294.655.655z" />
+                </svg>
+            </a>
+            <% } %>
+
+        </div>
+
+        <!-- Copyright Text -->
+        <div class="mt-8 md:order-1 md:mt-0">
+            <p class="text-center text-sm leading-5 text-gray-500"><%= settings.footer_text %></p>
+        </div>
+        
+    </div>
+</footer>
+
 </body>
 </html>
