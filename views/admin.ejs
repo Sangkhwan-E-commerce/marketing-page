@@ -63,6 +63,30 @@
                 <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.hero_img_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
             </div>
 
+
+            <!-- ================= ส่วนปุ่ม CTA ================= -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 text-primary">ตั้งค่าปุ่มสมัครใช้งาน</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <div>
+                        <label class="block font-semibold mb-2">ข้อความบนปุ่ม</label>
+                        <input type="text" name="btn_text" value="<%= settings.btn_text %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">URL ลิงก์</label>
+                        <input type="text" name="btn_url" value="<%= settings.btn_url %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">ขนาดอักษร</label>
+                        <select name="btn_size" class="w-full border p-2 rounded">
+                            <option value="text-sm" <%= settings.btn_size === 'text-sm' ? 'selected' : '' %>>เล็ก (text-sm)</option>
+                            <option value="text-base" <%= settings.btn_size === 'text-base' ? 'selected' : '' %>>ปกติ (text-base)</option>
+                            <option value="text-lg" <%= settings.btn_size === 'text-lg' ? 'selected' : '' %>>ใหญ่ (text-lg)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <!-- ================= ส่วนที่ 2: Feature 3 คอลัมน์ ================= -->
             <div class="mt-12 pt-8 border-t border-gray-200">
                 <h2 class="text-2xl font-bold mb-6 text-blue-600">จุดเด่น 3 คอลัมน์ (Story & Pricing)</h2>

@@ -79,7 +79,12 @@ const defaultSettings = {
         grid3_title: 'อัปเดตข้อมูลแบบเรียลไทม์',
         grid3_desc: 'สต๊อกสินค้าและยอดขายซิงค์ตรงกันทุกอุปกรณ์ทันที ไม่ต้องรอกดรีเฟรช',
         grid4_title: 'ระบบจัดการสิทธิ์พนักงาน',
-        grid4_desc: 'กำหนดสิทธิ์การเข้าถึงเมนูต่างๆ ของพนักงานแต่ละคนได้อย่างอิสระและปลอดภัย'
+        grid4_desc: 'กำหนดสิทธิ์การเข้าถึงเมนูต่างๆ ของพนักงานแต่ละคนได้อย่างอิสระและปลอดภัย',
+        
+        // เพิ่มตัวแปรปุ่ม
+        btn_text: 'สมัครใช้งานฟรี',
+        btn_url: '#',
+        btn_size: 'text-sm' // สามารถเปลี่ยนเป็น text-base หรือ text-lg ได้
         
     };
 
@@ -186,7 +191,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             // เพิ่มตัวแปร Grid Feature ตรงนี้
             grid_badge, grid_title, grid_desc,
             grid1_title, grid1_desc, grid2_title, grid2_desc,
-            grid3_title, grid3_desc, grid4_title, grid4_desc
+            grid3_title, grid3_desc, grid4_title, grid4_desc,
+            btn_text, btn_url, btn_size // เพิ่มตัวแปรปุ่มตรงนี้
         } = req.body;
         
         const updates = { 
@@ -198,7 +204,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             // เพิ่มตัวแปร Grid Feature ตรงนี้
             grid_badge, grid_title, grid_desc,
             grid1_title, grid1_desc, grid2_title, grid2_desc,
-            grid3_title, grid3_desc, grid4_title, grid4_desc
+            grid3_title, grid3_desc, grid4_title, grid4_desc,
+            btn_text, btn_url, btn_size // เพิ่มตัวแปรปุ่มตรงนี้
         };
 
         // ถ้ามีไฟล์แนบมา ให้อัปโหลดขึ้น R2 แล้วอัปเดต URL (เหมือนเดิม)
