@@ -66,7 +66,20 @@ const defaultSettings = {
         // เพิ่มตัวแปร Footer
         footer_text: '© 2026 Lullapos.com. โตไปด้วยกัน จ่ายตามจริง.',
         facebook_url: 'https://facebook.com/',
-        line_url: 'https://line.me/th/'
+        line_url: 'https://line.me/th/',
+
+        // เพิ่มตัวแปรสำหรับ Grid Feature (4 ข้อ)
+        grid_badge: 'ฟีเจอร์ที่ตอบโจทย์',
+        grid_title: 'ฟีเจอร์ครบครัน สำหรับจัดการร้านค้า',
+        grid_desc: 'ทุกสิ่งที่คุณต้องการในการบริหารร้านค้าให้อยู่หมัด รวบรวมไว้ในระบบเดียว ใช้งานง่าย ไม่ซับซ้อน',
+        grid1_title: 'ทำงานบนคลาวด์ 100%',
+        grid1_desc: 'ไม่ต้องติดตั้งโปรแกรม ข้อมูลไม่หายแม้อุปกรณ์พัง เข้าถึงร้านค้าได้จากทุกที่ทุกเวลา',
+        grid2_title: 'ความปลอดภัยสูงสุด',
+        grid2_desc: 'ปกป้องข้อมูลยอดขายและข้อมูลลูกค้าของคุณด้วยมาตรฐานความปลอดภัยระดับสากล',
+        grid3_title: 'อัปเดตข้อมูลแบบเรียลไทม์',
+        grid3_desc: 'สต๊อกสินค้าและยอดขายซิงค์ตรงกันทุกอุปกรณ์ทันที ไม่ต้องรอกดรีเฟรช',
+        grid4_title: 'ระบบจัดการสิทธิ์พนักงาน',
+        grid4_desc: 'กำหนดสิทธิ์การเข้าถึงเมนูต่างๆ ของพนักงานแต่ละคนได้อย่างอิสระและปลอดภัย'
         
     };
 
@@ -163,24 +176,29 @@ app.post('/admin/save', requireAuth, upload.fields([
     try {
         // รับค่าจาก Form ให้เพิ่ม theme_color เข้ามาด้วย
         // รับค่าจาก Form
+        // รับค่าจาก Form
         const { 
             theme_color,
             hero_badge, hero_title, hero_desc,
             feature_title, feature_subtitle,
-            col1_title, col1_desc,
-            col2_title, col2_desc,
-            col3_title, col3_desc,
-            footer_text, facebook_url, line_url // เพิ่มตรงนี้
+            col1_title, col1_desc, col2_title, col2_desc, col3_title, col3_desc,
+            footer_text, facebook_url, line_url,
+            // เพิ่มตัวแปร Grid Feature ตรงนี้
+            grid_badge, grid_title, grid_desc,
+            grid1_title, grid1_desc, grid2_title, grid2_desc,
+            grid3_title, grid3_desc, grid4_title, grid4_desc
         } = req.body;
         
         const updates = { 
             theme_color,
             hero_badge, hero_title, hero_desc,
             feature_title, feature_subtitle,
-            col1_title, col1_desc,
-            col2_title, col2_desc,
-            col3_title, col3_desc,
-            footer_text, facebook_url, line_url // เพิ่มตรงนี้
+            col1_title, col1_desc, col2_title, col2_desc, col3_title, col3_desc,
+            footer_text, facebook_url, line_url,
+            // เพิ่มตัวแปร Grid Feature ตรงนี้
+            grid_badge, grid_title, grid_desc,
+            grid1_title, grid1_desc, grid2_title, grid2_desc,
+            grid3_title, grid3_desc, grid4_title, grid4_desc
         };
 
         // ถ้ามีไฟล์แนบมา ให้อัปโหลดขึ้น R2 แล้วอัปเดต URL (เหมือนเดิม)

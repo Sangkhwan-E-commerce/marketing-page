@@ -99,6 +99,54 @@
             </div>
             <!-- ================= จบส่วนที่ 2 ================= -->
 
+            <!-- ================= ส่วนฟีเจอร์ 4 รายการ (Grid Features) ================= -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 text-primary">ฟีเจอร์ 4 รายการ (Grid Features)</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block font-semibold mb-2">ข้อความ Badge (ป้ายกำกับด้านบน)</label>
+                        <input type="text" name="grid_badge" value="<%= settings.grid_badge %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
+                        <input type="text" name="grid_title" value="<%= settings.grid_title %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
+                        <textarea name="grid_desc" rows="2" class="w-full border p-2 rounded" required><%= settings.grid_desc %></textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <!-- Feature 1 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 1 (ไอคอนคลาวด์)</h3>
+                        <input type="text" name="grid1_title" value="<%= settings.grid1_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                        <textarea name="grid1_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid1_desc %></textarea>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 2 (ไอคอนกุญแจ)</h3>
+                        <input type="text" name="grid2_title" value="<%= settings.grid2_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                        <textarea name="grid2_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid2_desc %></textarea>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 3 (ไอคอนซิงค์)</h3>
+                        <input type="text" name="grid3_title" value="<%= settings.grid3_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                        <textarea name="grid3_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid3_desc %></textarea>
+                    </div>
+                    <!-- Feature 4 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 4 (ไอคอนลายนิ้วมือ)</h3>
+                        <input type="text" name="grid4_title" value="<%= settings.grid4_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                        <textarea name="grid4_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid4_desc %></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- ================= จบส่วนฟีเจอร์ ================= -->
+
             <!-- ================= ส่วนที่ 3: Footer & Social Media ================= -->
             <div class="mt-12 pt-8 border-t border-gray-200">
                 <h2 class="text-2xl font-bold mb-6 text-primary">ส่วนท้ายเว็บไซต์ (Footer & Social Media)</h2>
