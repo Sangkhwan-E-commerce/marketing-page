@@ -162,22 +162,25 @@ app.post('/admin/save', requireAuth, upload.fields([
 ]), async (req, res) => {
     try {
         // รับค่าจาก Form ให้เพิ่ม theme_color เข้ามาด้วย
+        // รับค่าจาก Form
         const { 
-            theme_color, // เพิ่มตัวแปรนี้
+            theme_color,
             hero_badge, hero_title, hero_desc,
             feature_title, feature_subtitle,
             col1_title, col1_desc,
             col2_title, col2_desc,
-            col3_title, col3_desc
+            col3_title, col3_desc,
+            footer_text, facebook_url, line_url // เพิ่มตรงนี้
         } = req.body;
         
         const updates = { 
-            theme_color, // เพิ่มตัวแปรนี้
+            theme_color,
             hero_badge, hero_title, hero_desc,
             feature_title, feature_subtitle,
             col1_title, col1_desc,
             col2_title, col2_desc,
-            col3_title, col3_desc
+            col3_title, col3_desc,
+            footer_text, facebook_url, line_url // เพิ่มตรงนี้
         };
 
         // ถ้ามีไฟล์แนบมา ให้อัปโหลดขึ้น R2 แล้วอัปเดต URL (เหมือนเดิม)
