@@ -36,13 +36,16 @@
         <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
     </div>
 
-    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+    <!-- เปลี่ยนจาก gap เดิม เป็น gap-[30px] (ห่าง 30px เป๊ะๆ ทั้งแนวตั้งและแนวนอน) -->
+    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-[30px] lg:mx-0 lg:max-w-none lg:grid-cols-2">
       
       <!-- ฝั่งซ้าย: ข้อความ -->
-      <div class="lg:pr-8 lg:pt-4">
+      <div class="flex flex-col justify-center">
         <div class="lg:max-w-lg">
           <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h2>
           <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
+          
+          <!-- ใช้ <%- %> และ prose สำหรับ Text Editor -->
           <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
           
           <!-- ปุ่ม CTA -->
@@ -52,9 +55,10 @@
         </div>
       </div>
 
-      <!-- ฝั่งขวา: Product Screenshot ดึงจากฐานข้อมูล -->
+      <!-- ฝั่งขวา: Product Screenshot -->
       <div class="relative flex items-center justify-center">
-        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-[48rem] max-w-none rounded-xl shadow-2xl ring-1 ring-gray-400/10 sm:w-[57rem] md:-ml-4 lg:-ml-0">
+        <!-- เปลี่ยน class ภาพเป็น w-full เพื่อไม่ให้กว้างเกินจนล้นไปทับข้อความ -->
+        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full rounded-xl shadow-2xl ring-1 ring-gray-400/10">
       </div>
 
     </div>
