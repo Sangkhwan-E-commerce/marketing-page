@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lullapos - ระบบ POS สำหรับร้านค้าที่โตไปด้วยกัน</title>
+    <!-- โหลด Tailwind CSS ผ่าน CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Hero Section -->
+    <header class="bg-blue-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                Lullapos
+            </h1>
+            <p class="mt-4 text-xl sm:text-2xl font-light">
+                จุดเริ่มต้นจากหัวใจคนชนบท เพื่อยกระดับร้านค้าไทยให้เติบโตไกลกว่าเดิม
+            </p>
+            <div class="mt-8 flex justify-center gap-4">
+                <a href="#" class="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition shadow-lg">
+                    เริ่มต้นใช้งานฟรี
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Story Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <!-- Heroicon: User (Outline) -->
+                <svg class="w-16 h-16 mx-auto text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg>
+                <h2 class="text-3xl font-bold text-gray-900">ความฝันเล็กๆ สู่การเปลี่ยนแปลงที่ยิ่งใหญ่</h2>
+            </div>
+            <div class="prose prose-blue mx-auto text-lg text-gray-600 leading-relaxed">
+                <p>
+                    ในโลกที่เทคโนโลยีหมุนไปอย่างรวดเร็ว <strong>คุณอภิลักษณ์ แสงขวัญ</strong> ชายหนุ่มในหมู่บ้านชนบท มองเห็นความเป็นจริงที่ต่างออกไป พ่อค้าแม่ค้าทำงานหนัก แต่กลับต้องเสียโอกาสเพราะ "กำแพงราคา" ของเทคโนโลยีที่เข้าถึงยาก
+                </p>
+                <p class="mt-4">
+                    เขาเชื่อว่า <strong>"หัวใจของการทำธุรกิจ ไม่ควรถูกจำกัดด้วยขนาดของร้านหรือทำเลที่ตั้ง"</strong> Lullapos จึงถือกำเนิดขึ้น ไม่ใช่แค่เครื่องมือขายของ แต่เป็นเพื่อนคู่คิดที่เข้าใจหัวอกคนทำร้านค้า
+                </p>
+                <blockquote class="mt-8 border-l-4 border-blue-500 pl-4 italic text-gray-700 bg-gray-50 p-4 rounded-r-lg">
+                    "ผมต้องการสร้างโอกาสให้ร้านค้าในหมู่บ้านหรือในเมืองไกลๆ ได้ใช้เครื่องมือที่เท่าเทียมกับร้านค้าชั้นนำ เพื่อให้ทุกคนเติบโตไปพร้อมกับเทคโนโลยีได้อย่างยั่งยืน"
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-16 bg-blue-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">ปฏิวัติความยุติธรรม "โตไปด้วยกัน จ่ายตามจริง"</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                <!-- Free Tier -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <!-- Heroicon: Gift (Outline) -->
+                    <svg class="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path></svg>
+                    <h3 class="text-2xl font-semibold mb-2">เริ่มต้นใช้งาน</h3>
+                    <p class="text-4xl font-bold text-blue-600 mb-4">ฟรี!</p>
+                    <p class="text-gray-500">สำหรับ 1,000 ออเดอร์แรกต่อเดือน</p>
+                    <p class="mt-4 text-sm text-gray-400">เริ่มต้นเรียนรู้เทคโนโลยีโดยไม่มีความเสี่ยง</p>
+                </div>
+
+                <!-- Pay as you go Tier -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-2 border-blue-500 flex flex-col items-center relative">
+                    <span class="absolute -top-4 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">เมื่อธุรกิจเติบโต</span>
+                    <!-- Heroicon: Currency Dollar (Outline) -->
+                    <svg class="w-12 h-12 text-blue-500 mb-4 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h3 class="text-2xl font-semibold mb-2">ออเดอร์ที่ 1,001 เป็นต้นไป</h3>
+                    <p class="text-4xl font-bold text-blue-600 mb-4">5 <span class="text-xl">สตางค์</span></p>
+                    <p class="text-gray-500">ต่อ 1 ออเดอร์</p>
+                    <p class="mt-4 text-sm text-gray-500">เดือนไหนเงียบจ่ายน้อย เดือนไหนขายดีจ่ายตามจริง แฟร์ที่สุดสำหรับคุณ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white text-center py-8">
+        <p>&copy; 2026 Lullapos.com. เติบโตไปด้วยกัน.</p>
+    </footer>
+
+</body>
+</html>
