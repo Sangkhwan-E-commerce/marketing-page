@@ -8,6 +8,11 @@ const { getMeta, uploadSlotImage, clearSlotImage } = require("./lib/r2");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Render (and most hosting platforms) terminate HTTPS at a proxy and forward
+// plain HTTP internally. Without this, secure cookies never get set by the
+// browser, so the admin session silently fails to persist after login.
+app.set("trust proxy", 1);
+
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SESSION_SECRET = process.env.SESSION_SECRET;
