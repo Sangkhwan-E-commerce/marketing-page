@@ -26,6 +26,13 @@
                 </div>
             </div>
 
+            <!-- ตั้งค่าสีธีมหลัก -->
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <label class="block font-semibold mb-2">สีธีมหลัก (ปุ่ม, ลิงก์, ไอคอน)</label>
+                <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border p-2 rounded" required>
+                <p class="text-xs text-gray-500 mt-2">ใส่ค่าสีได้ทั้งแบบ RGB (เช่น <code>rgb(244 97 100 / 98%)</code>), HEX (เช่น <code>#F46164</code>) หรือชื่อสี (เช่น <code>red</code>)</p>
+            </div>
+
             <!-- เนื้อหา Hero Section -->
             <div>
                 <label class="block font-semibold mb-2">ข้อความ Badge (ด้านบนสุด)</label>

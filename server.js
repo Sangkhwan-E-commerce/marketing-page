@@ -39,7 +39,12 @@ async function initDB() {
     `);
     
     // ข้อมูล Default กรณีรันครั้งแรก
-    const defaultSettings = {
+const defaultSettings = {
+        favicon_url: 'https://via.placeholder.com/32',
+        logo_url: 'https://via.placeholder.com/150x50?text=Logo',
+        theme_color: 'rgb(244 97 100 / 98%)', // เพิ่มบรรทัดนี้เข้ามา
+        hero_badge: 'POS ระบบยุคใหม่เพื่อร้านค้าทุกขนาด',
+        // ... (ตัวแปรเดิมอื่นๆ ยังอยู่ครบ)
         favicon_url: 'https://via.placeholder.com/32',
         logo_url: 'https://via.placeholder.com/150x50?text=Logo',
         hero_badge: 'POS ระบบยุคใหม่เพื่อร้านค้าทุกขนาด',
@@ -149,8 +154,9 @@ app.post('/admin/save', requireAuth, upload.fields([
     { name: 'hero_img', maxCount: 1 }
 ]), async (req, res) => {
     try {
-        // รับค่าทั้งหมดจาก Form รวมถึงส่วน 3 คอลัมน์ที่เพิ่มมาใหม่
+        // รับค่าจาก Form ให้เพิ่ม theme_color เข้ามาด้วย
         const { 
+            theme_color, // เพิ่มตัวแปรนี้
             hero_badge, hero_title, hero_desc,
             feature_title, feature_subtitle,
             col1_title, col1_desc,
@@ -159,6 +165,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         } = req.body;
         
         const updates = { 
+            theme_color, // เพิ่มตัวแปรนี้
             hero_badge, hero_title, hero_desc,
             feature_title, feature_subtitle,
             col1_title, col1_desc,
