@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lullapos - <%= settings.hero_title %></title>
+    <!-- ดึง Favicon จากฐานข้อมูล -->
+    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Prompt', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- Hero Section ที่คุณต้องการ -->
+<div class="overflow-hidden bg-white py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    
+    <!-- แสดง Logo -->
+    <div class="mb-12">
+        <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-12 w-auto">
+    </div>
+
+    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+      
+      <!-- ฝั่งซ้าย: ข้อความ -->
+      <div class="lg:pr-8 lg:pt-4">
+        <div class="lg:max-w-lg">
+          <h2 class="text-base font-semibold leading-7 text-blue-600"><%= settings.hero_badge %></h2>
+          <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
+          <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.hero_desc %></p>
+          
+          <!-- ปุ่ม CTA -->
+          <div class="mt-10 flex items-center gap-x-6">
+            <a href="#" class="rounded-md bg-blue-600 px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition">สมัครใช้งานฟรี</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ฝั่งขวา: Product Screenshot ดึงจากฐานข้อมูล -->
+      <div class="relative flex items-center justify-center">
+        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-[48rem] max-w-none rounded-xl shadow-2xl ring-1 ring-gray-400/10 sm:w-[57rem] md:-ml-4 lg:-ml-0">
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Feature 3 Columns Section -->
+<div class="bg-blue-50 py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl lg:text-center">
+      <h2 class="text-base font-semibold leading-7 text-blue-600">วิสัยทัศน์ของเรา</h2>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
+      <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
+    </div>
+    
+    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+        
+        <!-- Column 1: Story -->
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-600">
+              <!-- Heroicon: User/Heart -->
+              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
+              </svg>
+            </div>
+            <%= settings.col1_title %>
+          </dt>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+            <p class="flex-auto"><%= settings.col1_desc %></p>
+          </dd>
+        </div>
+
+        <!-- Column 2: Free 1000 Orders -->
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-green-500">
+              <!-- Heroicon: Gift -->
+              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path>
+              </svg>
+            </div>
+            <%= settings.col2_title %>
+          </dt>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+            <p class="flex-auto"><%= settings.col2_desc %></p>
+          </dd>
+        </div>
+
+        <!-- Column 3: Pay as you grow -->
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-blue-500 hover:shadow-md transition relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
+          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-600">
+              <!-- Heroicon: Currency Dollar -->
+              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <%= settings.col3_title %>
+          </dt>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+            <p class="flex-auto"><%= settings.col3_desc %></p>
+          </dd>
+        </div>
+
+      </dl>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

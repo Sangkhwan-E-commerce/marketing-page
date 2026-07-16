@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <title>จัดการเว็บไซต์ - Lullapos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Prompt', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 text-gray-800 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-8 text-blue-600 border-b pb-4">จัดการหน้า Landing Page</h1>
+        
+        <form action="/admin/save" method="POST" enctype="multipart/form-data" class="space-y-6">
+            
+            <!-- รูปภาพ (รองรับ PNG) -->
+            <div class="grid grid-cols-2 gap-6 bg-blue-50 p-6 rounded-lg">
+                <div>
+                    <label class="block font-semibold mb-2">อัปโหลด Favicon (PNG/ICO)</label>
+                    <input type="file" name="favicon" accept="image/*" class="w-full text-sm">
+                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.favicon_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2">อัปโหลด Logo โปร่งใส (PNG)</label>
+                    <input type="file" name="logo" accept="image/png" class="w-full text-sm">
+                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.logo_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+                </div>
+            </div>
+
+            <!-- เนื้อหา Hero Section -->
+            <div>
+                <label class="block font-semibold mb-2">ข้อความ Badge (ด้านบนสุด)</label>
+                <input type="text" name="hero_badge" value="<%= settings.hero_badge %>" class="w-full border p-2 rounded" required>
+            </div>
+            
+            <div>
+                <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
+                <input type="text" name="hero_title" value="<%= settings.hero_title %>" class="w-full border p-2 rounded" required>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
+                <textarea name="hero_desc" rows="4" class="w-full border p-2 rounded" required><%= settings.hero_desc %></textarea>
+            </div>
+
+            <div class="bg-blue-50 p-6 rounded-lg">
+                <label class="block font-semibold mb-2">รูปภาพหน้าจอระบบ POS (Hero Image)</label>
+                <input type="file" name="hero_img" accept="image/*" class="w-full text-sm">
+                <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.hero_img_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+            </div>
+
+            <!-- ================= ส่วนที่ 2: Feature 3 คอลัมน์ ================= -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 text-blue-600">จุดเด่น 3 คอลัมน์ (Story & Pricing)</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block font-semibold mb-2">หัวข้อหลักของส่วนนี้</label>
+                        <input type="text" name="feature_title" value="<%= settings.feature_title %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">คำโปรยย่อย (Subtitle)</label>
+                        <textarea name="feature_subtitle" rows="2" class="w-full border p-2 rounded" required><%= settings.feature_subtitle %></textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <!-- Column 1 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">คอลัมน์ 1 (สตอรี่)</h3>
+                        <label class="block text-sm mb-1">หัวข้อ</label>
+                        <input type="text" name="col1_title" value="<%= settings.col1_title %>" class="w-full border p-2 rounded mb-3" required>
+                        <label class="block text-sm mb-1">รายละเอียด</label>
+                        <textarea name="col1_desc" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.col1_desc %></textarea>
+                    </div>
+                    <!-- Column 2 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">คอลัมน์ 2 (ใช้งานฟรี)</h3>
+                        <label class="block text-sm mb-1">หัวข้อ</label>
+                        <input type="text" name="col2_title" value="<%= settings.col2_title %>" class="w-full border p-2 rounded mb-3" required>
+                        <label class="block text-sm mb-1">รายละเอียด</label>
+                        <textarea name="col2_desc" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.col2_desc %></textarea>
+                    </div>
+                    <!-- Column 3 -->
+                    <div>
+                        <h3 class="font-bold mb-3 text-lg text-gray-700">คอลัมน์ 3 (5 สตางค์)</h3>
+                        <label class="block text-sm mb-1">หัวข้อ</label>
+                        <input type="text" name="col3_title" value="<%= settings.col3_title %>" class="w-full border p-2 rounded mb-3" required>
+                        <label class="block text-sm mb-1">รายละเอียด</label>
+                        <textarea name="col3_desc" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.col3_desc %></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- ================= จบส่วนที่ 2 ================= -->
+
+            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded font-bold hover:bg-blue-700 w-full text-lg shadow-lg">บันทึกและอัปเดตเว็บไซต์</button>
+        </form>
+    </div>
+</body>
+</html>
