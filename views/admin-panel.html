@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการรูปภาพหน้าเว็บ — ShopPOS Admin</title>
+<link rel="stylesheet" href="/css/output.css">
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+
+  <header class="bg-white border-b border-gray-100">
+    <div class="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-brand-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.984-4.804 2.545-7.4.088-.407-.22-.788-.635-.788H5.106M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        ShopPOS Admin
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/" target="_blank" class="text-sm text-gray-500 hover:text-gray-800">ดูหน้าเว็บ</a>
+        <form method="POST" action="/admin/logout">
+          <button class="text-sm text-gray-500 hover:text-gray-800">ออกจากระบบ</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-10">
+    <h1 class="text-xl font-semibold mb-1">จัดการรูปภาพหน้าเว็บ</h1>
+    <p class="text-sm text-gray-500 mb-8">อัปโหลดรูปเพื่อแทนที่กล่องตัวอย่างในหน้าแรก รองรับ JPG, PNG, WebP ขนาดไม่เกิน 5MB</p>
+
+    {{FLASH_BLOCK}}
+
+    <div class="grid gap-6">
+
+      <section class="bg-white border border-gray-100 rounded-xl p-6">
+        <h2 class="font-medium mb-1">ภาพหน้าจอระบบ POS (Hero)</h2>
+        <p class="text-xs text-gray-500 mb-4">แสดงในส่วนบนสุดของหน้าแรก แนะนำอัตราส่วนแนวนอน</p>
+        {{HERO_PREVIEW}}
+        <form method="POST" action="/admin/upload" enctype="multipart/form-data" class="flex items-center gap-3">
+          <input type="hidden" name="slot" value="hero">
+          <input type="file" name="image" accept="image/png,image/jpeg,image/webp" required
+            class="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-brand-50 file:text-brand-700 file:text-sm">
+          <button type="submit" class="bg-brand-600 text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brand-700 whitespace-nowrap">อัปโหลด</button>
+        </form>
+        {{HERO_REMOVE_FORM}}
+      </section>
+
+      <section class="bg-white border border-gray-100 rounded-xl p-6">
+        <h2 class="font-medium mb-1">ภาพประกอบใช้งานหลายอุปกรณ์ (ส่วน "ทำไมต้องฟรี")</h2>
+        <p class="text-xs text-gray-500 mb-4">แสดงคู่กับข้อความอธิบายโมเดลธุรกิจ</p>
+        {{WHYFREE_PREVIEW}}
+        <form method="POST" action="/admin/upload" enctype="multipart/form-data" class="flex items-center gap-3">
+          <input type="hidden" name="slot" value="whyFree">
+          <input type="file" name="image" accept="image/png,image/jpeg,image/webp" required
+            class="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-brand-50 file:text-brand-700 file:text-sm">
+          <button type="submit" class="bg-brand-600 text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brand-700 whitespace-nowrap">อัปโหลด</button>
+        </form>
+        {{WHYFREE_REMOVE_FORM}}
+      </section>
+
+    </div>
+  </main>
+
+</body>
+</html>
