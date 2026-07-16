@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lullapos - <%= settings.hero_title %></title>
     <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- เปลี่ยนบรรทัดนี้ -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    
     
     <!-- เพิ่ม Script นี้เพื่อให้ Tailwind ดึงสีจาก Database มาสร้างเป็นคลาส bg-primary, text-primary -->
     <script>
@@ -41,7 +43,7 @@
         <div class="lg:max-w-lg">
           <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h2>
           <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
-          <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.hero_desc %></p>
+          <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
           
           <!-- ปุ่ม CTA -->
           <div class="mt-10 flex items-center gap-x-6">
