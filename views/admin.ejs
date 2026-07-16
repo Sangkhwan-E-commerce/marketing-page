@@ -99,6 +99,28 @@
             </div>
             <!-- ================= จบส่วนที่ 2 ================= -->
 
+            <!-- ================= ส่วนที่ 3: Footer & Social Media ================= -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 text-primary">ส่วนท้ายเว็บไซต์ (Footer & Social Media)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
+                    <div>
+                        <label class="block font-semibold mb-2">ลิงก์ Facebook Page</label>
+                        <input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border p-2 rounded" placeholder="https://facebook.com/yourpage">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">ลิงก์ LINE (หรือ LINE OA)</label>
+                        <input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border p-2 rounded" placeholder="https://line.me/ti/p/yourid">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">ข้อความ Copyright (ด้านล่างสุด)</label>
+                    <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border p-2 rounded" required>
+                </div>
+            </div>
+            <!-- ================= จบส่วนที่ 3 ================= -->
+
             <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded font-bold hover:bg-blue-700 w-full text-lg shadow-lg">บันทึกและอัปเดตเว็บไซต์</button>
         </form>
     </div>
