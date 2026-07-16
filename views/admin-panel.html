@@ -59,6 +59,32 @@
         {{WHYFREE_REMOVE_FORM}}
       </section>
 
+      <section class="bg-white border border-gray-100 rounded-xl p-6">
+        <h2 class="font-medium mb-1">โลโก้เว็บไซต์</h2>
+        <p class="text-xs text-gray-500 mb-4">แสดงที่แถบเมนูด้านบนแทนไอคอนเริ่มต้น — รับเฉพาะไฟล์ .png พื้นหลังโปร่งใส แนะนำสูงประมาณ 64px</p>
+        {{LOGO_PREVIEW}}
+        <form method="POST" action="/admin/upload" enctype="multipart/form-data" class="flex items-center gap-3">
+          <input type="hidden" name="slot" value="logo">
+          <input type="file" name="image" accept="image/png" required
+            class="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-brand-50 file:text-brand-700 file:text-sm">
+          <button type="submit" class="bg-brand-600 text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brand-700 whitespace-nowrap">อัปโหลด</button>
+        </form>
+        {{LOGO_REMOVE_FORM}}
+      </section>
+
+      <section class="bg-white border border-gray-100 rounded-xl p-6">
+        <h2 class="font-medium mb-1">Favicon</h2>
+        <p class="text-xs text-gray-500 mb-4">ไอคอนที่แสดงบนแท็บเบราว์เซอร์ — รับเฉพาะไฟล์ .png แนะนำขนาดสี่เหลี่ยมจัตุรัส เช่น 32x32 หรือ 64x64</p>
+        {{FAVICON_PREVIEW}}
+        <form method="POST" action="/admin/upload" enctype="multipart/form-data" class="flex items-center gap-3">
+          <input type="hidden" name="slot" value="favicon">
+          <input type="file" name="image" accept="image/png" required
+            class="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-brand-50 file:text-brand-700 file:text-sm">
+          <button type="submit" class="bg-brand-600 text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-brand-700 whitespace-nowrap">อัปโหลด</button>
+        </form>
+        {{FAVICON_REMOVE_FORM}}
+      </section>
+
     </div>
   </main>
 

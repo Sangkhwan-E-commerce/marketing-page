@@ -78,6 +78,20 @@ app.get("/", async (req, res) => {
         </div>`
       );
     }
+    if (meta.logo) {
+      html = html.replace(
+        /<!-- SLOT:logo:START -->[\s\S]*?<!-- SLOT:logo:END -->/,
+        `<a href="/" class="flex items-center gap-2 font-semibold text-lg">
+          <img src="${meta.logo}" alt="ShopPOS" class="h-8 w-auto">
+        </a>`
+      );
+    }
+    if (meta.favicon) {
+      html = html.replace(
+        /<!-- SLOT:favicon:START -->[\s\S]*?<!-- SLOT:favicon:END -->/,
+        `<link rel="icon" type="image/png" href="${meta.favicon}">`
+      );
+    }
 
     res.send(html);
   } catch (err) {
@@ -128,11 +142,14 @@ app.post("/admin/upload", requireAdmin, (req, res) => {
       return res.send(await renderAdminPanel(`อัปโหลดไม่สำเร็จ: ${err.message}`, true));
     }
     const slot = req.body.slot;
-    if (!["hero", "whyFree"].includes(slot)) {
+    if (!["hero", "whyFree", "logo", "favicon"].includes(slot)) {
       return res.send(await renderAdminPanel("ตำแหน่งรูปไม่ถูกต้อง", true));
     }
     if (!req.file) {
       return res.send(await renderAdminPanel("กรุณาเลือกไฟล์รูปภาพ", true));
+    }
+    if (["logo", "favicon"].includes(slot) && req.file.mimetype !== "image/png") {
+      return res.send(await renderAdminPanel("โลโก้และ Favicon ต้องเป็นไฟล์ .png เท่านั้น", true));
     }
     try {
       await uploadSlotImage(slot, req.file.buffer, req.file.mimetype, req.file.originalname);
@@ -146,7 +163,7 @@ app.post("/admin/upload", requireAdmin, (req, res) => {
 
 app.post("/admin/remove", requireAdmin, async (req, res) => {
   const slot = req.body.slot;
-  if (!["hero", "whyFree"].includes(slot)) {
+  if (!["hero", "whyFree", "logo", "favicon"].includes(slot)) {
     return res.send(await renderAdminPanel("ตำแหน่งรูปไม่ถูกต้อง", true));
   }
   try {
@@ -190,7 +207,11 @@ async function renderAdminPanel(message, isError) {
     .replace("{{HERO_PREVIEW}}", preview(meta.hero))
     .replace("{{HERO_REMOVE_FORM}}", removeForm("hero", meta.hero))
     .replace("{{WHYFREE_PREVIEW}}", preview(meta.whyFree))
-    .replace("{{WHYFREE_REMOVE_FORM}}", removeForm("whyFree", meta.whyFree));
+    .replace("{{WHYFREE_REMOVE_FORM}}", removeForm("whyFree", meta.whyFree))
+    .replace("{{LOGO_PREVIEW}}", preview(meta.logo))
+    .replace("{{LOGO_REMOVE_FORM}}", removeForm("logo", meta.logo))
+    .replace("{{FAVICON_PREVIEW}}", preview(meta.favicon))
+    .replace("{{FAVICON_REMOVE_FORM}}", removeForm("favicon", meta.favicon));
 
   return html;
 }
