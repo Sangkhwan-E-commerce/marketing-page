@@ -3,193 +3,220 @@
 <head>
     <title>จัดการเว็บไซต์ - Lullapos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- เพิ่ม 2 บรรทัดนี้สำหรับ Quill.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
     <style> body { font-family: 'Prompt', sans-serif; } </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: { colors: { primary: '<%= settings.theme_color %>' } }
+        }
+      }
+    </script>
 </head>
-<body class="bg-gray-50 text-gray-800 p-8">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold mb-8 text-blue-600 border-b pb-4">จัดการหน้า Landing Page</h1>
+<body class="bg-gray-50 text-gray-800 p-4 md:p-8">
+    <div class="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-100">
+        <h1 class="text-3xl font-bold mb-6 text-primary border-b pb-4">จัดการหน้า Landing Page</h1>
         
-        <form action="/admin/save" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-gray-200 mb-8 overflow-x-auto" id="tabs">
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-general">1. ทั่วไป & Footer</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-hero">2. ส่วนบนสุด (Hero)</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features3">3. วิสัยทัศน์ (3 คอลัมน์)</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features4">4. ฟีเจอร์ (4 คอลัมน์)</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-stats">5. ภารกิจและสถิติ</button>
+        </div>
+
+        <!-- ฟอร์มรวมทุก Tabs -->
+        <form action="/admin/save" method="POST" enctype="multipart/form-data">
             
-            <!-- รูปภาพ (รองรับ PNG) -->
-            <div class="grid grid-cols-2 gap-6 bg-blue-50 p-6 rounded-lg">
-                <div>
-                    <label class="block font-semibold mb-2">อัปโหลด Favicon (PNG/ICO)</label>
-                    <input type="file" name="favicon" accept="image/*" class="w-full text-sm">
-                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.favicon_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">อัปโหลด Logo โปร่งใส (PNG)</label>
-                    <input type="file" name="logo" accept="image/png" class="w-full text-sm">
-                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.logo_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
-                </div>
-            </div>
-
-            <!-- ตั้งค่าสีธีมหลัก -->
-            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <label class="block font-semibold mb-2">สีธีมหลัก (ปุ่ม, ลิงก์, ไอคอน)</label>
-                <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border p-2 rounded" required>
-                <p class="text-xs text-gray-500 mt-2">ใส่ค่าสีได้ทั้งแบบ RGB (เช่น <code>rgb(244 97 100 / 98%)</code>), HEX (เช่น <code>#F46164</code>) หรือชื่อสี (เช่น <code>red</code>)</p>
-            </div>
-
-            <!-- เนื้อหา Hero Section -->
-            <div>
-                <label class="block font-semibold mb-2">ข้อความ Badge (ด้านบนสุด)</label>
-                <input type="text" name="hero_badge" value="<%= settings.hero_badge %>" class="w-full border p-2 rounded" required>
-            </div>
-            
-            <div>
-                <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
-                <input type="text" name="hero_title" value="<%= settings.hero_title %>" class="w-full border p-2 rounded" required>
-            </div>
-
-            <div>
-                <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
-                <!-- ซ่อน Input ไว้เก็บค่าส่ง Form -->
-                <input type="hidden" name="hero_desc" id="hero_desc">
-                <!-- ตัว Editor -->
-                <div class="quill-editor bg-white" data-target="hero_desc" style="height: 150px;"><%- settings.hero_desc %></div>
-            </div>
-
-            <div class="bg-blue-50 p-6 rounded-lg">
-                <label class="block font-semibold mb-2">รูปภาพหน้าจอระบบ POS (Hero Image)</label>
-                <input type="file" name="hero_img" accept="image/*" class="w-full text-sm">
-                <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.hero_img_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
-            </div>
-
-
-            <!-- ================= ส่วนปุ่ม CTA ================= -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <h2 class="text-2xl font-bold mb-6 text-primary">ตั้งค่าปุ่มสมัครใช้งาน</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <!-- Tab 1: General -->
+            <div id="tab-general" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50 p-6 rounded-lg">
                     <div>
-                        <label class="block font-semibold mb-2">ข้อความบนปุ่ม</label>
-                        <input type="text" name="btn_text" value="<%= settings.btn_text %>" class="w-full border p-2 rounded" required>
+                        <label class="block font-semibold mb-2">Favicon (PNG/ICO)</label>
+                        <input type="file" name="favicon" accept="image/*" class="w-full text-sm">
+                        <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.favicon_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
                     </div>
                     <div>
-                        <label class="block font-semibold mb-2">URL ลิงก์</label>
-                        <input type="text" name="btn_url" value="<%= settings.btn_url %>" class="w-full border p-2 rounded" required>
+                        <label class="block font-semibold mb-2">Logo โปร่งใส (PNG)</label>
+                        <input type="file" name="logo" accept="image/png" class="w-full text-sm">
+                        <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.logo_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <label class="block font-semibold mb-2">สีธีมหลัก (เช่น <code>rgb(244 97 100 / 98%)</code> หรือ <code>#F46164</code>)</label>
+                    <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border p-2 rounded" required>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
+                    <h3 class="font-bold text-lg text-primary border-b pb-2">ตั้งค่า Footer</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-semibold mb-2">ลิงก์ Facebook</label>
+                            <input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">ลิงก์ LINE</label>
+                            <input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border p-2 rounded">
+                        </div>
                     </div>
                     <div>
-                        <label class="block font-semibold mb-2">ขนาดอักษร</label>
-                        <select name="btn_size" class="w-full border p-2 rounded">
-                            <option value="text-sm" <%= settings.btn_size === 'text-sm' ? 'selected' : '' %>>เล็ก (text-sm)</option>
-                            <option value="text-base" <%= settings.btn_size === 'text-base' ? 'selected' : '' %>>ปกติ (text-base)</option>
-                            <option value="text-lg" <%= settings.btn_size === 'text-lg' ? 'selected' : '' %>>ใหญ่ (text-lg)</option>
-                        </select>
+                        <label class="block font-semibold mb-2">ข้อความ Copyright</label>
+                        <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border p-2 rounded" required>
                     </div>
                 </div>
             </div>
 
-            <!-- ================= ส่วนที่ 2: Feature 3 คอลัมน์ ================= -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <h2 class="text-2xl font-bold mb-6 text-blue-600">จุดเด่น 3 คอลัมน์ (Story & Pricing)</h2>
-                
-                <div class="space-y-4 mb-8">
+            <!-- Tab 2: Hero -->
+            <div id="tab-hero" class="tab-content space-y-6 hidden">
+                <div class="space-y-4">
                     <div>
-                        <label class="block font-semibold mb-2">หัวข้อหลักของส่วนนี้</label>
+                        <label class="block font-semibold mb-2">ข้อความ Badge (ด้านบนสุด)</label>
+                        <input type="text" name="hero_badge" value="<%= settings.hero_badge %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
+                        <input type="text" name="hero_title" value="<%= settings.hero_title %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
+                        <input type="hidden" name="hero_desc" id="hero_desc">
+                        <div class="quill-editor bg-white" data-target="hero_desc" style="height: 150px;"><%- settings.hero_desc %></div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <label class="block font-semibold mb-2">รูปภาพหน้าจอระบบ (Hero Image)</label>
+                    <input type="file" name="hero_img" accept="image/*" class="w-full text-sm">
+                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.hero_img_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-lg text-primary border-b pb-2 mb-4">ปุ่มสมัครใช้งาน</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block font-semibold mb-2">ข้อความ</label>
+                            <input type="text" name="btn_text" value="<%= settings.btn_text %>" class="w-full border p-2 rounded" required>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">URL ลิงก์</label>
+                            <input type="text" name="btn_url" value="<%= settings.btn_url %>" class="w-full border p-2 rounded" required>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">ขนาดอักษร</label>
+                            <select name="btn_size" class="w-full border p-2 rounded">
+                                <option value="text-sm" <%= settings.btn_size === 'text-sm' ? 'selected' : '' %>>เล็ก (text-sm)</option>
+                                <option value="text-base" <%= settings.btn_size === 'text-base' ? 'selected' : '' %>>ปกติ (text-base)</option>
+                                <option value="text-lg" <%= settings.btn_size === 'text-lg' ? 'selected' : '' %>>ใหญ่ (text-lg)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Features 3 Columns -->
+            <div id="tab-features3" class="tab-content space-y-6 hidden">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block font-semibold mb-2">หัวข้อหลัก</label>
                         <input type="text" name="feature_title" value="<%= settings.feature_title %>" class="w-full border p-2 rounded" required>
                     </div>
                     <div>
                         <label class="block font-semibold mb-2">คำโปรยย่อย (Subtitle)</label>
-                        <textarea name="feature_subtitle" rows="2" class="w-full border p-2 rounded" required><%= settings.feature_subtitle %></textarea>
+                        <input type="text" name="feature_subtitle" value="<%= settings.feature_subtitle %>" class="w-full border p-2 rounded" required>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                    <!-- Column 1 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">คอลัมน์ 1 (สตอรี่)</h3>
-                        <label class="block text-sm mb-1">หัวข้อ</label>
-                        <input type="text" name="col1_title" value="<%= settings.col1_title %>" class="w-full border p-2 rounded mb-3" required>
-                        <label class="block text-sm mb-1">รายละเอียด</label>
-                        <textarea name="col1_desc" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.col1_desc %></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <!-- Col 1 -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-lg text-gray-700">คอลัมน์ 1</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน (ก๊อปปี้โค้ด SVG จาก <a href="https://heroicons.com" target="_blank" class="underline">Heroicons.com</a>)</label>
+                        <textarea name="col1_icon" rows="3" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.col1_icon %></textarea>
+                        <input type="text" name="col1_title" value="<%= settings.col1_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
+                        <input type="hidden" name="col1_desc" id="col1_desc">
+                        <div class="quill-editor bg-white" data-target="col1_desc" style="height: 100px;"><%- settings.col1_desc %></div>
                     </div>
-                    <!-- Column 2 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">คอลัมน์ 2 (ใช้งานฟรี)</h3>
-                        <label class="block text-sm mb-1">หัวข้อ</label>
-                        <input type="text" name="col2_title" value="<%= settings.col2_title %>" class="w-full border p-2 rounded mb-3" required>
-                        <label class="block text-sm mb-1">รายละเอียด</label>
-                        <textarea name="col2_desc" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.col2_desc %></textarea>
+                    <!-- Col 2 -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-lg text-gray-700">คอลัมน์ 2</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                        <textarea name="col2_icon" rows="3" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.col2_icon %></textarea>
+                        <input type="text" name="col2_title" value="<%= settings.col2_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
+                        <input type="hidden" name="col2_desc" id="col2_desc">
+                        <div class="quill-editor bg-white" data-target="col2_desc" style="height: 100px;"><%- settings.col2_desc %></div>
                     </div>
-                    <!-- Column 3 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">คอลัมน์ 3 (5 สตางค์)</h3>
-                        <label class="block text-sm mb-1">หัวข้อ</label>
-                        <input type="text" name="col3_title" value="<%= settings.col3_title %>" class="w-full border p-2 rounded mb-3" required>
-                        <label class="block text-sm mb-1">รายละเอียด</label>
-                        <textarea name="col3_desc" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.col3_desc %></textarea>
+                    <!-- Col 3 -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-lg text-gray-700">คอลัมน์ 3</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                        <textarea name="col3_icon" rows="3" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.col3_icon %></textarea>
+                        <input type="text" name="col3_title" value="<%= settings.col3_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
+                        <input type="hidden" name="col3_desc" id="col3_desc">
+                        <div class="quill-editor bg-white" data-target="col3_desc" style="height: 100px;"><%- settings.col3_desc %></div>
                     </div>
                 </div>
             </div>
-            <!-- ================= จบส่วนที่ 2 ================= -->
 
-            <!-- ================= ส่วนฟีเจอร์ 4 รายการ (Grid Features) ================= -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <h2 class="text-2xl font-bold mb-6 text-primary">ฟีเจอร์ 4 รายการ (Grid Features)</h2>
-                
-                <div class="space-y-4 mb-8">
+            <!-- Tab 4: Features 4 Grids -->
+            <div id="tab-features4" class="tab-content space-y-6 hidden">
+                <div class="space-y-4 mb-6">
                     <div>
-                        <label class="block font-semibold mb-2">ข้อความ Badge (ป้ายกำกับด้านบน)</label>
+                        <label class="block font-semibold mb-2">ข้อความ Badge</label>
                         <input type="text" name="grid_badge" value="<%= settings.grid_badge %>" class="w-full border p-2 rounded" required>
                     </div>
                     <div>
-                        <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
+                        <label class="block font-semibold mb-2">หัวข้อหลัก</label>
                         <input type="text" name="grid_title" value="<%= settings.grid_title %>" class="w-full border p-2 rounded" required>
                     </div>
                     <div>
-                        <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
-                        <textarea name="grid_desc" rows="2" class="w-full border p-2 rounded" required><%= settings.grid_desc %></textarea>
+                        <label class="block font-semibold mb-2">รายละเอียด</label>
+                        <input type="hidden" name="grid_desc" id="grid_desc">
+                        <div class="quill-editor bg-white" data-target="grid_desc" style="height: 120px;"><%- settings.grid_desc %></div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                    <!-- Feature 1 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 1 (ไอคอนคลาวด์)</h3>
-                        <input type="text" name="grid1_title" value="<%= settings.grid1_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                    <!-- Grid 1 -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-gray-700">ฟีเจอร์ 1</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                        <textarea name="grid1_icon" rows="2" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.grid1_icon %></textarea>
+                        <input type="text" name="grid1_title" value="<%= settings.grid1_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
                         <textarea name="grid1_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid1_desc %></textarea>
                     </div>
-                    <!-- Feature 2 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 2 (ไอคอนกุญแจ)</h3>
-                        <input type="text" name="grid2_title" value="<%= settings.grid2_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                    <!-- Grid 2 -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-gray-700">ฟีเจอร์ 2</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                        <textarea name="grid2_icon" rows="2" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.grid2_icon %></textarea>
+                        <input type="text" name="grid2_title" value="<%= settings.grid2_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
                         <textarea name="grid2_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid2_desc %></textarea>
                     </div>
-                    <!-- Feature 3 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 3 (ไอคอนซิงค์)</h3>
-                        <input type="text" name="grid3_title" value="<%= settings.grid3_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                    <!-- Grid 3 -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-gray-700">ฟีเจอร์ 3</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                        <textarea name="grid3_icon" rows="2" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.grid3_icon %></textarea>
+                        <input type="text" name="grid3_title" value="<%= settings.grid3_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
                         <textarea name="grid3_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid3_desc %></textarea>
                     </div>
-                    <!-- Feature 4 -->
-                    <div>
-                        <h3 class="font-bold mb-3 text-lg text-gray-700">ฟีเจอร์ 4 (ไอคอนลายนิ้วมือ)</h3>
-                        <input type="text" name="grid4_title" value="<%= settings.grid4_title %>" class="w-full border p-2 rounded mb-2" placeholder="หัวข้อ" required>
+                    <!-- Grid 4 -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-gray-700">ฟีเจอร์ 4</h3>
+                        <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                        <textarea name="grid4_icon" rows="2" class="w-full border p-2 rounded text-xs font-mono bg-gray-100" required><%= settings.grid4_icon %></textarea>
+                        <input type="text" name="grid4_title" value="<%= settings.grid4_title %>" class="w-full border p-2 rounded" placeholder="หัวข้อ" required>
                         <textarea name="grid4_desc" rows="2" class="w-full border p-2 rounded text-sm" placeholder="รายละเอียด" required><%= settings.grid4_desc %></textarea>
                     </div>
                 </div>
             </div>
-            <!-- ================= จบส่วนฟีเจอร์ ================= -->
 
-            <!-- ================= ส่วน Mission & Stats ================= -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <h2 class="text-2xl font-bold mb-6 text-primary">ภารกิจและสถิติ (Mission & Stats)</h2>
-                
+            <!-- Tab 5: Stats -->
+            <div id="tab-stats" class="tab-content space-y-6 hidden">
                 <div class="bg-blue-50 p-6 rounded-lg mb-6">
                     <label class="block font-semibold mb-2">รูปภาพประกอบ (ฝั่งซ้าย)</label>
                     <input type="file" name="stats_img" accept="image/*" class="w-full text-sm">
                     <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.stats_img_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
                 </div>
-
-                <div class="space-y-4 mb-8">
+                <div class="space-y-4 mb-6">
                     <div>
                         <label class="block font-semibold mb-2">ข้อความ Badge</label>
                         <input type="text" name="stats_badge" value="<%= settings.stats_badge %>" class="w-full border p-2 rounded" required>
@@ -199,94 +226,72 @@
                         <input type="text" name="stats_title" value="<%= settings.stats_title %>" class="w-full border p-2 rounded" required>
                     </div>
                     <div>
-                        <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
+                        <label class="block font-semibold mb-2">รายละเอียด</label>
                         <input type="hidden" name="stats_desc" id="stats_desc">
-                        <div class="quill-editor bg-white" data-target="stats_desc" style="height: 150px;"><%- settings.stats_desc %></div>
+                        <div class="quill-editor bg-white" data-target="stats_desc" style="height: 120px;"><%- settings.stats_desc %></div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <div>
                         <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 1</h3>
-                        <label class="block text-sm mb-1">ตัวเลข</label>
-                        <input type="text" name="stat1_value" value="<%= settings.stat1_value %>" class="w-full border p-2 rounded mb-2" required>
-                        <label class="block text-sm mb-1">คำอธิบาย</label>
-                        <input type="text" name="stat1_label" value="<%= settings.stat1_label %>" class="w-full border p-2 rounded" required>
+                        <input type="text" name="stat1_value" value="<%= settings.stat1_value %>" class="w-full border p-2 rounded mb-2" placeholder="ตัวเลข" required>
+                        <input type="text" name="stat1_label" value="<%= settings.stat1_label %>" class="w-full border p-2 rounded" placeholder="คำอธิบาย" required>
                     </div>
                     <div>
                         <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 2</h3>
-                        <label class="block text-sm mb-1">ตัวเลข</label>
-                        <input type="text" name="stat2_value" value="<%= settings.stat2_value %>" class="w-full border p-2 rounded mb-2" required>
-                        <label class="block text-sm mb-1">คำอธิบาย</label>
-                        <input type="text" name="stat2_label" value="<%= settings.stat2_label %>" class="w-full border p-2 rounded" required>
+                        <input type="text" name="stat2_value" value="<%= settings.stat2_value %>" class="w-full border p-2 rounded mb-2" placeholder="ตัวเลข" required>
+                        <input type="text" name="stat2_label" value="<%= settings.stat2_label %>" class="w-full border p-2 rounded" placeholder="คำอธิบาย" required>
                     </div>
                     <div>
                         <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 3</h3>
-                        <label class="block text-sm mb-1">ตัวเลข</label>
-                        <input type="text" name="stat3_value" value="<%= settings.stat3_value %>" class="w-full border p-2 rounded mb-2" required>
-                        <label class="block text-sm mb-1">คำอธิบาย</label>
-                        <input type="text" name="stat3_label" value="<%= settings.stat3_label %>" class="w-full border p-2 rounded" required>
+                        <input type="text" name="stat3_value" value="<%= settings.stat3_value %>" class="w-full border p-2 rounded mb-2" placeholder="ตัวเลข" required>
+                        <input type="text" name="stat3_label" value="<%= settings.stat3_label %>" class="w-full border p-2 rounded" placeholder="คำอธิบาย" required>
                     </div>
                     <div>
                         <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 4</h3>
-                        <label class="block text-sm mb-1">ตัวเลข</label>
-                        <input type="text" name="stat4_value" value="<%= settings.stat4_value %>" class="w-full border p-2 rounded mb-2" required>
-                        <label class="block text-sm mb-1">คำอธิบาย</label>
-                        <input type="text" name="stat4_label" value="<%= settings.stat4_label %>" class="w-full border p-2 rounded" required>
+                        <input type="text" name="stat4_value" value="<%= settings.stat4_value %>" class="w-full border p-2 rounded mb-2" placeholder="ตัวเลข" required>
+                        <input type="text" name="stat4_label" value="<%= settings.stat4_label %>" class="w-full border p-2 rounded" placeholder="คำอธิบาย" required>
                     </div>
                 </div>
             </div>
 
-            <!-- ================= ส่วนที่ 3: Footer & Social Media ================= -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <h2 class="text-2xl font-bold mb-6 text-primary">ส่วนท้ายเว็บไซต์ (Footer & Social Media)</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
-                    <div>
-                        <label class="block font-semibold mb-2">ลิงก์ Facebook Page</label>
-                        <input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border p-2 rounded" placeholder="https://facebook.com/yourpage">
-                    </div>
-                    <div>
-                        <label class="block font-semibold mb-2">ลิงก์ LINE (หรือ LINE OA)</label>
-                        <input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border p-2 rounded" placeholder="https://line.me/ti/p/yourid">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-semibold mb-2">ข้อความ Copyright (ด้านล่างสุด)</label>
-                    <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border p-2 rounded" required>
-                </div>
+            <!-- Submit Button (Sticky to bottom) -->
+            <div class="mt-8 pt-6 border-t border-gray-200 sticky bottom-0 bg-white p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] rounded-b-xl z-20">
+                <button type="submit" class="bg-primary text-white px-8 py-4 rounded-lg font-bold hover:opacity-80 w-full text-lg shadow-lg transition">บันทึกและอัปเดตเว็บไซต์</button>
             </div>
-            <!-- ================= จบส่วนที่ 3 ================= -->
-
-            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded font-bold hover:bg-blue-700 w-full text-lg shadow-lg">บันทึกและอัปเดตเว็บไซต์</button>
         </form>
     </div>
 
-<script>
-        // โหลด Text Editor ทุกจุดที่มีคลาส quill-editor
+    <!-- Scripts สำหรับระบบ Tabs และ Quill Editor -->
+    <script>
+        // ระบบ Tabs
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-primary', 'text-primary');
+                el.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            let activeBtn = document.querySelector(`[data-target="${tabId}"]`);
+            activeBtn.classList.add('border-primary', 'text-primary');
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+        }
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => showTab(e.target.dataset.target));
+        });
+        showTab('tab-general'); // แสดงแท็บแรกเมื่อโหลดหน้าเว็บ
+
+        // ระบบ Text Editor (Quill)
         document.querySelectorAll('.quill-editor').forEach(function(editorDiv) {
             var targetId = editorDiv.getAttribute('data-target');
             var input = document.getElementById(targetId);
             
-            // ตั้งค่าเครื่องมือ (ตัวหนา เอียง ขีดเส้นใต้ ลิสต์)
             var quill = new Quill(editorDiv, {
                 theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                    ]
-                }
+                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
             });
-
-            // เมื่อพิมพ์ข้อความ ให้อัปเดตค่าลงใน input ที่ซ่อนไว้
-            quill.on('text-change', function() {
-                input.value = quill.root.innerHTML;
-            });
-            
-            // ดึงค่าเริ่มต้นใส่ input
+            quill.on('text-change', function() { input.value = quill.root.innerHTML; });
             input.value = quill.root.innerHTML;
         });
     </script>
