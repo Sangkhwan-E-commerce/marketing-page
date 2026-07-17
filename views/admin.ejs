@@ -50,15 +50,23 @@
                     <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border p-2 rounded" required>
                 </div>
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
-                    <h3 class="font-bold text-lg text-primary border-b pb-2">ตั้งค่า Footer</h3>
+                    <h3 class="font-bold text-lg text-primary border-b pb-2">ตั้งค่า Footer & โซเชียล</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-semibold mb-2">ลิงก์ Facebook</label>
                             <input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border p-2 rounded">
                         </div>
                         <div>
+                            <label class="block font-semibold mb-2">ไอคอน Facebook (SVG)</label>
+                            <textarea name="facebook_icon" rows="2" class="w-full border p-2 rounded text-xs font-mono"><%= settings.facebook_icon %></textarea>
+                        </div>
+                        <div>
                             <label class="block font-semibold mb-2">ลิงก์ LINE</label>
                             <input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">ไอคอน LINE (SVG)</label>
+                            <textarea name="line_icon" rows="2" class="w-full border p-2 rounded text-xs font-mono"><%= settings.line_icon %></textarea>
                         </div>
                     </div>
                     <div>
