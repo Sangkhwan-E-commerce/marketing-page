@@ -109,7 +109,13 @@ async function initDB() {
             { question: "เริ่มต้นใช้งานฟรี 1,000 ออเดอร์ จริงไหม?", answer: "จริงครับ! ไม่มีข้อผูกมัดใดๆ แอบแฝง หากเดือนไหนร้านค้าของคุณมียอดออเดอร์ไม่ถึง 1,000 บิล คุณจะไม่ต้องเสียค่าใช้จ่ายใดๆ ทั้งสิ้น" },
             { question: "ถ้าเกิน 1,000 ออเดอร์ จะคิดเงินอย่างไร?", answer: "เราคิดเพียง 5 สตางค์ ต่อ 1 ออเดอร์ที่เกินมาครับ เช่น เดือนนั้นคุณได้ 1,200 ออเดอร์ (เกินมา 200) คุณจะจ่ายเพียง 10 บาทเท่านั้น" },
             { question: "ข้อมูลร้านค้าจะปลอดภัยไหม?", answer: "ปลอดภัยสูงสุดครับ เราเก็บข้อมูลของคุณไว้บน Cloud Server มาตรฐานสากล มีการเข้ารหัสและสำรองข้อมูลตลอดเวลา" }
-        ])
+        ]),
+        cta_title: 'พร้อมที่จะเติบโตไปกับเราหรือยัง?',
+        cta_desc: 'สมัครใช้งาน Lullapos วันนี้ เริ่มต้นฟรี 1,000 ออเดอร์แรก ไม่มีข้อผูกมัดใดๆ และอัปเกรดง่ายๆ เมื่อธุรกิจคุณขยายตัว',
+        cta_btn1_text: 'เริ่มต้นใช้งานฟรี',
+        cta_btn1_url: '#',
+        cta_btn2_text: 'เรียนรู้เพิ่มเติม',
+        cta_btn2_url: '#'
     };
 
     for (const [key, value] of Object.entries(defaultSettings)) {
@@ -224,7 +230,12 @@ app.post('/admin/save', requireAuth, upload.fields([
             stats_badge, stats_title, stats_desc,
             stat1_label, stat1_value, stat2_label, stat2_value,
             stat3_label, stat3_value, stat4_label, stat4_value,
-            faq_title, faq_list
+            faq_title, faq_list,
+            
+            // เพิ่มตัวแปร CTA ตรงนี้
+            cta_title, cta_desc,
+            cta_btn1_text, cta_btn1_url,
+            cta_btn2_text, cta_btn2_url
         } = req.body;
         
         const updates = { 
@@ -247,7 +258,12 @@ app.post('/admin/save', requireAuth, upload.fields([
             stats_badge, stats_title, stats_desc,
             stat1_label, stat1_value, stat2_label, stat2_value,
             stat3_label, stat3_value, stat4_label, stat4_value,
-            faq_title, faq_list
+            faq_title, faq_list,
+            
+            // เพิ่มตัวแปร CTA ตรงนี้
+            cta_title, cta_desc,
+            cta_btn1_text, cta_btn1_url,
+            cta_btn2_text, cta_btn2_url
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);

@@ -22,11 +22,12 @@
         <!-- Tab Navigation -->
         <div class="flex border-b border-gray-200 mb-8 overflow-x-auto" id="tabs">
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-general">1. ทั่วไป & Footer</button>
-            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-hero">2. ส่วนบนสุด (Hero)</button>
-            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features3">3. วิสัยทัศน์ (3 คอลัมน์)</button>
-            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features4">4. ฟีเจอร์ (6 คอลัมน์)</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-hero">2. ส่วนบนสุด</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features3">3. วิสัยทัศน์</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features4">4. ฟีเจอร์</button>
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-stats">5. ภารกิจและสถิติ</button>
-            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-faq">6. คำถามที่พบบ่อย</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-faq">6. ฟังก์ชั่น</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-cta">7. ส่วนเชิญชวน</button>
         </div>
 
         <!-- ฟอร์มรวมทุก Tabs -->
@@ -298,6 +299,43 @@
                     
                     <!-- Input ที่ซ่อนไว้สำหรับส่งค่า JSON กลับไปที่ Server -->
                     <input type="hidden" name="faq_list" id="faq_list_input" value="<%= settings.faq_list %>">
+                </div>
+            </div>
+
+            <!-- Tab 7: CTA (Call to Action) -->
+            <div id="tab-cta" class="tab-content space-y-6 hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary border-b pb-4">ส่วนเชิญชวน (Call to Action)</h2>
+                
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
+                        <input type="text" name="cta_title" value="<%= settings.cta_title %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
+                        <input type="hidden" name="cta_desc" id="cta_desc">
+                        <!-- เรียกใช้ Text Editor -->
+                        <div class="quill-editor bg-white" data-target="cta_desc" style="height: 120px;"><%- settings.cta_desc %></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <!-- ปุ่มหลัก -->
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-700 border-b pb-2 mb-4">ปุ่มหลัก (ปุ่มทึบ)</h3>
+                        <label class="block text-sm mb-1">ข้อความบนปุ่ม</label>
+                        <input type="text" name="cta_btn1_text" value="<%= settings.cta_btn1_text %>" class="w-full border p-2 rounded mb-3" required>
+                        <label class="block text-sm mb-1">URL ลิงก์</label>
+                        <input type="text" name="cta_btn1_url" value="<%= settings.cta_btn1_url %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <!-- ปุ่มรอง -->
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-700 border-b pb-2 mb-4">ปุ่มรอง (ลิงก์มีลูกศร)</h3>
+                        <label class="block text-sm mb-1">ข้อความบนปุ่ม</label>
+                        <input type="text" name="cta_btn2_text" value="<%= settings.cta_btn2_text %>" class="w-full border p-2 rounded mb-3" required>
+                        <label class="block text-sm mb-1">URL ลิงก์</label>
+                        <input type="text" name="cta_btn2_url" value="<%= settings.cta_btn2_url %>" class="w-full border p-2 rounded" required>
+                    </div>
                 </div>
             </div>
 
