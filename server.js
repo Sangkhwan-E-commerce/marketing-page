@@ -204,6 +204,7 @@ app.post('/admin/save', requireAuth, upload.fields([
             col2_title, col2_desc, col2_icon, // เพิ่ม icon
             col3_title, col3_desc, col3_icon, // เพิ่ม icon
             footer_text, facebook_url, line_url,
+            facebook_icon, line_icon,
             grid_badge, grid_title, grid_desc,
             grid1_title, grid1_desc, grid1_icon, // เพิ่ม icon
             grid2_title, grid2_desc, grid2_icon, // เพิ่ม icon
@@ -225,6 +226,7 @@ app.post('/admin/save', requireAuth, upload.fields([
             col2_title, col2_desc, col2_icon, 
             col3_title, col3_desc, col3_icon, 
             footer_text, facebook_url, line_url,
+            facebook_icon,line_icon,
             grid_badge, grid_title, grid_desc,
             grid1_title, grid1_desc, grid1_icon, 
             grid2_title, grid2_desc, grid2_icon, 
