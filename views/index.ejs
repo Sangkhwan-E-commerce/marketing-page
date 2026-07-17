@@ -277,7 +277,7 @@
           </dt>
           <!-- ส่วนคำตอบ (ซ่อนเป็นค่าเริ่มต้น) -->
           <dd class="mt-2 pr-12 hidden faq-answer transition-all duration-300">
-            <p class="text-base leading-7 text-gray-600"><%= faq.answer %></p>
+            <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
           </dd>
         </div>
         <% }); %>
@@ -288,23 +288,26 @@
 </div>
 
 <!-- Script สำหรับเปิด/ปิด Accordion -->
+<!-- Script สำหรับเปิด/ปิด Accordion (เปิดได้ทีละข้อ) -->
 <script>
-    document.querySelectorAll('.faq-toggle-btn').forEach(button => {
+    const faqButtons = document.querySelectorAll('.faq-toggle-btn');
+    
+    faqButtons.forEach(button => {
         button.addEventListener('click', () => {
             const answer = button.parentElement.nextElementSibling;
             const iconPlus = button.querySelector('.faq-icon-plus');
             const iconMinus = button.querySelector('.faq-icon-minus');
             
-            // เช็คว่าตอนนี้เปิดอยู่หรือไม่
+            // เช็คว่าข้อนี้กำลังเปิดอยู่หรือไม่
             const isOpen = !answer.classList.contains('hidden');
             
-            if (isOpen) {
-                // ถ้าเปิดอยู่ ให้ปิด
-                answer.classList.add('hidden');
-                iconPlus.classList.remove('hidden');
-                iconMinus.classList.add('hidden');
-            } else {
-                // ถ้าปิดอยู่ ให้เปิด
+            // 1. ปิดทุกข้อก่อนเสมอ
+            document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
+            document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
+            document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
+            
+            // 2. ถ้าข้อที่กดไม่ได้เปิดอยู่แต่แรก ให้เปิดขึ้นมา
+            if (!isOpen) {
                 answer.classList.remove('hidden');
                 iconPlus.classList.add('hidden');
                 iconMinus.classList.remove('hidden');

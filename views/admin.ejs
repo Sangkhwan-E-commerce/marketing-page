@@ -354,15 +354,36 @@
             faqContainer.innerHTML = '';
             faqs.forEach((faq, index) => {
                 const div = document.createElement('div');
-                div.className = 'bg-white p-4 rounded border border-gray-200 relative';
+                div.className = 'bg-white p-4 rounded border border-gray-200 relative mb-4';
+                
+                // ใช้การเข้ารหัสเครื่องหมายคำพูดป้องกัน HTML พัง
+                const safeQuestion = faq.question ? faq.question.replace(/"/g, '&quot;') : '';
+
                 div.innerHTML = `
                     <button type="button" onclick="removeFaq(${index})" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg" title="ลบคำถามนี้">&times;</button>
                     <label class="block text-sm font-semibold mb-1">คำถาม</label>
-                    <input type="text" class="w-full border p-2 rounded mb-2 text-sm" value="${faq.question}" onchange="updateFaq(${index}, 'question', this.value)">
-                    <label class="block text-sm font-semibold mb-1">คำตอบ</label>
-                    <textarea class="w-full border p-2 rounded text-sm" rows="2" onchange="updateFaq(${index}, 'answer', this.value)">${faq.answer}</textarea>
+                    <input type="text" class="w-full border p-2 rounded mb-4 text-sm" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)">
+                    
+                    <label class="block text-sm font-semibold mb-1">คำตอบ (รายละเอียด)</label>
+                    <!-- สร้างพื้นที่สำหรับ Text Editor -->
+                    <div id="faq_editor_${index}" class="bg-white" style="height: 100px;"></div>
                 `;
                 faqContainer.appendChild(div);
+
+                // เริ่มต้นการทำงานของ Quill Editor สำหรับแต่ละข้อ
+                const editorDiv = document.getElementById(`faq_editor_${index}`);
+                editorDiv.innerHTML = faq.answer || ''; // ใส่ค่าเริ่มต้น
+
+                const quillFaq = new Quill(editorDiv, {
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+
+                // เมื่อพิมพ์ข้อความ ให้อัปเดตค่าลง JSON ทันที
+                quillFaq.on('text-change', function() {
+                    faqs[index].answer = quillFaq.root.innerHTML;
+                    faqInput.value = JSON.stringify(faqs);
+                });
             });
             faqInput.value = JSON.stringify(faqs); // อัปเดต JSON ลง Input
         }
