@@ -179,6 +179,64 @@
             </div>
             <!-- ================= จบส่วนฟีเจอร์ ================= -->
 
+            <!-- ================= ส่วน Mission & Stats ================= -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h2 class="text-2xl font-bold mb-6 text-primary">ภารกิจและสถิติ (Mission & Stats)</h2>
+                
+                <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                    <label class="block font-semibold mb-2">รูปภาพประกอบ (ฝั่งซ้าย)</label>
+                    <input type="file" name="stats_img" accept="image/*" class="w-full text-sm">
+                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.stats_img_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block font-semibold mb-2">ข้อความ Badge</label>
+                        <input type="text" name="stats_badge" value="<%= settings.stats_badge %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">หัวข้อหลัก</label>
+                        <input type="text" name="stats_title" value="<%= settings.stats_title %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">รายละเอียด (Description)</label>
+                        <input type="hidden" name="stats_desc" id="stats_desc">
+                        <div class="quill-editor bg-white" data-target="stats_desc" style="height: 150px;"><%- settings.stats_desc %></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <div>
+                        <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 1</h3>
+                        <label class="block text-sm mb-1">ตัวเลข</label>
+                        <input type="text" name="stat1_value" value="<%= settings.stat1_value %>" class="w-full border p-2 rounded mb-2" required>
+                        <label class="block text-sm mb-1">คำอธิบาย</label>
+                        <input type="text" name="stat1_label" value="<%= settings.stat1_label %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 2</h3>
+                        <label class="block text-sm mb-1">ตัวเลข</label>
+                        <input type="text" name="stat2_value" value="<%= settings.stat2_value %>" class="w-full border p-2 rounded mb-2" required>
+                        <label class="block text-sm mb-1">คำอธิบาย</label>
+                        <input type="text" name="stat2_label" value="<%= settings.stat2_label %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 3</h3>
+                        <label class="block text-sm mb-1">ตัวเลข</label>
+                        <input type="text" name="stat3_value" value="<%= settings.stat3_value %>" class="w-full border p-2 rounded mb-2" required>
+                        <label class="block text-sm mb-1">คำอธิบาย</label>
+                        <input type="text" name="stat3_label" value="<%= settings.stat3_label %>" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <h3 class="font-bold mb-2 text-gray-700 border-b pb-2">สถิติที่ 4</h3>
+                        <label class="block text-sm mb-1">ตัวเลข</label>
+                        <input type="text" name="stat4_value" value="<%= settings.stat4_value %>" class="w-full border p-2 rounded mb-2" required>
+                        <label class="block text-sm mb-1">คำอธิบาย</label>
+                        <input type="text" name="stat4_label" value="<%= settings.stat4_label %>" class="w-full border p-2 rounded" required>
+                    </div>
+                </div>
+            </div>
+
             <!-- ================= ส่วนที่ 3: Footer & Social Media ================= -->
             <div class="mt-12 pt-8 border-t border-gray-200">
                 <h2 class="text-2xl font-bold mb-6 text-primary">ส่วนท้ายเว็บไซต์ (Footer & Social Media)</h2>

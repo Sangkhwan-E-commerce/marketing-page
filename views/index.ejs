@@ -201,6 +201,46 @@
   </div>
 </div>
 
+<!-- Mission & Stats Section (Split with Image) -->
+<div class="relative bg-white">
+  <!-- ฝั่งซ้าย: รูปภาพ (จะเต็มจอบนมือถือ และแบ่งครึ่งซ้ายบนคอมพิวเตอร์) -->
+  <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
+  
+  <!-- ฝั่งขวา: เนื้อหาและสถิติ -->
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
+      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
+      
+      <!-- ใช้ <%- %> และ prose สำหรับ Text Editor -->
+      <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
+      
+      <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
+        <!-- สถิติที่ 1 -->
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
+          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt>
+          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd>
+        </div>
+        <!-- สถิติที่ 2 -->
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
+          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt>
+          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd>
+        </div>
+        <!-- สถิติที่ 3 -->
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
+          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt>
+          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd>
+        </div>
+        <!-- สถิติที่ 4 -->
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
+          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt>
+          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>
+
 <!-- Footer Section -->
 <footer class="bg-white border-t border-gray-200 py-12">
     <div class="mx-auto max-w-7xl px-6 md:flex md:items-center md:justify-between lg:px-8">

@@ -81,11 +81,20 @@ const defaultSettings = {
         grid4_title: 'ระบบจัดการสิทธิ์พนักงาน',
         grid4_desc: 'กำหนดสิทธิ์การเข้าถึงเมนูต่างๆ ของพนักงานแต่ละคนได้อย่างอิสระและปลอดภัย',
         
-        // เพิ่มตัวแปรปุ่ม
+        // ... (ตัวแปรเดิมของปุ่ม CTA)
         btn_text: 'สมัครใช้งานฟรี',
         btn_url: '#',
-        btn_size: 'text-sm' // สามารถเปลี่ยนเป็น text-base หรือ text-lg ได้
-        
+        btn_size: 'text-sm',
+
+        // เพิ่มตัวแปรสำหรับ Mission & Stats
+        stats_badge: 'ภารกิจของเรา',
+        stats_title: 'สถิติที่เติบโตไปพร้อมกับคุณ',
+        stats_desc: 'Lullapos มุ่งมั่นที่จะเป็นส่วนหนึ่งในความสำเร็จของร้านค้าขนาดเล็ก เราพร้อมสนับสนุนคุณด้วยระบบที่เสถียร ใช้งานง่าย และยุติธรรมที่สุด เพื่อให้คุณโฟกัสกับการขายได้อย่างเต็มที่',
+        stats_img_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2850&q=80',
+        stat1_label: 'ร้านค้าที่ไว้วางใจ', stat1_value: '8,000+',
+        stat2_label: 'ค่าธรรมเนียมแรกเข้า', stat2_value: '0 ฿',
+        stat3_label: 'ระบบเสถียร (Uptime)', stat3_value: '99.9%',
+        stat4_label: 'ประหยัดต้นทุนเฉลี่ย', stat4_value: '100%'
     };
 
     for (const [key, value] of Object.entries(defaultSettings)) {
@@ -176,7 +185,8 @@ app.get('/admin', requireAuth, async (req, res) => {
 app.post('/admin/save', requireAuth, upload.fields([
     { name: 'favicon', maxCount: 1 },
     { name: 'logo', maxCount: 1 },
-    { name: 'hero_img', maxCount: 1 }
+    { name: 'hero_img', maxCount: 1 },
+    { name: 'stats_img', maxCount: 1 } // เพิ่มบรรทัดนี้
 ]), async (req, res) => {
     try {
         // รับค่าจาก Form ให้เพิ่ม theme_color เข้ามาด้วย
@@ -192,7 +202,12 @@ app.post('/admin/save', requireAuth, upload.fields([
             grid_badge, grid_title, grid_desc,
             grid1_title, grid1_desc, grid2_title, grid2_desc,
             grid3_title, grid3_desc, grid4_title, grid4_desc,
-            btn_text, btn_url, btn_size // เพิ่มตัวแปรปุ่มตรงนี้
+            btn_text, btn_url, btn_size, // เพิ่มตัวแปรปุ่มตรงนี้
+            
+            // เพิ่มตัวแปร Stats ตรงนี้
+            stats_badge, stats_title, stats_desc,
+            stat1_label, stat1_value, stat2_label, stat2_value,
+            stat3_label, stat3_value, stat4_label, stat4_value
         } = req.body;
         
         const updates = { 
@@ -205,13 +220,20 @@ app.post('/admin/save', requireAuth, upload.fields([
             grid_badge, grid_title, grid_desc,
             grid1_title, grid1_desc, grid2_title, grid2_desc,
             grid3_title, grid3_desc, grid4_title, grid4_desc,
-            btn_text, btn_url, btn_size // เพิ่มตัวแปรปุ่มตรงนี้
+            btn_text, btn_url, btn_size,
+            
+            // เพิ่มตัวแปร Stats ตรงนี้
+            stats_badge, stats_title, stats_desc,
+            stat1_label, stat1_value, stat2_label, stat2_value,
+            stat3_label, stat3_value, stat4_label, stat4_value
         };
 
         // ถ้ามีไฟล์แนบมา ให้อัปโหลดขึ้น R2 แล้วอัปเดต URL (เหมือนเดิม)
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
         if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0]);
         if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
+        // เพิ่มเช็คไฟล์รูป Stats
+        if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0]);
 
         // บันทึกลงฐานข้อมูล (เหมือนเดิม)
         for (const [key, value] of Object.entries(updates)) {
