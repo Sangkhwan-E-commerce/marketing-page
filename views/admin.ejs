@@ -26,6 +26,7 @@
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features3">3. วิสัยทัศน์ (3 คอลัมน์)</button>
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-features4">4. ฟีเจอร์ (6 คอลัมน์)</button>
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-stats">5. ภารกิจและสถิติ</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-faq">6. คำถามที่พบบ่อย</button>
         </div>
 
         <!-- ฟอร์มรวมทุก Tabs -->
@@ -279,6 +280,27 @@
                 </div>
             </div>
 
+            <!-- Tab 6: FAQ -->
+            <div id="tab-faq" class="tab-content space-y-6 hidden">
+                <div>
+                    <label class="block font-semibold mb-2">หัวข้อหลัก (Title)</label>
+                    <input type="text" name="faq_title" value="<%= settings.faq_title %>" class="w-full border p-2 rounded" required>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg text-primary">รายการคำถาม (เพิ่มได้ไม่จำกัด)</h3>
+                        <button type="button" id="add-faq-btn" class="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition">+ เพิ่มคำถามใหม่</button>
+                    </div>
+                    
+                    <!-- ส่วนแสดงรายการคำถาม -->
+                    <div id="faq-container" class="space-y-4"></div>
+                    
+                    <!-- Input ที่ซ่อนไว้สำหรับส่งค่า JSON กลับไปที่ Server -->
+                    <input type="hidden" name="faq_list" id="faq_list_input" value="<%= settings.faq_list %>">
+                </div>
+            </div>
+
             <!-- Submit Button (Sticky to bottom) -->
             <div class="mt-8 pt-6 border-t border-gray-200 sticky bottom-0 bg-white p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] rounded-b-xl z-20">
                 <button type="submit" class="bg-primary text-white px-8 py-4 rounded-lg font-bold hover:opacity-80 w-full text-lg shadow-lg transition">บันทึกและอัปเดตเว็บไซต์</button>
@@ -318,6 +340,51 @@
             quill.on('text-change', function() { input.value = quill.root.innerHTML; });
             input.value = quill.root.innerHTML;
         });
+
+        // ระบบจัดการ FAQ (JSON Array)
+        const faqContainer = document.getElementById('faq-container');
+        const faqInput = document.getElementById('faq_list_input');
+        const addFaqBtn = document.getElementById('add-faq-btn');
+        
+        // โหลดข้อมูล FAQ เดิมจาก Input
+        let faqs = [];
+        try { faqs = JSON.parse(faqInput.value || '[]'); } catch(e) { faqs = []; }
+
+        function renderFaqs() {
+            faqContainer.innerHTML = '';
+            faqs.forEach((faq, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-4 rounded border border-gray-200 relative';
+                div.innerHTML = `
+                    <button type="button" onclick="removeFaq(${index})" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg" title="ลบคำถามนี้">&times;</button>
+                    <label class="block text-sm font-semibold mb-1">คำถาม</label>
+                    <input type="text" class="w-full border p-2 rounded mb-2 text-sm" value="${faq.question}" onchange="updateFaq(${index}, 'question', this.value)">
+                    <label class="block text-sm font-semibold mb-1">คำตอบ</label>
+                    <textarea class="w-full border p-2 rounded text-sm" rows="2" onchange="updateFaq(${index}, 'answer', this.value)">${faq.answer}</textarea>
+                `;
+                faqContainer.appendChild(div);
+            });
+            faqInput.value = JSON.stringify(faqs); // อัปเดต JSON ลง Input
+        }
+
+        window.updateFaq = function(index, key, value) {
+            faqs[index][key] = value;
+            faqInput.value = JSON.stringify(faqs);
+        };
+
+        window.removeFaq = function(index) {
+            if(confirm('ต้องการลบคำถามนี้ใช่หรือไม่?')) {
+                faqs.splice(index, 1);
+                renderFaqs();
+            }
+        };
+
+        addFaqBtn.addEventListener('click', () => {
+            faqs.push({ question: '', answer: '' });
+            renderFaqs();
+        });
+
+        renderFaqs(); // โหลดครั้งแรก
     </script>
 </body>
 </html>

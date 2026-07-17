@@ -101,7 +101,15 @@ async function initDB() {
         stat1_label: 'ร้านค้าที่ไว้วางใจ', stat1_value: '8,000+',
         stat2_label: 'ค่าธรรมเนียมแรกเข้า', stat2_value: '0 ฿',
         stat3_label: 'ระบบเสถียร (Uptime)', stat3_value: '99.9%',
-        stat4_label: 'ประหยัดต้นทุนเฉลี่ย', stat4_value: '100%'
+        stat4_label: 'ประหยัดต้นทุนเฉลี่ย', stat4_value: '100%',
+        // เพิ่มตัวแปร FAQ
+        faq_title: 'คำถามที่พบบ่อย (FAQ)',
+        // เก็บเป็น JSON String เพื่อให้เพิ่มได้ไม่จำกัด
+        faq_list: JSON.stringify([
+            { question: "เริ่มต้นใช้งานฟรี 1,000 ออเดอร์ จริงไหม?", answer: "จริงครับ! ไม่มีข้อผูกมัดใดๆ แอบแฝง หากเดือนไหนร้านค้าของคุณมียอดออเดอร์ไม่ถึง 1,000 บิล คุณจะไม่ต้องเสียค่าใช้จ่ายใดๆ ทั้งสิ้น" },
+            { question: "ถ้าเกิน 1,000 ออเดอร์ จะคิดเงินอย่างไร?", answer: "เราคิดเพียง 5 สตางค์ ต่อ 1 ออเดอร์ที่เกินมาครับ เช่น เดือนนั้นคุณได้ 1,200 ออเดอร์ (เกินมา 200) คุณจะจ่ายเพียง 10 บาทเท่านั้น" },
+            { question: "ข้อมูลร้านค้าจะปลอดภัยไหม?", answer: "ปลอดภัยสูงสุดครับ เราเก็บข้อมูลของคุณไว้บน Cloud Server มาตรฐานสากล มีการเข้ารหัสและสำรองข้อมูลตลอดเวลา" }
+        ])
     };
 
     for (const [key, value] of Object.entries(defaultSettings)) {
@@ -215,7 +223,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             btn_text, btn_url, btn_size,
             stats_badge, stats_title, stats_desc,
             stat1_label, stat1_value, stat2_label, stat2_value,
-            stat3_label, stat3_value, stat4_label, stat4_value
+            stat3_label, stat3_value, stat4_label, stat4_value,
+            faq_title, faq_list
         } = req.body;
         
         const updates = { 
@@ -237,7 +246,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             btn_text, btn_url, btn_size,
             stats_badge, stats_title, stats_desc,
             stat1_label, stat1_value, stat2_label, stat2_value,
-            stat3_label, stat3_value, stat4_label, stat4_value
+            stat3_label, stat3_value, stat4_label, stat4_value,
+            faq_title, faq_list
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
