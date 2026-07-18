@@ -213,7 +213,8 @@ app.post('/admin/save', requireAuth, upload.fields([
     { name: 'favicon', maxCount: 1 },
     { name: 'logo', maxCount: 1 },
     { name: 'hero_img', maxCount: 1 },
-    { name: 'stats_img', maxCount: 1 }
+    { name: 'stats_img', maxCount: 1 },
+    { name: 'seo_thumbnail', maxCount: 1 } // <--- เพิ่มบรรทัดนี้เข้าไปครับ
 ]), async (req, res) => {
     try {
         const { 
