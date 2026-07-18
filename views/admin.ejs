@@ -28,6 +28,7 @@
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-stats">5. ภารกิจและสถิติ</button>
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-faq">6. ฟังก์ชั่น</button>
             <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-cta">7. ส่วนเชิญชวน</button>
+            <button type="button" class="tab-btn px-4 py-3 border-b-2 font-semibold whitespace-nowrap transition-colors" data-target="tab-seo">8. SEO</button>
         </div>
 
         <!-- ฟอร์มรวมทุก Tabs -->
@@ -335,6 +336,35 @@
                         <input type="text" name="cta_btn2_text" value="<%= settings.cta_btn2_text %>" class="w-full border p-2 rounded mb-3" required>
                         <label class="block text-sm mb-1">URL ลิงก์</label>
                         <input type="text" name="cta_btn2_url" value="<%= settings.cta_btn2_url %>" class="w-full border p-2 rounded" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 8: SEO settings -->
+            <div id="tab-seo" class="tab-content space-y-6 hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary border-b pb-4">ตั้งค่า SEO & โซเชียลแชร์</h2>
+                
+                <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                    <label class="block font-semibold mb-2">รูปภาพ Thumbnail (แสดงเวลาแชร์ลิงก์ไปที่ Facebook/LINE)</label>
+                    <input type="file" name="seo_thumbnail" accept="image/*" class="w-full text-sm">
+                    <p class="text-xs text-gray-500 mt-1">ไฟล์ปัจจุบัน: <a href="<%= settings.seo_thumbnail_url %>" target="_blank" class="text-blue-500 underline">ดูรูป</a></p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block font-semibold mb-2">SEO Title (ชื่อเว็บที่แสดงบน Google)</label>
+                        <input type="text" name="seo_title" value="<%= settings.seo_title %>" class="w-full border p-2 rounded" required>
+                        <p class="text-xs text-gray-500 mt-1">คำแนะนำ: ความยาวไม่ควรเกิน 60 ตัวอักษร (เช่น "Lullapos - ระบบ POS ฟรีสำหรับร้านค้าเล็กๆ")</p>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">SEO Description (คำอธิบายเว็บใต้ลิงก์บน Google)</label>
+                        <textarea name="seo_description" rows="3" class="w-full border p-2 rounded" required><%= settings.seo_description %></textarea>
+                        <p class="text-xs text-gray-500 mt-1">คำแนะนำ: ความยาว 150-160 ตัวอักษร อธิบายจุดเด่นให้คนอยากคลิกอ่าน</p>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2">SEO Keywords (คำค้นหาหลัก)</label>
+                        <input type="text" name="seo_keywords" value="<%= settings.seo_keywords %>" class="w-full border p-2 rounded" required>
+                        <p class="text-xs text-gray-500 mt-1">คำแนะนำ: คั่นแต่ละคำด้วยเครื่องหมายจุลภาค (,) เช่น ระบบ pos, pos ฟรี, เครื่องคิดเงิน</p>
                     </div>
                 </div>
             </div>

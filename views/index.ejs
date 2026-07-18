@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lullapos - <%= settings.hero_title %></title>
+    
+    <title><%= settings.seo_title %></title>
+    <meta name="title" content="<%= settings.seo_title %>">
+    <meta name="description" content="<%= settings.seo_description %>">
+    <meta name="keywords" content="<%= settings.seo_keywords %>">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lullapos.com/">
+    <meta property="og:title" content="<%= settings.seo_title %>">
+    <meta property="og:description" content="<%= settings.seo_description %>">
+    <meta property="og:image" content="<%= settings.seo_thumbnail_url %>">
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://lullapos.com/">
+    <meta property="twitter:title" content="<%= settings.seo_title %>">
+    <meta property="twitter:description" content="<%= settings.seo_description %>">
+    <meta property="twitter:image" content="<%= settings.seo_thumbnail_url %>">
+
     <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
-    <!-- เปลี่ยนบรรทัดนี้ -->
+    
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     
-    
-    <!-- เพิ่ม Script นี้เพื่อให้ Tailwind ดึงสีจาก Database มาสร้างเป็นคลาส bg-primary, text-primary -->
     <script>
       tailwind.config = {
         theme: {

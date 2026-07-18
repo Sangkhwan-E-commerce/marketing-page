@@ -115,7 +115,13 @@ async function initDB() {
         cta_btn1_text: 'เริ่มต้นใช้งานฟรี',
         cta_btn1_url: '#',
         cta_btn2_text: 'เรียนรู้เพิ่มเติม',
-        cta_btn2_url: '#'
+        cta_btn2_url: '#',
+
+        // เพิ่มตัวแปรสำหรับ SEO และ Social Share
+        seo_title: 'Lullapos - ระบบ POS สำหรับร้านค้าขนาดเล็ก ใช้ฟรี จ่ายตามจริง',
+        seo_description: 'ระบบจัดการหน้าร้าน Lullapos เริ่มต้นใช้งานฟรี จ่ายเพียง 5 สตางค์เมื่อมียอดออเดอร์เกิน 1000 บิล ใช้งานง่ายบนคลาวด์ ไม่ต้องติดตั้ง',
+        seo_keywords: 'ระบบ pos, ระบบ pos ฟรี, เครื่องคิดเงิน, โปรแกรมขายหน้าร้าน, lullapos',
+        seo_thumbnail_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80'
     };
 
     for (const [key, value] of Object.entries(defaultSettings)) {
@@ -235,7 +241,10 @@ app.post('/admin/save', requireAuth, upload.fields([
             // เพิ่มตัวแปร CTA ตรงนี้
             cta_title, cta_desc,
             cta_btn1_text, cta_btn1_url,
-            cta_btn2_text, cta_btn2_url
+            cta_btn2_text, cta_btn2_url,
+            
+            // เพิ่มตัวแปร SEO ตรงนี้
+            seo_title, seo_description, seo_keywords
         } = req.body;
         
         const updates = { 
@@ -263,13 +272,18 @@ app.post('/admin/save', requireAuth, upload.fields([
             // เพิ่มตัวแปร CTA ตรงนี้
             cta_title, cta_desc,
             cta_btn1_text, cta_btn1_url,
-            cta_btn2_text, cta_btn2_url
+            cta_btn2_text, cta_btn2_url,
+            
+            // เพิ่มตัวแปร SEO ตรงนี้
+            seo_title, seo_description, seo_keywords
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
         if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0]);
         if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0]);
+        // เพิ่มเช็คไฟล์รูป Thumbnail
+        if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0]);
 
         for (const [key, value] of Object.entries(updates)) {
             await pool.query(
