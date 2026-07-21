@@ -11,15 +11,15 @@ const { JSDOM } = require('jsdom');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// === ให้ Express ทำงานร่วมกับ HTTPS ของ Render ได้ (แก้ปัญหาล็อกอินไม่ผ่าน) ===
 app.set('trust proxy', 1);
 
 // ==========================================
 // 1. ระบบรักษาความปลอดภัยพื้นฐาน (Security Middlewares)
 // ==========================================
-// Helmet ช่วยซ่อน Header ที่บอกว่าใช้ Express และป้องกันการโจมตีพื้นฐาน (ปิด CSP ไว้ก่อนเพื่อไม่ให้กระทบ Tailwind CDN)
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// ป้องกัน Brute Force ที่หน้า Login (จำกัด 5 ครั้งใน 15 นาที)
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
     max: 5,
@@ -42,9 +42,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // ต้องใช้ HTTPS เมื่อรันบน Production
-        httpOnly: true, // ป้องกัน XSS ดึงคุกกี้
-        maxAge: 1000 * 60 * 60 * 24 // หมดอายุใน 1 วัน
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24
     }
 }));
 
@@ -64,15 +64,17 @@ async function initDB() {
                 value TEXT
             );
         `);
-        // ข้อมูล Default (คงเดิม)
+        
         const defaultSettings = {
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
             theme_color: 'rgb(244 97 100 / 98%)',
+            
             hero_badge: 'POS ระบบยุคใหม่เพื่อร้านค้าทุกขนาด',
             hero_title: 'Lullapos โตไปด้วยกัน จ่ายตามจริง',
             hero_desc: 'จุดเริ่มต้นจากหัวใจคนชนบท สู่ระบบจัดการร้านค้าที่ทรงพลัง เลิกแบกรับต้นทุนรายเดือนที่แสนแพง ให้คุณเริ่มใช้ฟรี และจ่ายเพียงเศษสตางค์เมื่อธุรกิจคุณเติบโต',
             hero_img_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
+            
             feature_title: 'ความฝันเล็กๆ สู่การเปลี่ยนแปลงที่ยิ่งใหญ่',
             feature_subtitle: 'หัวใจของการทำธุรกิจ ไม่ควรถูกจำกัดด้วยขนาดของร้านหรือทำเลที่ตั้ง Lullapos จึงเกิดมาเพื่อทลายกำแพงนั้น',
             col1_title: 'สร้างจากหัวใจคนชนบท',
@@ -84,11 +86,13 @@ async function initDB() {
             col3_title: 'ยุติธรรม จ่ายเพียง 5 สตางค์',
             col3_desc: 'เมื่อถึงเวลาเติบโต ออเดอร์ที่ 1,001 เป็นต้นไป จ่ายแค่ 5 สตางค์/ออเดอร์ เดือนไหนเงียบจ่ายน้อย แฟร์ที่สุด',
             col3_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+            
             footer_text: '© 2026 Lullapos.com. โตไปด้วยกัน จ่ายตามจริง.',
             facebook_url: 'https://facebook.com/',
             facebook_icon: `<svg fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>`,
             line_url: 'https://line.me/th/',
             line_icon: `<svg fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.082.923.258 1.058.59.12.295.079.756.038 1.066l-.164 1.031c-.046.297.228.536.5.385 2.15-1.189 6.071-4.225 7.734-6.31 1.722-2.128 2.8-4.321 2.8-6.37zm-14.862 3.655h-2.502c-.366 0-.662-.297-.662-.662v-4.992c0-.365.296-.662.662-.662.366 0 .662.297.662.662v4.33h1.84c.366 0 .662.296.662.662 0 .365-.296.662-.662.662zm2.686-.662c0 .365-.296.662-.662.662-.366 0-.662-.297-.662-.662v-4.992c0-.365.296-.662.662-.662.366 0 .662.297.662.662v4.992zm5.023 0c0 .365-.296.662-.662.662-.366 0-.662-.297-.662-.662v-2.738l-1.928 2.535c-.131.171-.32.265-.515.265-.015 0-.03 0-.045-.002-.213-.021-.383-.2-.383-.414v-4.992c0-.365.296-.662.662-.662.366 0 .662.297.662.662v2.738l1.928-2.535c.131-.171.32-.265.515-.265.015 0 .03 0 .045.002.213.021.383.2.383.414v4.992zm4.316-3.003c0 .365-.296.662-.662.662h-1.84v.998h1.84c.366 0 .662.296.662.662 0 .365-.296.662-.662.662h-2.502c-.366 0-.662-.297-.662-.662v-4.992c0-.365.296-.662.662-.662h2.502c.366 0 .662.297.662.662 0 .365-.296.662-.662.662h-1.84v1.006h1.84c.366 0 .662.297.662.662z"/></svg>`,
+
             grid_badge: 'ฟีเจอร์ที่ตอบโจทย์',
             grid_title: 'ฟีเจอร์ครบครัน สำหรับจัดการร้านค้า',
             grid_desc: 'ทุกสิ่งที่คุณต้องการในการบริหารร้านค้าให้อยู่หมัด รวบรวมไว้ในระบบเดียว ใช้งานง่าย ไม่ซับซ้อน',
@@ -99,15 +103,23 @@ async function initDB() {
             grid5_title: 'รายงานยอดขายอัจฉริยะ', grid5_desc: 'สรุปยอดขายรายวัน รายเดือน พร้อมกราฟ', grid5_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path></svg>`,
             grid6_title: 'รองรับการชำระเงินหลายรูปแบบ', grid6_desc: 'เงินสด โอนเงิน พร้อมเพย์ หรือบัตรเครดิต', grid6_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"></path></svg>`,
             btn_text: 'สมัครใช้งานฟรี', btn_url: '#', btn_size: 'text-sm',
+            
             stats_badge: 'ภารกิจของเรา', stats_title: 'สถิติที่เติบโตไปพร้อมกับคุณ', stats_desc: 'Lullapos มุ่งมั่นที่จะเป็นส่วนหนึ่งในความสำเร็จของร้านค้าขนาดเล็ก เราพร้อมสนับสนุนคุณด้วยระบบที่เสถียร ใช้งานง่าย และยุติธรรมที่สุด', stats_img_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2850&q=80',
             stat1_label: 'ร้านค้าที่ไว้วางใจ', stat1_value: '8,000+', stat2_label: 'ค่าธรรมเนียมแรกเข้า', stat2_value: '0 ฿', stat3_label: 'ระบบเสถียร (Uptime)', stat3_value: '99.9%', stat4_label: 'ประหยัดต้นทุนเฉลี่ย', stat4_value: '100%',
+            
             faq_title: 'คำถามที่พบบ่อย (FAQ)',
             faq_list: JSON.stringify([
                 { question: "เริ่มต้นใช้งานฟรี 1,000 ออเดอร์ จริงไหม?", answer: "จริงครับ! ไม่มีข้อผูกมัดใดๆ แอบแฝง" },
                 { question: "ถ้าเกิน 1,000 ออเดอร์ จะคิดเงินอย่างไร?", answer: "เราคิดเพียง 5 สตางค์ ต่อ 1 ออเดอร์ที่เกินมาครับ" }
             ]),
+            
             cta_title: 'พร้อมที่จะเติบโตไปกับเราหรือยัง?', cta_desc: 'สมัครใช้งาน Lullapos วันนี้ เริ่มต้นฟรี 1,000 ออเดอร์แรก', cta_btn1_text: 'เริ่มต้นใช้งานฟรี', cta_btn1_url: '#', cta_btn2_text: 'เรียนรู้เพิ่มเติม', cta_btn2_url: '#',
-            seo_title: 'Lullapos - ระบบ POS สำหรับร้านค้าขนาดเล็ก ใช้ฟรี จ่ายตามจริง', seo_description: 'ระบบจัดการหน้าร้าน Lullapos เริ่มต้นใช้งานฟรี', seo_keywords: 'ระบบ pos, ระบบ pos ฟรี', seo_thumbnail_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80'
+            
+            seo_title: 'Lullapos - ระบบ POS สำหรับร้านค้าขนาดเล็ก ใช้ฟรี จ่ายตามจริง', seo_description: 'ระบบจัดการหน้าร้าน Lullapos เริ่มต้นใช้งานฟรี', seo_keywords: 'ระบบ pos, ระบบ pos ฟรี', seo_thumbnail_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
+            
+            banner_active: 'false',
+            banner_img_url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80',
+            banner_content: '<h2 class="text-2xl font-bold text-center text-primary mb-2">โปรโมชั่นพิเศษ!</h2><p class="text-center text-gray-600">สมัครวันนี้ ใช้งานฟรี 2,000 ออเดอร์แรก ไม่มีข้อผูกมัดใดๆ</p>'
         };
 
         for (const [key, value] of Object.entries(defaultSettings)) {
@@ -142,7 +154,6 @@ const s3 = new S3Client({
     }
 });
 
-// จำกัดขนาดไฟล์ที่ 5MB ป้องกัน DoS
 const upload = multer({ 
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 } 
@@ -216,12 +227,12 @@ app.post('/admin/save', requireAuth, upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'hero_img', maxCount: 1 },
     { name: 'stats_img', maxCount: 1 },
-    { name: 'seo_thumbnail', maxCount: 1 }
+    { name: 'seo_thumbnail', maxCount: 1 },
+    { name: 'banner_img', maxCount: 1 }
 ]), async (req, res, next) => {
     try {
         const body = req.body;
         
-        // กรอง XSS เฉพาะช่องที่เป็น HTML จาก Editor
         let cleanFaqList = body.faq_list;
         try {
             let parsedFaq = JSON.parse(body.faq_list || '[]');
@@ -260,7 +271,9 @@ app.post('/admin/save', requireAuth, upload.fields([
             cta_desc: sanitizeHtml(body.cta_desc),
             cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url,
             cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
-            seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords
+            seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
+            banner_active: body.banner_active === 'on' ? 'true' : 'false', 
+            banner_content: sanitizeHtml(body.banner_content)
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
@@ -268,6 +281,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0]);
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0]);
+        if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0]);
 
         for (const [key, value] of Object.entries(updates)) {
             await pool.query(
@@ -277,7 +291,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         }
         res.redirect('/admin');
     } catch (error) {
-        next(error); // ส่งไป Global Error Handler
+        next(error); 
     }
 });
 
