@@ -1,408 +1,617 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full bg-gray-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title><%= settings.seo_title %></title>
-    <meta name="title" content="<%= settings.seo_title %>">
-    <meta name="description" content="<%= settings.seo_description %>">
-    <meta name="keywords" content="<%= settings.seo_keywords %>">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://lullapos.com/">
-    <meta property="og:title" content="<%= settings.seo_title %>">
-    <meta property="og:description" content="<%= settings.seo_description %>">
-    <meta property="og:image" content="<%= settings.seo_thumbnail_url %>">
-    
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://lullapos.com/">
-    <meta property="twitter:title" content="<%= settings.seo_title %>">
-    <meta property="twitter:description" content="<%= settings.seo_description %>">
-    <meta property="twitter:image" content="<%= settings.seo_thumbnail_url %>">
-
-    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
-    
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    
+    <title>จัดการเว็บไซต์ - Lullapos Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <style> 
+        body { font-family: 'Prompt', sans-serif; } 
+        /* ซ่อน Scrollbar ของ Sidebar แต่ยัง Scroll ได้ */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
     <script>
       tailwind.config = {
         theme: {
-          extend: {
-            colors: {
-              primary: '<%= settings.theme_color %>'
-            }
-          }
+          extend: { colors: { primary: '<%= settings.theme_color %>' } }
         }
       }
     </script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Prompt', sans-serif; } </style>
-
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-T5P828RK');</script>
-    <!-- End Google Tag Manager -->
 </head>
-<body class="bg-gray-50 text-gray-800">
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5P828RK"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
- 
-<!-- Hero Section ที่คุณต้องการ -->
-<div class="overflow-hidden bg-white py-15 sm:py-30">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    
-    <!-- แสดง Logo -->
-    <div class="mb-12">
-        <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
-    </div>
+<body class="h-full overflow-hidden flex">
 
-    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
-      
-      <!-- ฝั่งซ้าย: ข้อความ (เพิ่ม pr-[30px] และ z-10 ให้อยู่เหนือรูปเสมอ) -->
-      <div class="lg:pr-[150px] lg:pt-4 relative z-10 bg-white/80 lg:bg-transparent rounded-2xl p-4 lg:p-0">
-        <div class="lg:max-w-lg">
-          <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h2>
-          <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
-          
-          <!-- ใช้ <%- %> และ prose สำหรับ Text Editor -->
-          <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
-          
-          <!-- ปุ่ม CTA -->
-          <div class="mt-10 flex items-center gap-x-6">
-            <a href="<%= settings.btn_url %>" 
-               class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition">
-               <%= settings.btn_text %>
-            </a>
-          </div>
-        </div>
-      </div>
+    <!-- Mobile sidebar backdrop (ซ่อนเป็นค่าเริ่มต้น) -->
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-gray-900/80 transition-opacity md:hidden" aria-hidden="true"></div>
 
-      <!-- ฝั่งขวา: Product Screenshot (ปรับให้พอดีจอมือถือ แต่ทะลุกรอบในจอคอม) -->
-      <div class="relative flex items-center justify-center mt-10 lg:mt-0">
-        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- Feature 3 Columns Section -->
-<div class="bg-primary-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-primary">วิสัยทัศน์ของเรา</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
-      <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
-    </div>
-    
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        
-        <!-- Column 1: Story -->
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.col1_icon %>
-            </div>
-            <%= settings.col1_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto"><%- settings.col1_desc %></p>
-          </dd>
-        </div>
-
-        <!-- Column 2: Free 1000 Orders -->
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.col2_icon %>
-            </div>
-            <%= settings.col2_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto"><%- settings.col2_desc %></p>
-          </dd>
-        </div>
-
-        <!-- Column 3: Pay as you grow -->
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-primary hover:shadow-md transition relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.col3_icon %>
-            </div>
-            <%= settings.col3_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto"><%- settings.col3_desc %></p>
-          </dd>
-        </div>
-
-      </dl>
-    </div>
-  </div>
-</div>
-
-<!-- Grid Features Section -->
-<div class="bg-red-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.grid_badge %></h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.grid_title %></p>
-      <p class="mt-6 text-lg leading-8 text-gray-600"><%- settings.grid_desc %></p>
-    </div>
-    
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-        
-        <!-- Feature 1 -->
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid1_icon %>
-            </div>
-            <%- settings.grid1_title %>
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid1_desc %></dd>
-        </div>
-
-        <!-- Feature 2 -->
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid2_icon %>
-            </div>
-            <%- settings.grid2_title %>
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid2_desc %></dd>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid3_icon %>
-            </div>
-            <%- settings.grid3_title %>
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid3_desc %></dd>
-        </div>
-
-        <!-- Feature 4 -->
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid4_icon %>
-            </div>
-            <%- settings.grid4_title %>
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid4_desc %></dd>
-        </div>
-
-        <!-- Feature 5 -->
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid5_icon %>
-            </div>
-            <%- settings.grid5_title %>
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid5_desc %></dd>
-        </div>
-
-        <!-- Feature 6 -->
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid6_icon %>
-            </div>
-            <%- settings.grid6_title %>
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid6_desc %></dd>
-        </div>
-
-      </dl>
-    </div>
-  </div>
-</div>
-
-<!-- Mission & Stats Section (Split with Image) -->
-<div class="relative bg-white">
-  <!-- ฝั่งซ้าย: รูปภาพ (จะเต็มจอบนมือถือ และแบ่งครึ่งซ้ายบนคอมพิวเตอร์) -->
-  <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
-  
-  <!-- ฝั่งขวา: เนื้อหาและสถิติ -->
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
-      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
-      
-      <!-- ใช้ <%- %> และ prose สำหรับ Text Editor -->
-      <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
-      
-      <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
-        <!-- สถิติที่ 1 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd>
-        </div>
-        <!-- สถิติที่ 2 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd>
-        </div>
-        <!-- สถิติที่ 3 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd>
-        </div>
-        <!-- สถิติที่ 4 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-</div>
-
-<!-- FAQ Section (Centered Accordion) -->
-<div class="bg-gray-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-4xl divide-y divide-gray-900/10">
-      <h2 class="text-2xl font-bold leading-10 tracking-tight text-gray-900"><%= settings.faq_title %></h2>
-      <dl class="mt-10 space-y-6 divide-y divide-gray-900/10">
-        
-        <% 
-            let faqs = [];
-            try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
-            faqs.forEach(function(faq, index) { 
-        %>
-        <div class="pt-6 faq-item">
-          <dt>
-            <!-- ปุ่มกดเพื่อเปิด/ปิด -->
-            <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
-              <span class="text-base font-semibold leading-7"><%= faq.question %></span>
-              <span class="ml-6 flex h-7 items-center">
-                <!-- Icon: Plus (แสดงตอนปิด) -->
-                <svg class="h-6 w-6 faq-icon-plus transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-                </svg>
-                <!-- Icon: Minus (แสดงตอนเปิด - ซ่อนเป็นค่าเริ่มต้น) -->
-                <svg class="h-6 w-6 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
-                </svg>
-              </span>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-gray-900 transition-transform duration-300 ease-in-out md:static md:translate-x-0">
+        <!-- Sidebar Header (Logo) -->
+        <div class="flex h-16 shrink-0 items-center bg-gray-900 px-6 border-b border-gray-800">
+            <span class="text-2xl font-bold text-white tracking-wide">Lulla<span class="text-primary">pos</span> <span class="text-xs text-gray-400 font-normal ml-1">Admin</span></span>
+            <!-- Close button (Mobile only) -->
+            <button id="close-sidebar-btn" type="button" class="ml-auto flex items-center justify-center text-gray-400 hover:text-white md:hidden">
+                <span class="sr-only">Close sidebar</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-          </dt>
-          <!-- ส่วนคำตอบ (ซ่อนเป็นค่าเริ่มต้น) -->
-          <dd class="mt-2 pr-12 hidden faq-answer transition-all duration-300">
-            <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
-          </dd>
         </div>
-        <% }); %>
 
-      </dl>
+        <!-- Sidebar Navigation -->
+        <nav class="flex flex-1 flex-col overflow-y-auto no-scrollbar px-4 py-6">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                <li>
+                    <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">จัดการเว็บไซต์</div>
+                    <ul role="list" class="-mx-2 space-y-1">
+                        <!-- เมนูที่ 1 (Active) -->
+                        <li>
+                            <a href="#" class="group flex gap-x-3 rounded-md bg-gray-800 p-2 text-sm font-semibold leading-6 text-white">
+                                <svg class="h-6 w-6 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+                                หน้า Landing Page
+                            </a>
+                        </li>
+                        <!-- เมนูที่ 2 (สำหรับอนาคต) -->
+                        <li>
+                            <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                <svg class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                                จัดการผู้ใช้งาน (เร็วๆ นี้)
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">ตั้งค่าระบบ</div>
+                    <ul role="list" class="-mx-2 space-y-1">
+                        <li>
+                            <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                <svg class="h-6 w-6 shrink-0 text-gray-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                ตั้งค่าทั่วไป (เร็วๆ นี้)
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Column -->
+    <div class="flex flex-col flex-1 w-0 overflow-hidden bg-gray-50">
+        
+        <!-- Top Navbar -->
+        <header class="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 shadow-sm sm:px-6 lg:px-8 shrink-0 relative z-10">
+            <!-- Mobile Hamburger -->
+            <button id="open-sidebar-btn" type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none md:hidden">
+                <span class="sr-only">Open sidebar</span>
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+            </button>
+
+            <!-- Page Title (Desktop) -->
+            <h1 class="hidden text-xl font-bold text-gray-800 md:block">แก้ไขเนื้อหาเว็บ (Landing Page)</h1>
+
+            <!-- Right Nav -->
+            <div class="flex items-center ml-auto space-x-4">
+                <!-- User Dropdown -->
+                <div class="relative ml-3">
+                    <button id="user-menu-btn" type="button" class="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
+                        <span class="sr-only">Open user menu</span>
+                        <img class="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm" src="https://ui-avatars.com/api/?name=Admin&background=random&color=fff" alt="Admin">
+                    </button>
+                    <!-- Dropdown Panel (ซ่อนเป็นค่าเริ่มต้น) -->
+                    <div id="user-dropdown-panel" class="absolute right-0 z-10 hidden w-48 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transform opacity-0 scale-95 transition-all duration-200">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <p class="text-sm text-gray-900 font-semibold">ผู้ดูแลระบบ</p>
+                            <p class="text-xs text-gray-500 truncate">admin@lullapos.com</p>
+                        </div>
+                        <a href="/" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">ดูหน้าเว็บไซต์จริง</a>
+                        <a href="/admin/login" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">ออกจากระบบ</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content (Scrollable) -->
+        <main class="flex-1 relative overflow-y-auto focus:outline-none">
+            <div class="py-6 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
+                
+                <form action="/admin/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    
+                    <!-- ส่วนหัวของ Card -->
+                    <div class="px-6 py-5 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold leading-6 text-gray-900">ตัวจัดการข้อมูลหน้าแรก</h3>
+                            <p class="mt-1 text-sm text-gray-500">เลือกแท็บด้านล่างเพื่อแก้ไขข้อมูลในแต่ละส่วนของหน้าเว็บไซต์</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0">
+                            <button type="submit" class="inline-flex items-center rounded-md bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                                บันทึกและอัปเดตเว็บไซต์
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div class="border-b border-gray-200 px-6">
+                        <nav class="-mb-px flex space-x-6 overflow-x-auto no-scrollbar" aria-label="Tabs" id="tabs">
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-primary text-primary" data-target="tab-general">1. ทั่วไป & Footer</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-hero">2. ส่วนบนสุด</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-features3">3. วิสัยทัศน์</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-features4">4. ฟีเจอร์</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-stats">5. ภารกิจและสถิติ</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-faq">6. ฟังก์ชั่น (FAQ)</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-cta">7. เชิญชวน</button>
+                            <button type="button" class="tab-btn whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-target="tab-seo">8. SEO</button>
+                        </nav>
+                    </div>
+
+                    <!-- เนื้อหาฟอร์ม (ใส่ padding รอบๆ) -->
+                    <div class="p-6">
+                        
+                        <!-- Tab 1: General -->
+                        <div id="tab-general" class="tab-content space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon (PNG/ICO)</label>
+                                    <input type="file" name="favicon" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.favicon_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Logo โปร่งใส (PNG)</label>
+                                    <input type="file" name="logo" accept="image/png" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.logo_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">สีธีมหลัก (เช่น <code>rgb(244 97 100 / 98%)</code> หรือ <code>#F46164</code>)</label>
+                                <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary sm:text-sm border p-2" required>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-gray-200">
+                                <h4 class="text-base font-semibold text-gray-900 mb-4">ตั้งค่า Footer & โซเชียล</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ลิงก์ Facebook</label>
+                                        <input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ไอคอน Facebook (SVG)</label>
+                                        <textarea name="facebook_icon" rows="2" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-xs font-mono"><%= settings.facebook_icon %></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ลิงก์ LINE</label>
+                                        <input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ไอคอน LINE (SVG)</label>
+                                        <textarea name="line_icon" rows="2" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-xs font-mono"><%= settings.line_icon %></textarea>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Copyright</label>
+                                    <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Hero -->
+                        <div id="tab-hero" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge (ด้านบนสุด)</label>
+                                    <input type="text" name="hero_badge" value="<%= settings.hero_badge %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก (Title)</label>
+                                    <input type="text" name="hero_title" value="<%= settings.hero_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด (Description)</label>
+                                    <input type="hidden" name="hero_desc" id="hero_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="hero_desc" style="height: 150px;"><%- settings.hero_desc %></div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพหน้าจอระบบ (Hero Image)</label>
+                                <input type="file" name="hero_img" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.hero_img_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-gray-200">
+                                <h4 class="text-base font-semibold text-gray-900 mb-4">ปุ่มสมัครใช้งาน</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ</label>
+                                        <input type="text" name="btn_text" value="<%= settings.btn_text %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">URL ลิงก์</label>
+                                        <input type="text" name="btn_url" value="<%= settings.btn_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ขนาดอักษร</label>
+                                        <select name="btn_size" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm">
+                                            <option value="text-sm" <%= settings.btn_size === 'text-sm' ? 'selected' : '' %>>เล็ก (text-sm)</option>
+                                            <option value="text-base" <%= settings.btn_size === 'text-base' ? 'selected' : '' %>>ปกติ (text-base)</option>
+                                            <option value="text-lg" <%= settings.btn_size === 'text-lg' ? 'selected' : '' %>>ใหญ่ (text-lg)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Features 3 Columns -->
+                        <div id="tab-features3" class="tab-content space-y-6 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label>
+                                    <input type="text" name="feature_title" value="<%= settings.feature_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">คำโปรยย่อย (Subtitle)</label>
+                                    <input type="text" name="feature_subtitle" value="<%= settings.feature_subtitle %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+                                <!-- Col 1 -->
+                                <div class="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2">คอลัมน์ 1</h4>
+                                    <label class="block text-xs font-semibold text-blue-600">ไอคอน (ก๊อปปี้ SVG จาก <a href="https://heroicons.com" target="_blank" class="underline">Heroicons</a>)</label>
+                                    <textarea name="col1_icon" rows="3" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" required><%= settings.col1_icon %></textarea>
+                                    <input type="text" name="col1_title" value="<%= settings.col1_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <input type="hidden" name="col1_desc" id="col1_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="col1_desc" style="height: 100px;"><%- settings.col1_desc %></div>
+                                </div>
+                                <!-- Col 2 -->
+                                <div class="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2">คอลัมน์ 2</h4>
+                                    <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                                    <textarea name="col2_icon" rows="3" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" required><%= settings.col2_icon %></textarea>
+                                    <input type="text" name="col2_title" value="<%= settings.col2_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <input type="hidden" name="col2_desc" id="col2_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="col2_desc" style="height: 100px;"><%- settings.col2_desc %></div>
+                                </div>
+                                <!-- Col 3 -->
+                                <div class="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2">คอลัมน์ 3</h4>
+                                    <label class="block text-xs font-semibold text-blue-600">ไอคอน SVG</label>
+                                    <textarea name="col3_icon" rows="3" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" required><%= settings.col3_icon %></textarea>
+                                    <input type="text" name="col3_title" value="<%= settings.col3_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <input type="hidden" name="col3_desc" id="col3_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="col3_desc" style="height: 100px;"><%- settings.col3_desc %></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: Features 4 Grids -->
+                        <div id="tab-features4" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label>
+                                        <input type="text" name="grid_badge" value="<%= settings.grid_badge %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label>
+                                        <input type="text" name="grid_title" value="<%= settings.grid_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label>
+                                    <input type="hidden" name="grid_desc" id="grid_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="grid_desc" style="height: 100px;"><%- settings.grid_desc %></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+                                <!-- Grid 1 -->
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900">ฟีเจอร์ 1</h4>
+                                    <textarea name="grid1_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" placeholder="ไอคอน SVG" required><%= settings.grid1_icon %></textarea>
+                                    <input type="text" name="grid1_title" value="<%= settings.grid1_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <textarea name="grid1_desc" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="รายละเอียด" required><%= settings.grid1_desc %></textarea>
+                                </div>
+                                <!-- Grid 2 -->
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900">ฟีเจอร์ 2</h4>
+                                    <textarea name="grid2_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" placeholder="ไอคอน SVG" required><%= settings.grid2_icon %></textarea>
+                                    <input type="text" name="grid2_title" value="<%= settings.grid2_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <textarea name="grid2_desc" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="รายละเอียด" required><%= settings.grid2_desc %></textarea>
+                                </div>
+                                <!-- Grid 3 -->
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900">ฟีเจอร์ 3</h4>
+                                    <textarea name="grid3_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" placeholder="ไอคอน SVG" required><%= settings.grid3_icon %></textarea>
+                                    <input type="text" name="grid3_title" value="<%= settings.grid3_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <textarea name="grid3_desc" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="รายละเอียด" required><%= settings.grid3_desc %></textarea>
+                                </div>
+                                <!-- Grid 4 -->
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900">ฟีเจอร์ 4</h4>
+                                    <textarea name="grid4_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" placeholder="ไอคอน SVG" required><%= settings.grid4_icon %></textarea>
+                                    <input type="text" name="grid4_title" value="<%= settings.grid4_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <textarea name="grid4_desc" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="รายละเอียด" required><%= settings.grid4_desc %></textarea>
+                                </div>
+                                <!-- Grid 5 -->
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900">ฟีเจอร์ 5</h4>
+                                    <textarea name="grid5_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" placeholder="ไอคอน SVG" required><%= settings.grid5_icon %></textarea>
+                                    <input type="text" name="grid5_title" value="<%= settings.grid5_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <textarea name="grid5_desc" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="รายละเอียด" required><%= settings.grid5_desc %></textarea>
+                                </div>
+                                <!-- Grid 6 -->
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900">ฟีเจอร์ 6</h4>
+                                    <textarea name="grid6_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono bg-white" placeholder="ไอคอน SVG" required><%= settings.grid6_icon %></textarea>
+                                    <input type="text" name="grid6_title" value="<%= settings.grid6_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="หัวข้อ" required>
+                                    <textarea name="grid6_desc" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-sm" placeholder="รายละเอียด" required><%= settings.grid6_desc %></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 5: Stats -->
+                        <div id="tab-stats" class="tab-content space-y-6 hidden">
+                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100 mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพประกอบ (ฝั่งซ้าย)</label>
+                                <input type="file" name="stats_img" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.stats_img_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label>
+                                        <input type="text" name="stats_badge" value="<%= settings.stats_badge %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label>
+                                        <input type="text" name="stats_title" value="<%= settings.stats_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label>
+                                    <input type="hidden" name="stats_desc" id="stats_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="stats_desc" style="height: 120px;"><%- settings.stats_desc %></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
+                                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                    <h4 class="font-semibold text-gray-700 border-b pb-2 mb-3 text-sm">สถิติที่ 1</h4>
+                                    <input type="text" name="stat1_value" value="<%= settings.stat1_value %>" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-2 font-bold" placeholder="ตัวเลข (เช่น 8,000+)" required>
+                                    <input type="text" name="stat1_label" value="<%= settings.stat1_label %>" class="w-full border-gray-300 rounded-md border p-2 text-sm text-gray-500" placeholder="คำอธิบาย" required>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                    <h4 class="font-semibold text-gray-700 border-b pb-2 mb-3 text-sm">สถิติที่ 2</h4>
+                                    <input type="text" name="stat2_value" value="<%= settings.stat2_value %>" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-2 font-bold" required>
+                                    <input type="text" name="stat2_label" value="<%= settings.stat2_label %>" class="w-full border-gray-300 rounded-md border p-2 text-sm text-gray-500" required>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                    <h4 class="font-semibold text-gray-700 border-b pb-2 mb-3 text-sm">สถิติที่ 3</h4>
+                                    <input type="text" name="stat3_value" value="<%= settings.stat3_value %>" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-2 font-bold" required>
+                                    <input type="text" name="stat3_label" value="<%= settings.stat3_label %>" class="w-full border-gray-300 rounded-md border p-2 text-sm text-gray-500" required>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                    <h4 class="font-semibold text-gray-700 border-b pb-2 mb-3 text-sm">สถิติที่ 4</h4>
+                                    <input type="text" name="stat4_value" value="<%= settings.stat4_value %>" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-2 font-bold" required>
+                                    <input type="text" name="stat4_label" value="<%= settings.stat4_label %>" class="w-full border-gray-300 rounded-md border p-2 text-sm text-gray-500" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: FAQ -->
+                        <div id="tab-faq" class="tab-content space-y-6 hidden">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก (Title)</label>
+                                <input type="text" name="faq_title" value="<%= settings.faq_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold text-gray-900">รายการคำถาม (เพิ่มได้ไม่จำกัด)</h4>
+                                    <button type="button" id="add-faq-btn" class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">
+                                        <svg class="-ml-0.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+                                        เพิ่มคำถามใหม่
+                                    </button>
+                                </div>
+                                
+                                <div id="faq-container" class="space-y-4"></div>
+                                <input type="hidden" name="faq_list" id="faq_list_input" value="<%= settings.faq_list %>">
+                            </div>
+                        </div>
+
+                        <!-- Tab 7: CTA -->
+                        <div id="tab-cta" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก (Title)</label>
+                                    <input type="text" name="cta_title" value="<%= settings.cta_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด (Description)</label>
+                                    <input type="hidden" name="cta_desc" id="cta_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="cta_desc" style="height: 120px;"><%- settings.cta_desc %></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2 mb-4">ปุ่มหลัก (ปุ่มทึบ)</h4>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">ข้อความบนปุ่ม</label>
+                                    <input type="text" name="cta_btn1_text" value="<%= settings.cta_btn1_text %>" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-3" required>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">URL ลิงก์</label>
+                                    <input type="text" name="cta_btn1_url" value="<%= settings.cta_btn1_url %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2 mb-4">ปุ่มรอง (ลิงก์มีลูกศร)</h4>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">ข้อความบนปุ่ม</label>
+                                    <input type="text" name="cta_btn2_text" value="<%= settings.cta_btn2_text %>" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-3" required>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">URL ลิงก์</label>
+                                    <input type="text" name="cta_btn2_url" value="<%= settings.cta_btn2_url %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 8: SEO -->
+                        <div id="tab-seo" class="tab-content space-y-6 hidden">
+                            <div class="bg-blue-50/50 p-6 rounded-lg border border-blue-100 mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพ Thumbnail (แสดงเวลาแชร์ลิงก์ไปที่ Facebook/LINE)</label>
+                                <input type="file" name="seo_thumbnail" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.seo_thumbnail_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                            </div>
+
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">SEO Title (ชื่อเว็บที่แสดงบน Google)</label>
+                                    <input type="text" name="seo_title" value="<%= settings.seo_title %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    <p class="text-xs text-gray-400 mt-1">ความยาวไม่ควรเกิน 60 ตัวอักษร</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">SEO Description (คำอธิบายเว็บใต้ลิงก์บน Google)</label>
+                                    <textarea name="seo_description" rows="3" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required><%= settings.seo_description %></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">ความยาว 150-160 ตัวอักษร อธิบายจุดเด่นให้คนอยากคลิกอ่าน</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">SEO Keywords (คำค้นหาหลัก)</label>
+                                    <input type="text" name="seo_keywords" value="<%= settings.seo_keywords %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                    <p class="text-xs text-gray-400 mt-1">คั่นแต่ละคำด้วยเครื่องหมายจุลภาค (,) เช่น ระบบ pos, pos ฟรี</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </main>
     </div>
-  </div>
-</div>
 
-<!-- Script สำหรับเปิด/ปิด Accordion -->
-<!-- Script สำหรับเปิด/ปิด Accordion (เปิดได้ทีละข้อ) -->
-<script>
-    const faqButtons = document.querySelectorAll('.faq-toggle-btn');
-    
-    faqButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const answer = button.parentElement.nextElementSibling;
-            const iconPlus = button.querySelector('.faq-icon-plus');
-            const iconMinus = button.querySelector('.faq-icon-minus');
-            
-            // เช็คว่าข้อนี้กำลังเปิดอยู่หรือไม่
-            const isOpen = !answer.classList.contains('hidden');
-            
-            // 1. ปิดทุกข้อก่อนเสมอ
-            document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
-            document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
-            document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
-            
-            // 2. ถ้าข้อที่กดไม่ได้เปิดอยู่แต่แรก ให้เปิดขึ้นมา
-            if (!isOpen) {
-                answer.classList.remove('hidden');
-                iconPlus.classList.add('hidden');
-                iconMinus.classList.remove('hidden');
+    <!-- Scripts สำหรับ UI และการทำงานของฟอร์ม -->
+    <script>
+        // --- ระบบ Sidebar และ Dropdown (Tailwind UI) ---
+        const openSidebarBtn = document.getElementById('open-sidebar-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdownPanel = document.getElementById('user-dropdown-panel');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarBackdrop.classList.toggle('hidden');
+        }
+
+        openSidebarBtn.addEventListener('click', toggleSidebar);
+        closeSidebarBtn.addEventListener('click', toggleSidebar);
+        sidebarBackdrop.addEventListener('click', toggleSidebar);
+
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (userDropdownPanel.classList.contains('hidden')) {
+                userDropdownPanel.classList.remove('hidden');
+                // Allow animation to run
+                setTimeout(() => {
+                    userDropdownPanel.classList.remove('opacity-0', 'scale-95');
+                    userDropdownPanel.classList.add('opacity-100', 'scale-100');
+                }, 10);
+            } else {
+                userDropdownPanel.classList.remove('opacity-100', 'scale-100');
+                userDropdownPanel.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => { userDropdownPanel.classList.add('hidden'); }, 200);
             }
         });
-    });
-</script>
 
-<!-- CTA Section (Simple Centered) -->
-<div class="bg-red-50 py-16 sm:py-24 lg:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl text-center">
-      
-      <!-- หัวข้อ CTA -->
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.cta_title %></h2>
-      
-      <!-- รายละเอียด (แสดงผล HTML จาก Text Editor) -->
-      <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none">
-        <%- settings.cta_desc %>
-      </div>
-      
-      <!-- ส่วนปุ่มและลิงก์ -->
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <!-- ปุ่มหลัก -->
-        <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition">
-          <%= settings.cta_btn1_text %>
-        </a>
-        <!-- ปุ่มรอง (ลิงก์ลูกศร) -->
-        <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group">
-          <%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span>
-        </a>
-      </div>
-      
-    </div>
-  </div>
-</div>
+        document.addEventListener('click', () => {
+            if (!userDropdownPanel.classList.contains('hidden')) {
+                userDropdownPanel.classList.remove('opacity-100', 'scale-100');
+                userDropdownPanel.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => { userDropdownPanel.classList.add('hidden'); }, 200);
+            }
+        });
 
-<!-- Footer Section -->
-<footer class="bg-white border-t border-gray-200 py-12">
-    <div class="mx-auto max-w-7xl px-6 md:flex md:items-center md:justify-between lg:px-8">
-        
-        <!-- Social Media Icons -->
-        <div class="flex justify-center space-x-6 md:order-2">
-            
-            <% if(settings.facebook_url) { %>
-            <a href="<%= settings.facebook_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
-                <span class="sr-only">Facebook</span>
-                <!-- ไอคอนเปลี่ยนตามที่ตั้งค่าไว้ -->
-                <div class="h-7 w-7 [&>svg]:w-7 [&>svg]:h-7"><%- settings.facebook_icon %></div>
-            </a>
-            <% } %>
+        // --- ระบบ Tabs ---
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('border-primary', 'text-primary');
+                el.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            let activeBtn = document.querySelector(`[data-target="${tabId}"]`);
+            activeBtn.classList.add('border-primary', 'text-primary');
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+        }
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => showTab(e.target.dataset.target));
+        });
+        showTab('tab-general'); // แสดงแท็บแรกเสมอ
 
-            <% if(settings.line_url) { %>
-            <a href="<%= settings.line_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
-                <span class="sr-only">LINE</span>
-                <!-- ไอคอนเปลี่ยนตามที่ตั้งค่าไว้ -->
-                <div class="h-7 w-7 [&>svg]:w-7 [&>svg]:h-7"><%- settings.line_icon %></div>
-            </a>
-            <% } %>
-        </div>
+        // --- ระบบ Text Editor (Quill) ---
+        document.querySelectorAll('.quill-editor').forEach(function(editorDiv) {
+            var targetId = editorDiv.getAttribute('data-target');
+            var input = document.getElementById(targetId);
+            var quill = new Quill(editorDiv, {
+                theme: 'snow',
+                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+            });
+            quill.on('text-change', function() { input.value = quill.root.innerHTML; });
+            input.value = quill.root.innerHTML;
+        });
 
-        <!-- Copyright Text -->
-        <div class="mt-8 md:order-1 md:mt-0">
-            <p class="text-center text-sm leading-5 text-gray-500"><%= settings.footer_text %></p>
-        </div>
-        
-    </div>
-</footer>
+        // --- ระบบจัดการ FAQ (JSON Array) ---
+        const faqContainer = document.getElementById('faq-container');
+        const faqInput = document.getElementById('faq_list_input');
+        const addFaqBtn = document.getElementById('add-faq-btn');
+        let faqs = [];
+        try { faqs = JSON.parse(faqInput.value || '[]'); } catch(e) { faqs = []; }
 
+        function renderFaqs() {
+            faqContainer.innerHTML = '';
+            faqs.forEach((faq, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-5 rounded-lg border border-gray-200 shadow-sm relative';
+                const safeQuestion = faq.question ? faq.question.replace(/"/g, '&quot;') : '';
+
+                div.innerHTML = `
+                    <button type="button" onclick="removeFaq(${index})" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors" title="ลบคำถามนี้">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">คำถาม</label>
+                    <input type="text" class="w-full border-gray-300 rounded-md border p-2 text-sm mb-4 pr-10" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">คำตอบ (รายละเอียด)</label>
+                    <div id="faq_editor_${index}" class="bg-white rounded-b-md" style="height: 100px;"></div>
+                `;
+                faqContainer.appendChild(div);
+
+                const editorDiv = document.getElementById(`faq_editor_${index}`);
+                editorDiv.innerHTML = faq.answer || '';
+                const quillFaq = new Quill(editorDiv, {
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+                quillFaq.on('text-change', function() {
+                    faqs[index].answer = quillFaq.root.innerHTML;
+                    faqInput.value = JSON.stringify(faqs);
+                });
+            });
+            faqInput.value = JSON.stringify(faqs);
+        }
+
+        window.updateFaq = function(index, key, value) {
+            faqs[index][key] = value;
+            faqInput.value = JSON.stringify(faqs);
+        };
+        window.removeFaq = function(index) {
+            if(confirm('ต้องการลบคำถามนี้ใช่หรือไม่?')) {
+                faqs.splice(index, 1);
+                renderFaqs();
+            }
+        };
+        addFaqBtn.addEventListener('click', () => {
+            faqs.push({ question: '', answer: '' });
+            renderFaqs();
+        });
+        renderFaqs();
+    </script>
 </body>
 </html>
