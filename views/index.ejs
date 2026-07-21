@@ -163,31 +163,35 @@
   </div>
 </div>
 
+<!-- FAQ Section -->
 <div class="bg-gray-50 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-4xl divide-y divide-gray-900/10">
-      <h2 class="text-2xl font-bold leading-10 tracking-tight text-gray-900"><%= settings.faq_title %></h2>
-      <dl class="mt-10 space-y-6 divide-y divide-gray-900/10">
-        <% 
-            let faqs = [];
-            try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
-            faqs.forEach(function(faq, index) { 
-        %>
-        <div class="pt-6 faq-item">
-          <dt>
-            <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
-              <span class="text-base font-semibold leading-7"><%= faq.question %></span>
-              <span class="ml-6 flex h-7 items-center">
-                <svg class="h-6 w-6 faq-icon-plus transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
-                <svg class="h-6 w-6 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
-              </span>
-            </button>
-          </dt>
-          <dd class="mt-2 pr-12 hidden faq-answer transition-all duration-300"><div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div></dd>
-        </div>
-        <% }); %>
-      </dl>
+    <div class="mx-auto text-center mb-12">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.faq_title %></h2>
     </div>
+    
+    <dl class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
+      <% 
+          let faqs = [];
+          try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
+          faqs.forEach(function(faq, index) { 
+      %>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 faq-item self-start hover:shadow-md transition-shadow">
+        <dt>
+          <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
+            <span class="text-base font-semibold leading-7 pr-4"><%= faq.question %></span>
+            <span class="flex h-7 items-center shrink-0">
+              <svg class="h-5 w-5 faq-icon-plus transition-transform duration-200 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+              <svg class="h-5 w-5 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
+            </span>
+          </button>
+        </dt>
+        <dd class="mt-4 hidden faq-answer transition-all duration-300 border-t border-gray-100 pt-4">
+          <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
+        </dd>
+      </div>
+      <% }); %>
+    </dl>
   </div>
 </div>
 
