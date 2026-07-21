@@ -248,7 +248,10 @@ app.post('/admin/save', requireAuth, upload.fields([
             banner_active: body.banner_active === 'on' ? 'true' : 'false', 
             banner_display_type: body.banner_display_type || 'always',
             banner_display_limit: body.banner_display_limit || '1',
-            banner_content: sanitizeHtml(body.banner_content)
+            banner_content: sanitizeHtml(body.banner_content),
+
+            // 👇 เพิ่มบรรทัดนี้เข้าไปครับ เพื่อสร้างเวอร์ชันใหม่ทุกครั้งที่กดบันทึก
+            banner_version: Date.now().toString()
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);

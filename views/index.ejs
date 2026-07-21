@@ -288,8 +288,10 @@
         const displayType = '<%= settings.banner_display_type %>';
         const displayLimit = parseInt('<%= settings.banner_display_limit %>', 10) || 1;
         
-        // ใช้ localStorage เพื่อจำผู้ใช้แม้ปิดเบราว์เซอร์
-        let showCount = parseInt(localStorage.getItem('lullapos_promo_count') || '0', 10);
+        // 👇 เปลี่ยนมาใช้ Key ที่มีเวอร์ชันพ่วงท้าย หากมีการเซฟหลังบ้านใหม่ Key นี้จะเปลี่ยนไป ทำให้เริ่มนับ 0 ใหม่
+        const storageKey = 'lullapos_promo_count_<%= settings.banner_version || "default" %>';
+        
+        let showCount = parseInt(localStorage.getItem(storageKey) || '0', 10);
         let shouldShow = false;
         
         if (displayType === 'always') {
@@ -315,9 +317,9 @@
                 modalBox.classList.add('scale-95', 'opacity-0');
                 setTimeout(() => { modal.classList.add('hidden'); }, 300);
                 
-                // อัปเดตจำนวนครั้งที่ดู ถ้าเป็นแบบจำกัด
+                // อัปเดตจำนวนครั้งที่ดูเฉพาะเวอร์ชันปัจจุบัน
                 if (displayType === 'limited') {
-                    localStorage.setItem('lullapos_promo_count', showCount + 1);
+                    localStorage.setItem(storageKey, showCount + 1);
                 }
             };
 
