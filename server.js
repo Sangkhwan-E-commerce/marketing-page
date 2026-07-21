@@ -12,12 +12,8 @@ const { JSDOM } = require('jsdom');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// === ให้ Express ทำงานร่วมกับ HTTPS ของ Render ได้ (แก้ปัญหาล็อกอินไม่ผ่าน) ===
 app.set('trust proxy', 1);
 
-// ==========================================
-// 1. ระบบรักษาความปลอดภัยพื้นฐาน (Security Middlewares)
-// ==========================================
 app.use(helmet({ contentSecurityPolicy: false }));
 
 const loginLimiter = rateLimit({
@@ -26,17 +22,11 @@ const loginLimiter = rateLimit({
     message: 'เข้าสู่ระบบผิดพลาดบ่อยเกินไป กรุณาลองใหม่ในอีก 15 นาที'
 });
 
-// ==========================================
-// 2. ตั้งค่า View Engine & Body Parser
-// ==========================================
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// ==========================================
-// 3. ตั้งค่า Session ให้ปลอดภัยยิ่งขึ้น
-// ==========================================
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-change-me-in-production',
     resave: false,
@@ -48,9 +38,6 @@ app.use(session({
     }
 }));
 
-// ==========================================
-// 4. ตั้งค่า Database (PostgreSQL)
-// ==========================================
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -69,12 +56,10 @@ async function initDB() {
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
             theme_color: 'rgb(244 97 100 / 98%)',
-            
             hero_badge: 'POS ระบบยุคใหม่เพื่อร้านค้าทุกขนาด',
             hero_title: 'Lullapos โตไปด้วยกัน จ่ายตามจริง',
             hero_desc: 'จุดเริ่มต้นจากหัวใจคนชนบท สู่ระบบจัดการร้านค้าที่ทรงพลัง เลิกแบกรับต้นทุนรายเดือนที่แสนแพง ให้คุณเริ่มใช้ฟรี และจ่ายเพียงเศษสตางค์เมื่อธุรกิจคุณเติบโต',
             hero_img_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
-            
             feature_title: 'ความฝันเล็กๆ สู่การเปลี่ยนแปลงที่ยิ่งใหญ่',
             feature_subtitle: 'หัวใจของการทำธุรกิจ ไม่ควรถูกจำกัดด้วยขนาดของร้านหรือทำเลที่ตั้ง Lullapos จึงเกิดมาเพื่อทลายกำแพงนั้น',
             col1_title: 'สร้างจากหัวใจคนชนบท',
@@ -86,13 +71,11 @@ async function initDB() {
             col3_title: 'ยุติธรรม จ่ายเพียง 5 สตางค์',
             col3_desc: 'เมื่อถึงเวลาเติบโต ออเดอร์ที่ 1,001 เป็นต้นไป จ่ายแค่ 5 สตางค์/ออเดอร์ เดือนไหนเงียบจ่ายน้อย แฟร์ที่สุด',
             col3_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-            
             footer_text: '© 2026 Lullapos.com. โตไปด้วยกัน จ่ายตามจริง.',
             facebook_url: 'https://facebook.com/',
             facebook_icon: `<svg fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>`,
             line_url: 'https://line.me/th/',
             line_icon: `<svg fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.082.923.258 1.058.59.12.295.079.756.038 1.066l-.164 1.031c-.046.297.228.536.5.385 2.15-1.189 6.071-4.225 7.734-6.31 1.722-2.128 2.8-4.321 2.8-6.37zm-14.862 3.655h-2.502c-.366 0-.662-.297-.662-.662v-4.992c0-.365.296-.662.662-.662.366 0 .662.297.662.662v4.33h1.84c.366 0 .662.296.662.662 0 .365-.296.662-.662.662zm2.686-.662c0 .365-.296.662-.662.662-.366 0-.662-.297-.662-.662v-4.992c0-.365.296-.662.662-.662.366 0 .662.297.662.662v4.992zm5.023 0c0 .365-.296.662-.662.662-.366 0-.662-.297-.662-.662v-2.738l-1.928 2.535c-.131.171-.32.265-.515.265-.015 0-.03 0-.045-.002-.213-.021-.383-.2-.383-.414v-4.992c0-.365.296-.662.662-.662.366 0 .662.297.662.662v2.738l1.928-2.535c.131-.171.32-.265.515-.265.015 0 .03 0 .045.002.213.021.383.2.383.414v4.992zm4.316-3.003c0 .365-.296.662-.662.662h-1.84v.998h1.84c.366 0 .662.296.662.662 0 .365-.296.662-.662.662h-2.502c-.366 0-.662-.297-.662-.662v-4.992c0-.365.296-.662.662-.662h2.502c.366 0 .662.297.662.662 0 .365-.296.662-.662.662h-1.84v1.006h1.84c.366 0 .662.297.662.662z"/></svg>`,
-
             grid_badge: 'ฟีเจอร์ที่ตอบโจทย์',
             grid_title: 'ฟีเจอร์ครบครัน สำหรับจัดการร้านค้า',
             grid_desc: 'ทุกสิ่งที่คุณต้องการในการบริหารร้านค้าให้อยู่หมัด รวบรวมไว้ในระบบเดียว ใช้งานง่าย ไม่ซับซ้อน',
@@ -118,6 +101,8 @@ async function initDB() {
             seo_title: 'Lullapos - ระบบ POS สำหรับร้านค้าขนาดเล็ก ใช้ฟรี จ่ายตามจริง', seo_description: 'ระบบจัดการหน้าร้าน Lullapos เริ่มต้นใช้งานฟรี', seo_keywords: 'ระบบ pos, ระบบ pos ฟรี', seo_thumbnail_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
             
             banner_active: 'false',
+            banner_display_type: 'always', 
+            banner_display_limit: '1',
             banner_img_url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80',
             banner_content: '<h2 class="text-2xl font-bold text-center text-primary mb-2">โปรโมชั่นพิเศษ!</h2><p class="text-center text-gray-600">สมัครวันนี้ ใช้งานฟรี 2,000 ออเดอร์แรก ไม่มีข้อผูกมัดใดๆ</p>'
         };
@@ -142,9 +127,6 @@ async function getSettings() {
     return settings;
 }
 
-// ==========================================
-// 5. ตั้งค่า Cloudflare R2 & Multer
-// ==========================================
 const s3 = new S3Client({
     region: 'auto',
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -171,24 +153,14 @@ async function uploadToR2(file) {
     return `${process.env.R2_PUBLIC_URL}/${fileName}`;
 }
 
-// ==========================================
-// 6. Admin Auth Middleware
-// ==========================================
 function requireAuth(req, res, next) {
     if (req.session.isLoggedIn) return next();
     res.redirect('/admin/login');
 }
 
-// ==========================================
-// 7. XSS Sanitizer Instance
-// ==========================================
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
-
-// ==========================================
-// 8. Routes (Controllers)
-// ==========================================
 
 app.get('/', async (req, res, next) => {
     try {
@@ -272,7 +244,10 @@ app.post('/admin/save', requireAuth, upload.fields([
             cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url,
             cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
+            
             banner_active: body.banner_active === 'on' ? 'true' : 'false', 
+            banner_display_type: body.banner_display_type || 'always',
+            banner_display_limit: body.banner_display_limit || '1',
             banner_content: sanitizeHtml(body.banner_content)
         };
 
@@ -295,9 +270,6 @@ app.post('/admin/save', requireAuth, upload.fields([
     }
 });
 
-// ==========================================
-// 9. Global Error Handler
-// ==========================================
 app.use((err, req, res, next) => {
     console.error(err.stack);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {

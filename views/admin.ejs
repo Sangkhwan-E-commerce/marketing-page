@@ -19,14 +19,23 @@
           extend: { colors: { primary: '<%= settings.theme_color %>' } }
         }
       }
+
+      // ฟังก์ชันสำหรับ Live Preview รูปภาพโดยไม่ต้องคลิกลิงก์
+      function previewImage(input, imgId) {
+          if (input.files && input.files[0]) {
+              var reader = new FileReader();
+              reader.onload = function(e) {
+                  document.getElementById(imgId).src = e.target.result;
+              }
+              reader.readAsDataURL(input.files[0]);
+          }
+      }
     </script>
 </head>
 <body class="h-full overflow-hidden flex">
 
-    <!-- Mobile sidebar backdrop -->
     <div id="mobile-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-gray-900/80 transition-opacity md:hidden" aria-hidden="true"></div>
 
-    <!-- Sidebar -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-gray-900 transition-transform duration-300 ease-in-out md:static md:translate-x-0">
         <div class="flex h-16 shrink-0 items-center bg-gray-900 px-6 border-b border-gray-800">
             <span class="text-2xl font-bold text-white tracking-wide">Lulla<span class="text-primary">pos</span> <span class="text-xs text-gray-400 font-normal ml-1">Admin</span></span>
@@ -51,19 +60,11 @@
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-seo">9. ตั้งค่า SEO</button></li>
                     </ul>
                 </li>
-                <li>
-                    <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">ตั้งค่าระบบ (เร็วๆ นี้)</div>
-                    <ul role="list" class="-mx-2 space-y-1">
-                        <li><a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-500 hover:bg-gray-800 transition-colors opacity-50 cursor-not-allowed">จัดการผู้ใช้งาน</a></li>
-                    </ul>
-                </li>
             </ul>
         </nav>
     </aside>
 
-    <!-- Main Column -->
     <div class="flex flex-col flex-1 w-0 overflow-hidden bg-gray-50">
-        
         <header class="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 shadow-sm sm:px-6 lg:px-8 shrink-0 relative z-10">
             <button id="open-sidebar-btn" type="button" class="text-gray-500 hover:text-gray-700 md:hidden">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
@@ -87,7 +88,6 @@
             <div class="py-6 px-4 sm:px-6 lg:px-8 mx-auto max-w-5xl">
                 
                 <form action="/admin/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
-                    
                     <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-20 rounded-t-xl">
                         <div>
                             <p class="text-sm text-gray-500">กรุณากดบันทึกทุกครั้งเมื่อแก้ไขข้อมูลเสร็จสิ้น</p>
@@ -107,13 +107,19 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon (PNG/ICO)</label>
-                                    <input type="file" name="favicon" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
-                                    <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.favicon_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                                    <input type="file" name="favicon" accept="image/*" onchange="previewImage(this, 'preview-favicon')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <div class="mt-3">
+                                        <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                        <img id="preview-favicon" src="<%= settings.favicon_url %>" class="h-10 w-auto object-contain rounded border border-gray-200 shadow-sm bg-white p-1">
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Logo โปร่งใส (PNG)</label>
-                                    <input type="file" name="logo" accept="image/png" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
-                                    <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.logo_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                                    <input type="file" name="logo" accept="image/png" onchange="previewImage(this, 'preview-logo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <div class="mt-3">
+                                        <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                        <img id="preview-logo" src="<%= settings.logo_url %>" class="h-12 w-auto object-contain rounded border border-gray-200 shadow-sm bg-gray-100 p-1">
+                                    </div>
                                 </div>
                             </div>
                             
@@ -150,8 +156,11 @@
                             </div>
                             <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพหน้าจอระบบ (Hero Image)</label>
-                                <input type="file" name="hero_img" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
-                                <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.hero_img_url %>" target="_blank" class="text-blue-600 hover:underline">ดูรูป</a></p>
+                                <input type="file" name="hero_img" accept="image/*" onchange="previewImage(this, 'preview-hero')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-hero" src="<%= settings.hero_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
                             </div>
                             <div class="pt-6 border-t border-gray-200">
                                 <h4 class="text-base font-semibold text-gray-900 mb-4">ปุ่มสมัครใช้งาน</h4>
@@ -221,7 +230,11 @@
                         <div id="tab-stats" class="tab-content space-y-6 hidden">
                             <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100 mb-6">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพประกอบ (ฝั่งซ้าย)</label>
-                                <input type="file" name="stats_img" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <input type="file" name="stats_img" accept="image/*" onchange="previewImage(this, 'preview-stats')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-stats" src="<%= settings.stats_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
                             </div>
                             <div class="space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,23 +275,54 @@
                         <!-- Tab 8: Banner -->
                         <div id="tab-banner" class="tab-content space-y-6 hidden">
                             <div class="bg-blue-50/50 p-6 rounded-lg border border-blue-100 flex items-center justify-between">
-                                <div><h4 class="font-semibold">สถานะแบนเนอร์โฆษณา</h4><p class="text-sm text-gray-500">แสดงหน้าต่าง Modal ขึ้นมา 1 ครั้งเมื่อผู้ใช้เข้าเว็บ</p></div>
+                                <div><h4 class="font-semibold">สถานะแบนเนอร์โฆษณา</h4><p class="text-sm text-gray-500">แสดงหน้าต่างโปรโมชั่น Modal ขึ้นมากลางหน้าเว็บ</p></div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>
+                            
+                            <!-- ตั้งค่าเงื่อนไขการแสดงผล -->
+                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
+                                <h4 class="font-semibold text-gray-900 mb-3">เงื่อนไขการแสดงผล (เมื่อเปิดใช้งาน)</h4>
+                                <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-6">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="banner_display_type" value="always" class="text-primary focus:ring-primary h-4 w-4" <%= settings.banner_display_type === 'always' ? 'checked' : '' %> onchange="document.getElementById('limit-box').classList.add('opacity-50', 'pointer-events-none')">
+                                        <span class="ml-2 text-sm text-gray-700">แสดงทุกครั้งที่เข้าเว็บ</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="banner_display_type" value="limited" class="text-primary focus:ring-primary h-4 w-4" <%= settings.banner_display_type === 'limited' ? 'checked' : '' %> onchange="document.getElementById('limit-box').classList.remove('opacity-50', 'pointer-events-none')">
+                                        <span class="ml-2 text-sm text-gray-700">จำกัดจำนวนครั้ง</span>
+                                    </label>
+                                </div>
+                                <div id="limit-box" class="mt-4 flex items-center <%= settings.banner_display_type === 'always' ? 'opacity-50 pointer-events-none' : '' %>">
+                                    <span class="text-sm text-gray-600 mr-2">อนุญาตให้โชว์</span>
+                                    <input type="number" name="banner_display_limit" min="1" value="<%= settings.banner_display_limit %>" class="w-20 border-gray-300 rounded-md border p-1 text-center text-sm shadow-sm">
+                                    <span class="text-sm text-gray-600 ml-2">ครั้ง ต่อ 1 ผู้ใช้งาน</span>
+                                </div>
+                            </div>
+
                             <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
                                 <label class="block text-sm font-semibold mb-2">รูปภาพประกอบ (สัดส่วน 16:9)</label>
-                                <input type="file" name="banner_img" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white">
-                                <p class="text-xs text-gray-500 mt-2">ไฟล์ปัจจุบัน: <a href="<%= settings.banner_img_url %>" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูรูป</a></p>
+                                <input type="file" name="banner_img" accept="image/*" onchange="previewImage(this, 'preview-banner')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-banner" src="<%= settings.banner_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
                             </div>
                             <div><label class="block text-sm mb-1">เนื้อหาโปรโมชั่น</label><input type="hidden" name="banner_content" id="banner_content"><div class="quill-editor bg-white rounded-b-md" data-target="banner_content" style="height: 150px;"><%- settings.banner_content %></div></div>
                         </div>
 
                         <!-- Tab 9: SEO -->
                         <div id="tab-seo" class="tab-content space-y-6 hidden">
-                            <div class="bg-blue-50/50 p-6 rounded-lg mb-6"><label class="block text-sm font-semibold mb-2">รูปภาพ Thumbnail (แชร์ลง Facebook/LINE)</label><input type="file" name="seo_thumbnail" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white"></div>
+                            <div class="bg-blue-50/50 p-6 rounded-lg mb-6 border border-blue-100">
+                                <label class="block text-sm font-semibold mb-2">รูปภาพ Thumbnail (แชร์ลง Facebook/LINE)</label>
+                                <input type="file" name="seo_thumbnail" accept="image/*" onchange="previewImage(this, 'preview-seo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-seo" src="<%= settings.seo_thumbnail_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
+                            </div>
                             <div class="space-y-4">
                                 <div><label class="block text-sm">SEO Title</label><input type="text" name="seo_title" value="<%= settings.seo_title %>" class="w-full border p-2 rounded text-sm" required></div>
                                 <div><label class="block text-sm">SEO Description</label><textarea name="seo_description" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.seo_description %></textarea></div>
@@ -293,7 +337,6 @@
     </div>
 
     <script>
-        // --- ระบบ Sidebar เปลี่ยนหน้า ---
         const pageTitleDisplay = document.getElementById('page-title-display');
         
         function showTab(tabId, menuTitle) {
@@ -324,7 +367,6 @@
         });
         showTab('tab-general', '1. ทั่วไป & Footer');
 
-        // --- ระบบ Mobile Menu ---
         document.getElementById('open-sidebar-btn').addEventListener('click', () => {
             document.getElementById('sidebar').classList.remove('-translate-x-full');
             document.getElementById('mobile-sidebar-backdrop').classList.remove('hidden');
@@ -334,14 +376,12 @@
             document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
         });
 
-        // --- ระบบ User Dropdown ---
         document.getElementById('user-menu-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('user-dropdown-panel').classList.toggle('hidden');
         });
         document.addEventListener('click', () => document.getElementById('user-dropdown-panel').classList.add('hidden'));
 
-        // --- ระบบ Text Editor (Quill) ---
         document.querySelectorAll('.quill-editor').forEach(function(editorDiv) {
             var targetId = editorDiv.getAttribute('data-target');
             var input = document.getElementById(targetId);
@@ -350,7 +390,6 @@
             input.value = quill.root.innerHTML;
         });
 
-        // --- ระบบ FAQ ---
         const faqContainer = document.getElementById('faq-container');
         const faqInput = document.getElementById('faq_list_input');
         let faqs = [];
