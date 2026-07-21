@@ -46,49 +46,30 @@
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-T5P828RK');</script>
-    <!-- End Google Tag Manager -->
 </head>
 <body class="bg-gray-50 text-gray-800">
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5P828RK"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5P828RK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
  
-<!-- Hero Section ที่คุณต้องการ -->
+<!-- Hero Section -->
 <div class="overflow-hidden bg-white py-15 sm:py-30">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    
-    <!-- แสดง Logo -->
     <div class="mb-12">
         <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
     </div>
-
     <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
-      
-      <!-- ฝั่งซ้าย: ข้อความ (เพิ่ม pr-[30px] และ z-10 ให้อยู่เหนือรูปเสมอ) -->
       <div class="lg:pr-[150px] lg:pt-4 relative z-10 bg-white/80 lg:bg-transparent rounded-2xl p-4 lg:p-0">
         <div class="lg:max-w-lg">
           <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h2>
           <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
-          
-          <!-- ใช้ <%- %> และ prose สำหรับ Text Editor -->
           <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
-          
-          <!-- ปุ่ม CTA -->
           <div class="mt-10 flex items-center gap-x-6">
-            <a href="<%= settings.btn_url %>" 
-               class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition">
-               <%= settings.btn_text %>
-            </a>
+            <a href="<%= settings.btn_url %>" class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.btn_text %></a>
           </div>
         </div>
       </div>
-
-      <!-- ฝั่งขวา: Product Screenshot (ปรับให้พอดีจอมือถือ แต่ทะลุกรอบในจอคอม) -->
       <div class="relative flex items-center justify-center mt-10 lg:mt-0">
         <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
       </div>
-
     </div>
   </div>
 </div>
@@ -101,50 +82,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
       <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
     </div>
-    
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        
-        <!-- Column 1: Story -->
+        <!-- Col 1 -->
         <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
           <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.col1_icon %>
-            </div>
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col1_icon %></div>
             <%= settings.col1_title %>
           </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto"><%- settings.col1_desc %></p>
-          </dd>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col1_desc %></p></dd>
         </div>
-
-        <!-- Column 2: Free 1000 Orders -->
+        <!-- Col 2 -->
         <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
           <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.col2_icon %>
-            </div>
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col2_icon %></div>
             <%= settings.col2_title %>
           </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto"><%- settings.col2_desc %></p>
-          </dd>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col2_desc %></p></dd>
         </div>
-
-        <!-- Column 3: Pay as you grow -->
+        <!-- Col 3 -->
         <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-primary hover:shadow-md transition relative overflow-hidden">
           <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
           <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.col3_icon %>
-            </div>
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col3_icon %></div>
             <%= settings.col3_title %>
           </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-            <p class="flex-auto"><%- settings.col3_desc %></p>
-          </dd>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col3_desc %></p></dd>
         </div>
-
       </dl>
     </div>
   </div>
@@ -158,128 +122,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.grid_title %></p>
       <p class="mt-6 text-lg leading-8 text-gray-600"><%- settings.grid_desc %></p>
     </div>
-    
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-        
-        <!-- Feature 1 -->
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid1_icon %>
-            </div>
-            <%- settings.grid1_title %>
-          </dt>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid1_icon %></div><%- settings.grid1_title %></dt>
           <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid1_desc %></dd>
         </div>
-
-        <!-- Feature 2 -->
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid2_icon %>
-            </div>
-            <%- settings.grid2_title %>
-          </dt>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid2_icon %></div><%- settings.grid2_title %></dt>
           <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid2_desc %></dd>
         </div>
-
-        <!-- Feature 3 -->
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid3_icon %>
-            </div>
-            <%- settings.grid3_title %>
-          </dt>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid3_icon %></div><%- settings.grid3_title %></dt>
           <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid3_desc %></dd>
         </div>
-
-        <!-- Feature 4 -->
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid4_icon %>
-            </div>
-            <%- settings.grid4_title %>
-          </dt>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid4_icon %></div><%- settings.grid4_title %></dt>
           <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid4_desc %></dd>
         </div>
-
-        <!-- Feature 5 -->
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid5_icon %>
-            </div>
-            <%- settings.grid5_title %>
-          </dt>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid5_icon %></div><%- settings.grid5_title %></dt>
           <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid5_desc %></dd>
         </div>
-
-        <!-- Feature 6 -->
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6">
-              <%- settings.grid6_icon %>
-            </div>
-            <%- settings.grid6_title %>
-          </dt>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid6_icon %></div><%- settings.grid6_title %></dt>
           <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid6_desc %></dd>
         </div>
-
       </dl>
     </div>
   </div>
 </div>
 
-<!-- Mission & Stats Section (Split with Image) -->
+<!-- Mission & Stats Section -->
 <div class="relative bg-white">
-  <!-- ฝั่งซ้าย: รูปภาพ (จะเต็มจอบนมือถือ และแบ่งครึ่งซ้ายบนคอมพิวเตอร์) -->
   <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
-  
-  <!-- ฝั่งขวา: เนื้อหาและสถิติ -->
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
       <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
       <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
-      
-      <!-- ใช้ <%- %> และ prose สำหรับ Text Editor -->
       <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
-      
       <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
-        <!-- สถิติที่ 1 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd>
-        </div>
-        <!-- สถิติที่ 2 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd>
-        </div>
-        <!-- สถิติที่ 3 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd>
-        </div>
-        <!-- สถิติที่ 4 -->
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6">
-          <dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt>
-          <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd>
-        </div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd></div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd></div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd></div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd></div>
       </dl>
     </div>
   </div>
 </div>
 
-<!-- FAQ Section (Centered Accordion) -->
+<!-- FAQ Section -->
 <div class="bg-gray-50 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-4xl divide-y divide-gray-900/10">
       <h2 class="text-2xl font-bold leading-10 tracking-tight text-gray-900"><%= settings.faq_title %></h2>
       <dl class="mt-10 space-y-6 divide-y divide-gray-900/10">
-        
         <% 
             let faqs = [];
             try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
@@ -287,53 +184,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         %>
         <div class="pt-6 faq-item">
           <dt>
-            <!-- ปุ่มกดเพื่อเปิด/ปิด -->
             <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
               <span class="text-base font-semibold leading-7"><%= faq.question %></span>
               <span class="ml-6 flex h-7 items-center">
-                <!-- Icon: Plus (แสดงตอนปิด) -->
-                <svg class="h-6 w-6 faq-icon-plus transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-                </svg>
-                <!-- Icon: Minus (แสดงตอนเปิด - ซ่อนเป็นค่าเริ่มต้น) -->
-                <svg class="h-6 w-6 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
-                </svg>
+                <svg class="h-6 w-6 faq-icon-plus transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+                <svg class="h-6 w-6 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
               </span>
             </button>
           </dt>
-          <!-- ส่วนคำตอบ (ซ่อนเป็นค่าเริ่มต้น) -->
-          <dd class="mt-2 pr-12 hidden faq-answer transition-all duration-300">
-            <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
-          </dd>
+          <dd class="mt-2 pr-12 hidden faq-answer transition-all duration-300"><div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div></dd>
         </div>
         <% }); %>
-
       </dl>
     </div>
   </div>
 </div>
 
-<!-- Script สำหรับเปิด/ปิด Accordion -->
-<!-- Script สำหรับเปิด/ปิด Accordion (เปิดได้ทีละข้อ) -->
 <script>
     const faqButtons = document.querySelectorAll('.faq-toggle-btn');
-    
     faqButtons.forEach(button => {
         button.addEventListener('click', () => {
             const answer = button.parentElement.nextElementSibling;
             const iconPlus = button.querySelector('.faq-icon-plus');
             const iconMinus = button.querySelector('.faq-icon-minus');
-            
-            // เช็คว่าข้อนี้กำลังเปิดอยู่หรือไม่
             const isOpen = !answer.classList.contains('hidden');
             
-            // 1. ปิดทุกข้อก่อนเสมอ
             document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
             document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
             document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
             
-            // 2. ถ้าข้อที่กดไม่ได้เปิดอยู่แต่แรก ให้เปิดขึ้นมา
             if (!isOpen) {
                 answer.classList.remove('hidden');
                 iconPlus.classList.add('hidden');
@@ -343,31 +222,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
 </script>
 
-<!-- CTA Section (Simple Centered) -->
+<!-- CTA Section -->
 <div class="bg-red-50 py-16 sm:py-24 lg:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl text-center">
-      
-      <!-- หัวข้อ CTA -->
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.cta_title %></h2>
-      
-      <!-- รายละเอียด (แสดงผล HTML จาก Text Editor) -->
-      <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none">
-        <%- settings.cta_desc %>
-      </div>
-      
-      <!-- ส่วนปุ่มและลิงก์ -->
+      <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.cta_desc %></div>
       <div class="mt-10 flex items-center justify-center gap-x-6">
-        <!-- ปุ่มหลัก -->
-        <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition">
-          <%= settings.cta_btn1_text %>
-        </a>
-        <!-- ปุ่มรอง (ลิงก์ลูกศร) -->
-        <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group">
-          <%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span>
-        </a>
+        <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.cta_btn1_text %></a>
+        <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group"><%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span></a>
       </div>
-      
     </div>
   </div>
 </div>
@@ -375,34 +239,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- Footer Section -->
 <footer class="bg-white border-t border-gray-200 py-12">
     <div class="mx-auto max-w-7xl px-6 md:flex md:items-center md:justify-between lg:px-8">
-        
-        <!-- Social Media Icons -->
         <div class="flex justify-center space-x-6 md:order-2">
-            
             <% if(settings.facebook_url) { %>
             <a href="<%= settings.facebook_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
                 <span class="sr-only">Facebook</span>
-                <!-- ไอคอนเปลี่ยนตามที่ตั้งค่าไว้ -->
                 <div class="h-7 w-7 [&>svg]:w-7 [&>svg]:h-7"><%- settings.facebook_icon %></div>
             </a>
             <% } %>
-
             <% if(settings.line_url) { %>
             <a href="<%= settings.line_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
                 <span class="sr-only">LINE</span>
-                <!-- ไอคอนเปลี่ยนตามที่ตั้งค่าไว้ -->
                 <div class="h-7 w-7 [&>svg]:w-7 [&>svg]:h-7"><%- settings.line_icon %></div>
             </a>
             <% } %>
         </div>
-
-        <!-- Copyright Text -->
         <div class="mt-8 md:order-1 md:mt-0">
             <p class="text-center text-sm leading-5 text-gray-500"><%= settings.footer_text %></p>
         </div>
-        
     </div>
 </footer>
+
+<!-- ========================================== -->
+<!-- Promotional Banner Modal -->
+<!-- ========================================== -->
+<% if (settings.banner_active === 'true') { %>
+<div id="promo-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-sm"></div>
+  <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg scale-95 opacity-0" id="modal-content-box">
+        
+        <button type="button" id="close-modal-btn" class="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/10 text-gray-700 hover:bg-black/20 hover:text-gray-900 transition backdrop-blur-md">
+            <span class="sr-only">ปิดหน้าต่าง</span>
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+
+        <% if (settings.banner_img_url) { %>
+        <div class="relative">
+            <img src="<%= settings.banner_img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[300px]">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        </div>
+        <% } %>
+        
+        <div class="px-6 py-8">
+          <div class="prose prose-sm max-w-none text-gray-700">
+              <%- settings.banner_content %>
+          </div>
+          <div class="mt-8 flex justify-center">
+              <button type="button" id="close-modal-btn-bottom" class="rounded-full bg-primary px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition w-full sm:w-auto">รับทราบ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (!sessionStorage.getItem('lullapos_promo_shown')) {
+            const modal = document.getElementById('promo-modal');
+            const modalBox = document.getElementById('modal-content-box');
+            
+            setTimeout(() => {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalBox.classList.remove('scale-95', 'opacity-0');
+                    modalBox.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }, 1000); 
+            
+            const closeModal = () => {
+                modalBox.classList.remove('scale-100', 'opacity-100');
+                modalBox.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => { modal.classList.add('hidden'); }, 300);
+                sessionStorage.setItem('lullapos_promo_shown', 'true');
+            };
+
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            document.getElementById('close-modal-btn-bottom').addEventListener('click', closeModal);
+        }
+    });
+</script>
+<% } %>
 
 </body>
 </html>
