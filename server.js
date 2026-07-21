@@ -11,6 +11,7 @@ const { JSDOM } = require('jsdom');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.set('trust proxy', 1);
 
 // ==========================================
 // 1. ระบบรักษาความปลอดภัยพื้นฐาน (Security Middlewares)
