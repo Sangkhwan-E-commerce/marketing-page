@@ -302,19 +302,20 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        
 
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <div class="flex justify-between items-center border-b pb-4 mb-4">
-                                <h3 class="text-lg font-bold">จัดการสไลด์โฆษณา (Carousel)</h3>
-                                <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">
-                                    + เพิ่มสไลด์ใหม่
-                                </button>
-                            </div>
-                            
-                            <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
-                            <div id="banner-container" class="space-y-4">
-                                <!-- รายการสไลด์แบนเนอร์จะถูกสร้างที่นี่ด้วย JavaScript -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                                    <h3 class="text-lg font-bold">จัดการสไลด์โฆษณา (Carousel)</h3>
+                                    <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">
+                                        + เพิ่มสไลด์ใหม่
+                                    </button>
+                                </div>
+                                
+                                <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
+                                <div id="banner-container" class="space-y-4">
+                                    <!-- รายการสไลด์แบนเนอร์จะถูกสร้างที่นี่ด้วย JavaScript -->
+                                </div>
                             </div>
                         </div>
 
