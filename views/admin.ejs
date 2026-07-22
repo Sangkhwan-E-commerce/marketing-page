@@ -309,6 +309,11 @@
                                     <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
                                     <img id="preview-banner" src="<%= settings.banner_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
                                 </div>
+                                <div class="mt-6 pt-4 border-t border-gray-200">
+                                    <label class="block text-sm font-semibold mb-1">ลิงก์ปลายทางเมื่อคลิกรูปภาพ (ถ้ามี)</label>
+                                    <input type="url" name="banner_link_url" value="<%= settings.banner_link_url %>" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm" placeholder="https://...">
+                                    <p class="text-xs text-gray-400 mt-1">เว้นว่างไว้หากไม่ต้องการให้รูปภาพกดคลิกได้</p>
+                                </div>
                             </div>
                             <div><label class="block text-sm mb-1">เนื้อหาโปรโมชั่น</label><input type="hidden" name="banner_content" id="banner_content"><div class="quill-editor bg-white rounded-b-md" data-target="banner_content" style="height: 150px;"><%- settings.banner_content %></div></div>
                         </div>

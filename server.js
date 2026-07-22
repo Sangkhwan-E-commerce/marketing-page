@@ -104,6 +104,7 @@ async function initDB() {
             banner_display_type: 'always', 
             banner_display_limit: '1',
             banner_img_url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80',
+            banner_link_url: '', // 👇 เพิ่มบรรทัดนี้
             banner_content: '<h2 class="text-2xl font-bold text-center text-primary mb-2">โปรโมชั่นพิเศษ!</h2><p class="text-center text-gray-600">สมัครวันนี้ ใช้งานฟรี 2,000 ออเดอร์แรก ไม่มีข้อผูกมัดใดๆ</p>'
         };
 
@@ -220,11 +221,14 @@ app.post('/admin/save', requireAuth, upload.fields([
             hero_badge: body.hero_badge, hero_title: body.hero_title, 
             hero_desc: sanitizeHtml(body.hero_desc),
             feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
+            
             col1_title: body.col1_title, col1_desc: sanitizeHtml(body.col1_desc), col1_icon: body.col1_icon, 
             col2_title: body.col2_title, col2_desc: sanitizeHtml(body.col2_desc), col2_icon: body.col2_icon, 
             col3_title: body.col3_title, col3_desc: sanitizeHtml(body.col3_desc), col3_icon: body.col3_icon, 
+            
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url,
             facebook_icon: body.facebook_icon, line_icon: body.line_icon,
+            
             grid_badge: body.grid_badge, grid_title: body.grid_title, 
             grid_desc: sanitizeHtml(body.grid_desc),
             grid1_title: body.grid1_title, grid1_desc: body.grid1_desc, grid1_icon: body.grid1_icon, 
@@ -233,16 +237,20 @@ app.post('/admin/save', requireAuth, upload.fields([
             grid4_title: body.grid4_title, grid4_desc: body.grid4_desc, grid4_icon: body.grid4_icon, 
             grid5_title: body.grid5_title, grid5_desc: body.grid5_desc, grid5_icon: body.grid5_icon, 
             grid6_title: body.grid6_title, grid6_desc: body.grid6_desc, grid6_icon: body.grid6_icon, 
+            
             btn_text: body.btn_text, btn_url: body.btn_url, btn_size: body.btn_size,
             stats_badge: body.stats_badge, stats_title: body.stats_title, 
             stats_desc: sanitizeHtml(body.stats_desc),
             stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
             stat3_label: body.stat3_label, stat3_value: body.stat3_value, stat4_label: body.stat4_label, stat4_value: body.stat4_value,
+            
             faq_title: body.faq_title, faq_list: cleanFaqList,
+
             cta_title: body.cta_title, 
             cta_desc: sanitizeHtml(body.cta_desc),
             cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url,
             cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
+
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
             
             banner_active: body.banner_active === 'on' ? 'true' : 'false', 
@@ -250,8 +258,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             banner_display_limit: body.banner_display_limit || '1',
             banner_content: sanitizeHtml(body.banner_content),
 
-            // 👇 เพิ่มบรรทัดนี้เข้าไปครับ เพื่อสร้างเวอร์ชันใหม่ทุกครั้งที่กดบันทึก
-            banner_version: Date.now().toString()
+            banner_version: Date.now().toString(),
+            banner_link_url: body.banner_link_url || ''
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
