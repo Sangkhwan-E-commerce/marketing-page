@@ -286,8 +286,10 @@ app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), a
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
         }
-        // ดึง URL ของไฟล์ที่เพิ่งอัปโหลดขึ้น Cloudflare R2
-        const fileUrl = req.file.location || req.file.url || req.file.path; 
+        
+        // ส่งไฟล์ขึ้น Cloudflare R2 แทนที่จะอ่านค่าจาก path เปล่าๆ
+        const fileUrl = await uploadToR2(req.file); 
+        
         res.json({ success: true, url: fileUrl });
     } catch (error) {
         console.error('Upload Error:', error);
