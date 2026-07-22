@@ -271,7 +271,7 @@
               class="hidden"></div>
     
         <div id="promo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-            <div class="relative w-[80%] sm:w-full max-w-lg md:max-w-3xl lg:max-w-4xl xl:max-w-5xl scale-80 transform rounded-2xl bg-white shadow-2xl transition-all duration-300 flex flex-col max-h-[70vh] overflow-hidden" id="promo-modal-content">
+            <div class="relative w-[95%] sm:w-full max-w-lg md:max-w-3xl lg:max-w-4xl xl:max-w-5xl scale-95 transform rounded-2xl bg-white shadow-2xl transition-all duration-300 flex flex-col max-h-[90vh] overflow-hidden" id="promo-modal-content">
                 
                 <!-- ปุ่มปิด -->
                 <button id="close-promo" class="absolute right-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-500 hover:bg-white hover:text-gray-900 shadow-sm backdrop-blur transition-colors">
@@ -284,13 +284,13 @@
                         <% parsedBanners.forEach(function(slide) { %>
                             <div class="swiper-slide flex flex-col h-auto">
                                 <% if (slide.img_url) { %>
-                                    <div class="relative flex-shrink-0 bg-gray-100">
+                                    <div class="relative flex-shrink-0">
                                         <% if (slide.link_url && slide.link_url.trim() !== '') { %>
                                             <a href="<%= slide.link_url %>" target="_blank" class="block transition hover:opacity-90">
-                                                <img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-video object-contain">
+                                                <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px] md:max-h-[60vh] lg:max-h-[70vh]">
                                             </a>
                                         <% } else { %>
-                                            <img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-video object-contain">
+                                            <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px] md:max-h-[60vh] lg:max-h-[70vh]">
                                         <% } %>
                                     </div>
                                 <% } %>
