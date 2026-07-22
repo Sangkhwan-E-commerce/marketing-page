@@ -280,6 +280,21 @@ app.post('/admin/save', requireAuth, upload.fields([
     }
 });
 
+// --- API สำหรับอัปโหลดรูปภาพสไลด์โฆษณา (AJAX) ---
+app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
+        }
+        // ดึง URL ของไฟล์ที่เพิ่งอัปโหลดขึ้น Cloudflare R2
+        const fileUrl = req.file.location || req.file.url || req.file.path; 
+        res.json({ success: true, url: fileUrl });
+    } catch (error) {
+        console.error('Upload Error:', error);
+        res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' });
+    }
+});
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
