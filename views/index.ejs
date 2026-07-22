@@ -261,22 +261,24 @@
             let parsedBanners = [];
             try { parsedBanners = JSON.parse(settings.banner_list || '[]'); } catch(e) {}
         %>
-        <!-- เก็บค่า config ไว้ให้ JavaScript อ่าน -->
-        <div id="promo-config" 
-             data-type="<%= settings.banner_display_type %>" 
-             data-limit="<%= settings.banner_display_limit %>"
-             data-version="<%= settings.banner_version %>"
-             class="hidden"></div>
-    
-        <div id="promo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-            <div class="relative w-full max-w-lg scale-95 transform rounded-2xl bg-white shadow-2xl transition-all duration-300 flex flex-col max-h-[90vh] overflow-hidden" id="promo-modal-content">
-                
-                <!-- ปุ่มปิด -->
-                <button id="close-promo" class="absolute right-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-500 hover:bg-white hover:text-gray-900 shadow-sm backdrop-blur transition-colors">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-    
-                <% if (parsedBanners.length > 0) { %>
+        
+        <!-- 👇 เพิ่มเงื่อนไขเช็คว่าต้องมีสไลด์อย่างน้อย 1 รูป ถึงจะเรนเดอร์ Modal และ Script 👇 -->
+        <% if (parsedBanners.length > 0) { %>
+            <!-- เก็บค่า config ไว้ให้ JavaScript อ่าน -->
+            <div id="promo-config" 
+                 data-type="<%= settings.banner_display_type %>" 
+                 data-limit="<%= settings.banner_display_limit %>"
+                 data-version="<%= settings.banner_version %>"
+                 class="hidden"></div>
+        
+            <div id="promo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+                <div class="relative w-full max-w-lg scale-95 transform rounded-2xl bg-white shadow-2xl transition-all duration-300 flex flex-col max-h-[90vh] overflow-hidden" id="promo-modal-content">
+                    
+                    <!-- ปุ่มปิด -->
+                    <button id="close-promo" class="absolute right-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-500 hover:bg-white hover:text-gray-900 shadow-sm backdrop-blur transition-colors">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+        
                     <!-- Swiper Carousel -->
                     <div class="swiper bannerSwiper w-full h-full flex-grow flex flex-col">
                         <div class="swiper-wrapper">
@@ -284,7 +286,6 @@
                                 <div class="swiper-slide flex flex-col h-auto">
                                     <% if (slide.img_url) { %>
                                         <div class="relative flex-shrink-0">
-                                            <!-- 👇 ปรับแก้โครงสร้างนี้ให้ VS Code ไม่ Error 👇 -->
                                             <% if (slide.link_url && slide.link_url.trim() !== '') { %>
                                                 <a href="<%= slide.link_url %>" target="_blank" class="block transition hover:opacity-90">
                                                     <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px]">
@@ -311,81 +312,78 @@
                             <div class="swiper-button-prev !text-white !w-8 !h-8 bg-black/30 rounded-full !left-2 after:!text-sm backdrop-blur-sm"></div>
                         <% } %>
                     </div>
-                <% } else { %>
-                    <div class="p-8 text-center text-gray-500">ไม่มีข้อมูลโปรโมชั่น</div>
-                <% } %>
+                </div>
             </div>
-        </div>
-    
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const modal = document.getElementById('promo-modal');
-                const modalContent = document.getElementById('promo-modal-content');
-                const closeBtn = document.getElementById('close-promo');
-                const config = document.getElementById('promo-config');
-                
-                if (!modal || !config) return;
-    
-                const displayType = config.dataset.type;
-                const displayLimit = parseInt(config.dataset.limit) || 1;
-                const bannerVersion = config.dataset.version;
-                
-                const storageKey = `promo_views_v${bannerVersion}`;
-                let views = parseInt(localStorage.getItem(storageKey) || '0');
-                
-                // 👇 ดึงค่าตัวแปรจาก EJS มาเก็บไว้ก่อน เพื่อป้องกัน Syntax Error ใน Object ของ JS 👇
-                const isLoopActive = <%= parsedBanners.length > 1 ? 'true' : 'false' %>;
-    
-                const showModal = () => {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    new Swiper('.bannerSwiper', {
-                        observer: true,
-                        observeParents: true,
-                        loop: isLoopActive,
-                        pagination: { el: '.swiper-pagination', clickable: true },
-                        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-                        autoplay: { delay: 5000, disableOnInteraction: true }
-                    });
-                    
-                    setTimeout(() => {
-                        modal.classList.remove('opacity-0');
-                        modalContent.classList.remove('scale-95');
-                    }, 50);
-                    
-                    if (displayType === 'limited') {
-                        localStorage.setItem(storageKey, (views + 1).toString());
-                    }
-                };
-    
-                const hideModal = () => {
-                    modal.classList.add('opacity-0');
-                    modalContent.classList.add('scale-95');
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                    }, 300);
-                };
-    
-                if (displayType === 'always' || views < displayLimit) {
-                    setTimeout(showModal, 1500); 
-                }
-    
-                closeBtn.addEventListener('click', hideModal);
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) hideModal();
-                });
-            });
-        </script>
         
-        <style>
-            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-            .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-            .swiper-pagination-bullet { background: #cbd5e1; opacity: 1; }
-            .swiper-pagination-bullet-active { background: #000; }
-        </style>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const modal = document.getElementById('promo-modal');
+                    const modalContent = document.getElementById('promo-modal-content');
+                    const closeBtn = document.getElementById('close-promo');
+                    const config = document.getElementById('promo-config');
+                    
+                    if (!modal || !config) return;
+        
+                    const displayType = config.dataset.type;
+                    const displayLimit = parseInt(config.dataset.limit) || 1;
+                    const bannerVersion = config.dataset.version;
+                    
+                    const storageKey = `promo_views_v${bannerVersion}`;
+                    let views = parseInt(localStorage.getItem(storageKey) || '0');
+                    
+                    const isLoopActive = <%= parsedBanners.length > 1 ? 'true' : 'false' %>;
+        
+                    const showModal = () => {
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                        new Swiper('.bannerSwiper', {
+                            observer: true,
+                            observeParents: true,
+                            loop: isLoopActive,
+                            pagination: { el: '.swiper-pagination', clickable: true },
+                            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                            autoplay: { delay: 5000, disableOnInteraction: true }
+                        });
+                        
+                        setTimeout(() => {
+                            modal.classList.remove('opacity-0');
+                            modalContent.classList.remove('scale-95');
+                        }, 50);
+                        
+                        if (displayType === 'limited') {
+                            localStorage.setItem(storageKey, (views + 1).toString());
+                        }
+                    };
+        
+                    const hideModal = () => {
+                        modal.classList.add('opacity-0');
+                        modalContent.classList.add('scale-95');
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                            modal.classList.remove('flex');
+                        }, 300);
+                    };
+        
+                    if (displayType === 'always' || views < displayLimit) {
+                        setTimeout(showModal, 1500); 
+                    }
+        
+                    closeBtn.addEventListener('click', hideModal);
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) hideModal();
+                    });
+                });
+            </script>
+            
+            <style>
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+                .swiper-pagination-bullet { background: #cbd5e1; opacity: 1; }
+                .swiper-pagination-bullet-active { background: #000; }
+            </style>
+        <% } %>
     <% } %>
 
 </body>
