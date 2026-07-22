@@ -284,13 +284,13 @@
                         <% parsedBanners.forEach(function(slide) { %>
                             <div class="swiper-slide flex flex-col h-auto">
                                 <% if (slide.img_url) { %>
-                                    <div class="relative flex-shrink-0">
+                                    <div class="relative flex-shrink-0 bg-gray-100">
                                         <% if (slide.link_url && slide.link_url.trim() !== '') { %>
                                             <a href="<%= slide.link_url %>" target="_blank" class="block transition hover:opacity-90">
-                                                <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px] md:max-h-[60vh] lg:max-h-[70vh]">
+                                                <img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-video object-contain">
                                             </a>
                                         <% } else { %>
-                                            <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px] md:max-h-[60vh] lg:max-h-[70vh]">
+                                            <img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-video object-contain">
                                         <% } %>
                                     </div>
                                 <% } %>
