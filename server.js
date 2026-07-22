@@ -100,12 +100,12 @@ async function initDB() {
             
             seo_title: 'Lullapos - ระบบ POS สำหรับร้านค้าขนาดเล็ก ใช้ฟรี จ่ายตามจริง', seo_description: 'ระบบจัดการหน้าร้าน Lullapos เริ่มต้นใช้งานฟรี', seo_keywords: 'ระบบ pos, ระบบ pos ฟรี', seo_thumbnail_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
             
+            // --- Banner Settings ---
             banner_active: 'false',
             banner_display_type: 'always', 
             banner_display_limit: '1',
-            banner_img_url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80',
-            banner_link_url: '', // 👇 เพิ่มบรรทัดนี้
-            banner_content: '<h2 class="text-2xl font-bold text-center text-primary mb-2">โปรโมชั่นพิเศษ!</h2><p class="text-center text-gray-600">สมัครวันนี้ ใช้งานฟรี 2,000 ออเดอร์แรก ไม่มีข้อผูกมัดใดๆ</p>'
+            banner_version: '1',
+            banner_list: '[]' // เก็บข้อมูลสไลด์เป็น JSON Array
         };
 
         for (const [key, value] of Object.entries(defaultSettings)) {
@@ -253,13 +253,12 @@ app.post('/admin/save', requireAuth, upload.fields([
 
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
             
+            // --- Banner Updates ---
             banner_active: body.banner_active === 'on' ? 'true' : 'false', 
             banner_display_type: body.banner_display_type || 'always',
             banner_display_limit: body.banner_display_limit || '1',
-            banner_content: sanitizeHtml(body.banner_content),
-
             banner_version: Date.now().toString(),
-            banner_link_url: body.banner_link_url || ''
+            banner_list: body.banner_list || '[]'
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);

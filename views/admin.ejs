@@ -273,49 +273,47 @@
                         </div>
 
                         <!-- Tab 8: Banner -->
-                        <div id="tab-banner" class="tab-content space-y-6 hidden">
-                            <div class="bg-blue-50/50 p-6 rounded-lg border border-blue-100 flex items-center justify-between">
-                                <div><h4 class="font-semibold">สถานะแบนเนอร์โฆษณา</h4><p class="text-sm text-gray-500">แสดงหน้าต่างโปรโมชั่น Modal ขึ้นมากลางหน้าเว็บ</p></div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าการแสดงผลโฆษณา (Modal Carousel)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <div class="relative">
+                                            <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                        </div>
+                                        <span class="font-semibold text-gray-700">เปิดใช้งานแบนเนอร์โฆษณา</span>
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-2">หากปิดไว้ ระบบจะไม่แสดงหน้าต่างโฆษณาเลย</p>
+                                </div>
+                                <div class="space-y-4 border-l pl-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">รูปแบบการแสดงผล</label>
+                                        <select name="banner_display_type" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                            <option value="always" <%= settings.banner_display_type === 'always' ? 'selected' : '' %>>แสดงทุกครั้งที่โหลดหน้าเว็บ</option>
+                                            <option value="limited" <%= settings.banner_display_type === 'limited' ? 'selected' : '' %>>จำกัดจำนวนครั้งต่อผู้ใช้ 1 คน</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">แสดงผลสูงสุด (ครั้ง)</label>
+                                        <input type="number" name="banner_display_limit" value="<%= settings.banner_display_limit %>" min="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                                <h3 class="text-lg font-bold">จัดการสไลด์โฆษณา (Carousel)</h3>
+                                <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">
+                                    + เพิ่มสไลด์ใหม่
+                                </button>
                             </div>
                             
-                            <!-- ตั้งค่าเงื่อนไขการแสดงผล -->
-                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
-                                <h4 class="font-semibold text-gray-900 mb-3">เงื่อนไขการแสดงผล (เมื่อเปิดใช้งาน)</h4>
-                                <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-6">
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="radio" name="banner_display_type" value="always" class="text-primary focus:ring-primary h-4 w-4" <%= settings.banner_display_type === 'always' ? 'checked' : '' %> onchange="document.getElementById('limit-box').classList.add('opacity-50', 'pointer-events-none')">
-                                        <span class="ml-2 text-sm text-gray-700">แสดงทุกครั้งที่เข้าเว็บ</span>
-                                    </label>
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="radio" name="banner_display_type" value="limited" class="text-primary focus:ring-primary h-4 w-4" <%= settings.banner_display_type === 'limited' ? 'checked' : '' %> onchange="document.getElementById('limit-box').classList.remove('opacity-50', 'pointer-events-none')">
-                                        <span class="ml-2 text-sm text-gray-700">จำกัดจำนวนครั้ง</span>
-                                    </label>
-                                </div>
-                                <div id="limit-box" class="mt-4 flex items-center <%= settings.banner_display_type === 'always' ? 'opacity-50 pointer-events-none' : '' %>">
-                                    <span class="text-sm text-gray-600 mr-2">อนุญาตให้โชว์</span>
-                                    <input type="number" name="banner_display_limit" min="1" value="<%= settings.banner_display_limit %>" class="w-20 border-gray-300 rounded-md border p-1 text-center text-sm shadow-sm">
-                                    <span class="text-sm text-gray-600 ml-2">ครั้ง ต่อ 1 ผู้ใช้งาน</span>
-                                </div>
+                            <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
+                            <div id="banner-container" class="space-y-4">
+                                <!-- รายการสไลด์แบนเนอร์จะถูกสร้างที่นี่ด้วย JavaScript -->
                             </div>
-
-                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
-                                <label class="block text-sm font-semibold mb-2">รูปภาพประกอบ (สัดส่วน 16:9)</label>
-                                <input type="file" name="banner_img" accept="image/*" onchange="previewImage(this, 'preview-banner')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white">
-                                <div class="mt-4">
-                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
-                                    <img id="preview-banner" src="<%= settings.banner_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
-                                </div>
-                                <div class="mt-6 pt-4 border-t border-gray-200">
-                                    <label class="block text-sm font-semibold mb-1">ลิงก์ปลายทางเมื่อคลิกรูปภาพ (ถ้ามี)</label>
-                                    <input type="url" name="banner_link_url" value="<%= settings.banner_link_url %>" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm" placeholder="https://...">
-                                    <p class="text-xs text-gray-400 mt-1">เว้นว่างไว้หากไม่ต้องการให้รูปภาพกดคลิกได้</p>
-                                </div>
-                            </div>
-                            <div><label class="block text-sm mb-1">เนื้อหาโปรโมชั่น</label><input type="hidden" name="banner_content" id="banner_content"><div class="quill-editor bg-white rounded-b-md" data-target="banner_content" style="height: 150px;"><%- settings.banner_content %></div></div>
                         </div>
 
                         <!-- Tab 9: SEO -->
@@ -457,6 +455,103 @@
         document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
         
         renderFaqs();
+
+        // --- ระบบ Banner Carousel ---
+        const bannerContainer = document.getElementById('banner-container');
+        const bannerInput = document.getElementById('banner_list_input');
+        let banners = [];
+        try { banners = JSON.parse(bannerInput.value || '[]'); } catch(e) { banners = []; }
+        let quillBanners = []; // เก็บ instance ของ Quill
+
+        function renderBanners() {
+            bannerContainer.innerHTML = '';
+            quillBanners = []; // รีเซ็ต
+
+            if (banners.length === 0) {
+                bannerContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ยังไม่มีสไลด์โฆษณา กดปุ่ม "+ เพิ่มสไลด์ใหม่" ด้านบน</p>';
+                bannerInput.value = '[]';
+                return;
+            }
+
+            banners.forEach((banner, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 p-5 rounded-lg border border-gray-200 relative mb-4';
+                
+                let actionButtons = `
+                    <div class="absolute top-3 right-3 flex space-x-2 z-10">
+                        ${index > 0 ? `<button type="button" onclick="moveBanner(${index}, -1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▲ ขึ้น</button>` : ''}
+                        ${index < banners.length - 1 ? `<button type="button" onclick="moveBanner(${index}, 1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeBanner(${index})" class="bg-white text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition shadow-sm">✖ ลบ</button>
+                    </div>
+                `;
+
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-40 mb-4 flex items-center space-x-2">
+                        <span class="bg-primary text-white font-bold w-6 h-6 flex items-center justify-center rounded-full text-xs"> ${index + 1} </span>
+                        <h4 class="font-bold text-gray-700">สไลด์ที่ ${index + 1}</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">URL รูปภาพ (คัดลอกลิงก์จากระบบจัดการไฟล์)</label>
+                            <input type="text" class="w-full border p-2 text-sm rounded" value="${banner.img_url || ''}" onchange="updateBanner(${index}, 'img_url', this.value)" placeholder="https://...">
+                            ${banner.img_url ? `<img src="${banner.img_url}" class="mt-2 h-20 w-auto rounded border object-cover">` : ''}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">ลิงก์ปลายทางเมื่อคลิกรูป (ถ้ามี)</label>
+                            <input type="url" class="w-full border p-2 text-sm rounded" value="${banner.link_url || ''}" onchange="updateBanner(${index}, 'link_url', this.value)" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <label class="block text-sm font-semibold mb-1">ข้อความรายละเอียดด้านล่างรูป</label>
+                    <div id="banner_editor_${index}" class="bg-white h-24 rounded-b border-gray-300"></div>
+                `;
+                bannerContainer.appendChild(div);
+                
+                const quillBanner = new Quill(document.getElementById(`banner_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'color': []}], [{ 'align': [] }], ['clean'] ] }
+                });
+                quillBanner.root.innerHTML = banner.content || '';
+                quillBanner.on('text-change', () => { 
+                    banners[index].content = quillBanner.root.innerHTML; 
+                    bannerInput.value = JSON.stringify(banners); 
+                });
+                quillBanners.push(quillBanner);
+            });
+            bannerInput.value = JSON.stringify(banners);
+        }
+
+        window.moveBanner = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < banners.length) {
+                const temp = banners[index];
+                banners[index] = banners[newIndex];
+                banners[newIndex] = temp;
+                renderBanners();
+            }
+        };
+
+        window.updateBanner = (index, key, value) => { 
+            banners[index][key] = value; 
+            bannerInput.value = JSON.stringify(banners);
+            if (key === 'img_url') renderBanners(); // รีเฟรชเพื่อโชว์พรีวิวรูป
+        };
+        
+        window.removeBanner = (index) => { 
+            if(confirm('ลบสไลด์นี้?')) { 
+                banners.splice(index, 1); 
+                renderBanners(); 
+            } 
+        };
+        
+        document.getElementById('add-banner-btn').addEventListener('click', () => { 
+            banners.push({ img_url: '', link_url: '', content: '' }); 
+            renderBanners(); 
+        });
+        
+        renderBanners();
     </script>
 </body>
 </html>
