@@ -269,8 +269,17 @@
 
         <% if (settings.banner_img_url) { %>
         <div class="relative">
+            <!-- 👇 ครอบแท็ก a ถ้ามีการตั้งค่าลิงก์ไว้ 👇 -->
+            <% if (settings.banner_link_url && settings.banner_link_url.trim() !== '') { %>
+                <a href="<%= settings.banner_link_url %>" target="_blank" class="block transition hover:opacity-90">
+            <% } %>
+            
             <img src="<%= settings.banner_img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[300px]">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+            
+            <% if (settings.banner_link_url && settings.banner_link_url.trim() !== '') { %>
+                </a>
+            <% } %>
         </div>
         <% } %>
         
