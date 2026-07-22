@@ -273,30 +273,32 @@
                         </div>
 
                         <!-- Tab 8: Banner -->
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าการแสดงผลโฆษณา (Modal Carousel)</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="flex items-center space-x-3 cursor-pointer">
-                                        <div class="relative">
-                                            <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
-                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                        </div>
-                                        <span class="font-semibold text-gray-700">เปิดใช้งานแบนเนอร์โฆษณา</span>
-                                    </label>
-                                    <p class="text-xs text-gray-500 mt-2">หากปิดไว้ ระบบจะไม่แสดงหน้าต่างโฆษณาเลย</p>
-                                </div>
-                                <div class="space-y-4 border-l pl-6">
+                        <div id="tab-banner" class="tab-content space-y-6 hidden">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าการแสดงผลโฆษณา (Modal Carousel)</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-sm font-semibold mb-1">รูปแบบการแสดงผล</label>
-                                        <select name="banner_display_type" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
-                                            <option value="always" <%= settings.banner_display_type === 'always' ? 'selected' : '' %>>แสดงทุกครั้งที่โหลดหน้าเว็บ</option>
-                                            <option value="limited" <%= settings.banner_display_type === 'limited' ? 'selected' : '' %>>จำกัดจำนวนครั้งต่อผู้ใช้ 1 คน</option>
-                                        </select>
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <div class="relative">
+                                                <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                            </div>
+                                            <span class="font-semibold text-gray-700">เปิดใช้งานแบนเนอร์โฆษณา</span>
+                                        </label>
+                                        <p class="text-xs text-gray-500 mt-2">หากปิดไว้ ระบบจะไม่แสดงหน้าต่างโฆษณาเลย</p>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold mb-1">แสดงผลสูงสุด (ครั้ง)</label>
-                                        <input type="number" name="banner_display_limit" value="<%= settings.banner_display_limit %>" min="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                    <div class="space-y-4 border-l pl-6">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">รูปแบบการแสดงผล</label>
+                                            <select name="banner_display_type" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                                <option value="always" <%= settings.banner_display_type === 'always' ? 'selected' : '' %>>แสดงทุกครั้งที่โหลดหน้าเว็บ</option>
+                                                <option value="limited" <%= settings.banner_display_type === 'limited' ? 'selected' : '' %>>จำกัดจำนวนครั้งต่อผู้ใช้ 1 คน</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">แสดงผลสูงสุด (ครั้ง)</label>
+                                            <input type="number" name="banner_display_limit" value="<%= settings.banner_display_limit %>" min="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
