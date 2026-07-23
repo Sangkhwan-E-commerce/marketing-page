@@ -1,343 +1,402 @@
-<%
-// ฟังก์ชันช่วยดึงข้อมูล JSON แยกตามภาษาปัจจุบัน
-function getVal(key) {
-    let val = settings[key] || '';
-    try {
-        let parsed = JSON.parse(val);
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && (parsed.th !== undefined || parsed.en !== undefined)) {
-            return parsed[currentLang] !== undefined ? parsed[currentLang] : '';
-        }
-    } catch(e) { }
-    return val;
-}
-
-// เตรียมข้อมูลสไลด์แบนเนอร์
-let bannerSlides = [];
-try {
-    bannerSlides = JSON.parse(getVal('banner_list') || '[]');
-} catch(e) { }
-%>
 <!DOCTYPE html>
-<html lang="<%= currentLang %>">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= getVal('seo_title') %></title>
-    <meta name="description" content="<%= getVal('seo_description') %>">
-    <meta name="keywords" content="<%= getVal('seo_keywords') %>">
     
-    <!-- Open Graph (SEO Social Media) -->
-    <meta property="og:title" content="<%= getVal('seo_title') %>">
-    <meta property="og:description" content="<%= getVal('seo_description') %>">
+    <title><%= settings.seo_title %></title>
+    <meta name="title" content="<%= settings.seo_title %>">
+    <meta name="description" content="<%= settings.seo_description %>">
+    <meta name="keywords" content="<%= settings.seo_keywords %>">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lullapos.com/">
+    <meta property="og:title" content="<%= settings.seo_title %>">
+    <meta property="og:description" content="<%= settings.seo_description %>">
     <meta property="og:image" content="<%= settings.seo_thumbnail_url %>">
     
-    <!-- Favicon -->
-    <link rel="icon" href="<%= settings.favicon_url %>">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://lullapos.com/">
+    <meta property="twitter:title" content="<%= settings.seo_title %>">
+    <meta property="twitter:description" content="<%= settings.seo_description %>">
+    <meta property="twitter:image" content="<%= settings.seo_thumbnail_url %>">
 
-    <!-- CSS / Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
     
-    <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
-
-    <style>
-        :root {
-            --theme-color: <%= settings.theme_color || '#3b82f6' %>;
-        }
-        .text-theme { color: var(--theme-color); }
-        .bg-theme { background-color: var(--theme-color); }
-        .border-theme { border-color: var(--theme-color); }
-        .hover-bg-theme:hover { filter: brightness(0.9); }
-    </style>
-</head>
-<body class="font-sans antialiased text-gray-800 bg-white">
-
-    <!-- Navbar -->
-    <nav class="bg-white shadow-sm fixed w-full z-40 top-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <!-- Logo -->
-                <div class="flex-shrink-0">
-                    <a href="/"><img src="<%= settings.logo_url %>" alt="Logo" class="h-8 w-auto"></a>
-                </div>
-                
-                <!-- Action & Lang Switcher -->
-                <div class="flex items-center gap-4">
-                    <select onchange="window.location.href='/?lang=' + this.value" class="text-sm font-medium border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 py-1.5 pl-3 pr-8 cursor-pointer">
-                        <option value="th" <%= currentLang === 'th' ? 'selected' : '' %>>🇹🇭 TH</option>
-                        <option value="en" <%= currentLang === 'en' ? 'selected' : '' %>>🇬🇧 EN</option>
-                    </select>
-                    <a href="<%= getVal('btn_url') %>" class="bg-theme text-white px-4 py-2 rounded-full text-sm font-bold shadow hover-bg-theme transition-all">
-                        <%= getVal('btn_text') %>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Spacer for fixed navbar -->
-    <div class="h-16"></div>
-
-    <!-- Hero Section -->
-    <section class="relative bg-gray-50 overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 lg:pt-32 lg:pb-40 flex flex-col lg:flex-row items-center gap-12">
-            <div class="w-full lg:w-1/2 text-center lg:text-left z-10">
-                <% if(getVal('hero_badge')) { %>
-                    <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-theme text-sm font-semibold mb-4 border border-blue-200">
-                        <%= getVal('hero_badge') %>
-                    </span>
-                <% } %>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
-                    <%- getVal('hero_title').replace(/\n/g, '<br>') %>
-                </h1>
-                <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0">
-                    <%- getVal('hero_desc') %>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    <a href="<%= getVal('btn_url') %>" class="bg-theme text-white text-lg font-bold px-8 py-3 rounded-full shadow-lg hover:-translate-y-1 transition-transform">
-                        <%= getVal('btn_text') %>
-                    </a>
-                </div>
-            </div>
-            <div class="w-full lg:w-1/2 relative z-10">
-                <img src="<%= settings.hero_img_url %>" alt="Hero" class="rounded-2xl shadow-2xl w-full object-cover aspect-video lg:aspect-square">
-            </div>
-        </div>
-    </section>
-
-    <!-- 3 Columns Feature Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4"><%= getVal('feature_title') %></h2>
-            <p class="text-lg text-gray-500 max-w-3xl mx-auto mb-16"><%= getVal('feature_subtitle') %></p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <% for(let i=1; i<=3; i++) { %>
-                <div class="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-gray-50 transition-colors">
-                    <div class="w-16 h-16 bg-blue-50 text-theme rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
-                        <%- getVal('col' + i + '_icon') %>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3"><%= getVal('col' + i + '_title') %></h3>
-                    <p class="text-gray-600"><%- getVal('col' + i + '_desc') %></p>
-                </div>
-                <% } %>
-            </div>
-        </div>
-    </section>
-
-    <!-- Grid Features (6 Boxes) -->
-    <section class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <% if(getVal('grid_badge')) { %>
-                    <span class="text-theme font-semibold tracking-wide uppercase text-sm mb-2 block"><%= getVal('grid_badge') %></span>
-                <% } %>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4"><%= getVal('grid_title') %></h2>
-                <p class="text-lg text-gray-500 max-w-2xl mx-auto"><%- getVal('grid_desc') %></p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <% for(let i=1; i<=6; i++) { %>
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div class="w-12 h-12 text-theme mb-6">
-                        <%- getVal('grid' + i + '_icon') %>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2"><%= getVal('grid' + i + '_title') %></h3>
-                    <p class="text-gray-600"><%= getVal('grid' + i + '_desc') %></p>
-                </div>
-                <% } %>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="relative py-24 bg-gray-900 overflow-hidden">
-        <div class="absolute inset-0">
-            <img src="<%= settings.stats_img_url %>" class="w-full h-full object-cover opacity-20" alt="Stats Background">
-        </div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white z-10">
-            <span class="text-blue-400 font-semibold tracking-wide uppercase text-sm mb-2 block"><%= getVal('stats_badge') %></span>
-            <h2 class="text-3xl md:text-4xl font-bold mb-4"><%= getVal('stats_title') %></h2>
-            <p class="text-lg text-gray-300 max-w-2xl mx-auto mb-16"><%- getVal('stats_desc') %></p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <% for(let i=1; i<=4; i++) { %>
-                <div>
-                    <div class="text-4xl md:text-5xl font-extrabold text-white mb-2"><%= getVal('stat' + i + '_value') %></div>
-                    <div class="text-sm md:text-base text-gray-400 font-medium"><%= getVal('stat' + i + '_label') %></div>
-                </div>
-                <% } %>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <% 
-        let faqs = [];
-        try { faqs = JSON.parse(getVal('faq_list') || '[]'); } catch(e) {}
-        if(faqs.length > 0) {
-    %>
-    <section class="py-20 bg-white">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12"><%= getVal('faq_title') %></h2>
-            <div class="space-y-4">
-                <% faqs.forEach((faq, index) => { %>
-                <div class="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden">
-                    <button class="w-full px-6 py-4 text-left font-bold text-gray-900 flex justify-between items-center focus:outline-none" onclick="document.getElementById('faq-<%= index %>').classList.toggle('hidden')">
-                        <%= faq.question %>
-                        <i class="fas fa-chevron-down text-gray-400"></i>
-                    </button>
-                    <div id="faq-<%= index %>" class="hidden px-6 pb-4 text-gray-600">
-                        <%- faq.answer %>
-                    </div>
-                </div>
-                <% }) %>
-            </div>
-        </div>
-    </section>
-    <% } %>
-
-    <!-- CTA & Footer -->
-    <section class="py-20 bg-theme text-white text-center">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-5xl font-bold mb-6"><%= getVal('cta_title') %></h2>
-            <p class="text-xl mb-10 text-white/90"><%- getVal('cta_desc') %></p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="<%= getVal('cta_btn1_url') %>" class="bg-white text-theme text-lg font-bold px-8 py-3 rounded-full shadow hover:bg-gray-100 transition-colors">
-                    <%= getVal('cta_btn1_text') %>
-                </a>
-                <% if(getVal('cta_btn2_text')) { %>
-                <a href="<%= getVal('cta_btn2_url') %>" class="bg-transparent border-2 border-white text-white text-lg font-bold px-8 py-3 rounded-full hover:bg-white/10 transition-colors">
-                    <%= getVal('cta_btn2_text') %>
-                </a>
-                <% } %>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-gray-900 text-gray-400 py-12 text-center">
-        <div class="flex justify-center gap-6 mb-6">
-            <% if(settings.facebook_url) { %>
-            <a href="<%= settings.facebook_url %>" target="_blank" class="text-gray-400 hover:text-white transition-colors w-6 h-6"><%- settings.facebook_icon %></a>
-            <% } %>
-            <% if(settings.line_url) { %>
-            <a href="<%= settings.line_url %>" target="_blank" class="text-gray-400 hover:text-white transition-colors w-6 h-6"><%- settings.line_icon %></a>
-            <% } %>
-        </div>
-        <p class="text-sm"><%= getVal('footer_text') %></p>
-    </footer>
-
-    <!-- ============================================== -->
-    <!-- Modal Banner (Swiper Carousel) -->
-    <!-- ============================================== -->
-    <div id="bannerModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeBanner()"></div>
-        
-        <!-- Modal Content -->
-        <div class="relative w-full max-w-lg bg-transparent rounded-2xl shadow-2xl overflow-hidden z-10 transform scale-95 opacity-0 transition-all duration-300" id="bannerContent">
-            
-            <!-- ปุ่มปิดมุมขวาบน -->
-            <button onclick="closeBanner()" class="absolute top-2 right-2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/80 transition-colors">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <!-- Swiper Container -->
-            <div class="swiper mySwiper w-full bg-white">
-                <div class="swiper-wrapper">
-                    <% bannerSlides.forEach(slide => { %>
-                        <div class="swiper-slide">
-                            <% if(slide.link) { %><a href="<%= slide.link %>" target="_blank"><% } %>
-                                <img src="<%= slide.url %>" alt="Promotion" class="w-full h-auto object-contain max-h-[70vh]">
-                            <% if(slide.link) { %></a><% } %>
-                        </div>
-                    <% }) %>
-                </div>
-                <!-- Controls -->
-                <% if(bannerSlides.length > 1) { %>
-                    <div class="swiper-button-next !text-white drop-shadow-md after:!text-2xl"></div>
-                    <div class="swiper-button-prev !text-white drop-shadow-md after:!text-2xl"></div>
-                    <div class="swiper-pagination"></div>
-                <% } %>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    
     <script>
-        // ระบบจัดการ Banner
-        const bannerActive = <%= settings.banner_active === 'true' %>;
-        const bannerType = '<%= settings.banner_display_type %>';
-        const displayLimit = parseInt('<%= settings.banner_display_limit || 1 %>');
-        const bannerVersion = '<%= settings.banner_version || "1" %>';
-        const hasSlides = <%= bannerSlides.length > 0 %>;
-
-        function showBanner() {
-            const modal = document.getElementById('bannerModal');
-            const content = document.getElementById('bannerContent');
-            
-            modal.classList.remove('hidden');
-            // Trigger animation
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
-
-            // Initialize Swiper
-            new Swiper(".mySwiper", {
-                loop: <%= bannerSlides.length > 1 %>,
-                autoplay: { delay: 4000, disableOnInteraction: false },
-                pagination: { el: ".swiper-pagination", clickable: true },
-                navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
-            });
-        }
-
-        function closeBanner() {
-            const modal = document.getElementById('bannerModal');
-            const content = document.getElementById('bannerContent');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
-        }
-
-        // เช็คเงื่อนไขการแสดงผล (Local Storage)
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!bannerActive || !hasSlides) return;
-
-            const storageKey = `lullapos_banner_${bannerVersion}`;
-            const today = new Date().toDateString();
-            
-            let bannerData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-
-            // ล้างข้อมูลถ้าเป็นวันใหม่
-            if (bannerData.date !== today) {
-                bannerData = { date: today, count: 0, showed_this_session: false };
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '<%= settings.theme_color %>'
             }
+          }
+        }
+      }
+    </script>
 
-            let shouldShow = false;
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-            if (bannerType === 'always') {
-                shouldShow = true;
-            } else if (bannerType === 'once_per_session') {
-                if (!sessionStorage.getItem('banner_shown')) {
-                    shouldShow = true;
-                    sessionStorage.setItem('banner_shown', 'true');
-                }
-            } else if (bannerType === 'limited_times') {
-                if (bannerData.count < displayLimit) {
-                    shouldShow = true;
-                    bannerData.count += 1;
-                }
-            }
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Prompt', sans-serif; } </style>
 
-            if (shouldShow) {
-                localStorage.setItem(storageKey, JSON.stringify(bannerData));
-                setTimeout(showBanner, 1000); // หน่วงเวลา 1 วินาทีก่อนแสดง
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T5P828RK');</script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5P828RK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+ 
+<div class="overflow-hidden bg-white py-15 sm:py-30">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12">
+        <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
+    </div>
+    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+      <div class="lg:pr-[150px] lg:pt-4 relative z-10 bg-white/80 lg:bg-transparent rounded-2xl p-4 lg:p-0">
+        <div class="lg:max-w-lg">
+          <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h2>
+          <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
+          <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
+          <div class="mt-10 flex items-center gap-x-6">
+            <a href="<%= settings.btn_url %>" class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.btn_text %></a>
+          </div>
+        </div>
+      </div>
+      <div class="relative flex items-center justify-center mt-10 lg:mt-0">
+        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-primary-50 py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl lg:text-center">
+      <h2 class="text-base font-semibold leading-7 text-primary">วิสัยทัศน์ของเรา</h2>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
+      <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
+    </div>
+    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col1_icon %></div>
+            <%= settings.col1_title %>
+          </dt>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col1_desc %></p></dd>
+        </div>
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col2_icon %></div>
+            <%= settings.col2_title %>
+          </dt>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col2_desc %></p></dd>
+        </div>
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-primary hover:shadow-md transition relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
+          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col3_icon %></div>
+            <%= settings.col3_title %>
+          </dt>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col3_desc %></p></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<div class="bg-red-50 py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl lg:text-center">
+      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.grid_badge %></h2>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.grid_title %></p>
+      <p class="mt-6 text-lg leading-8 text-gray-600"><%- settings.grid_desc %></p>
+    </div>
+    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+        <div class="relative pl-16">
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid1_icon %></div><%- settings.grid1_title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid1_desc %></dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid2_icon %></div><%- settings.grid2_title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid2_desc %></dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid3_icon %></div><%- settings.grid3_title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid3_desc %></dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid4_icon %></div><%- settings.grid4_title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid4_desc %></dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid5_icon %></div><%- settings.grid5_title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid5_desc %></dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid6_icon %></div><%- settings.grid6_title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid6_desc %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<div class="relative bg-white">
+  <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
+      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
+      <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
+      <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd></div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd></div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd></div>
+        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd></div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="bg-gray-50 py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto text-center mb-12">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.faq_title %></h2>
+    </div>
+    
+    <dl class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
+      <% 
+          let faqs = [];
+          try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
+          faqs.forEach(function(faq, index) { 
+      %>
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 faq-item self-start hover:shadow-md transition-shadow">
+        <dt>
+          <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
+            <span class="text-base font-semibold leading-7 pr-4 flex items-center gap-3"><%- faq.question %></span>
+            <span class="flex h-7 items-center shrink-0">
+              <svg class="h-5 w-5 faq-icon-plus transition-transform duration-200 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+              <svg class="h-5 w-5 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
+            </span>
+          </button>
+        </dt>
+        <dd class="mt-4 hidden faq-answer transition-all duration-300 border-t border-gray-100 pt-4">
+          <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
+        </dd>
+      </div>
+      <% }); %>
+    </dl>
+  </div>
+</div>
+
+<script>
+    const faqButtons = document.querySelectorAll('.faq-toggle-btn');
+    faqButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const answer = button.parentElement.nextElementSibling;
+            const iconPlus = button.querySelector('.faq-icon-plus');
+            const iconMinus = button.querySelector('.faq-icon-minus');
+            const isOpen = !answer.classList.contains('hidden');
+            
+            document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
+            document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
+            document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
+            
+            if (!isOpen) {
+                answer.classList.remove('hidden');
+                iconPlus.classList.add('hidden');
+                iconMinus.classList.remove('hidden');
             }
         });
-    </script>
+    });
+</script>
+
+<div class="bg-red-50 py-16 sm:py-24 lg:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.cta_title %></h2>
+      <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.cta_desc %></div>
+      <div class="mt-10 flex items-center justify-center gap-x-6">
+        <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.cta_btn1_text %></a>
+        <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group"><%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="bg-white border-t border-gray-200 py-12">
+    <div class="mx-auto max-w-7xl px-6 md:flex md:items-center md:justify-between lg:px-8">
+        <div class="flex justify-center space-x-6 md:order-2">
+            <% if(settings.facebook_url) { %>
+            <a href="<%= settings.facebook_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
+                <span class="sr-only">Facebook</span>
+                <div class="h-7 w-7 [&>svg]:w-7 [&>svg]:h-7"><%- settings.facebook_icon %></div>
+            </a>
+            <% } %>
+            <% if(settings.line_url) { %>
+            <a href="<%= settings.line_url %>" target="_blank" class="text-gray-400 hover:text-primary transition transform hover:scale-110">
+                <span class="sr-only">LINE</span>
+                <div class="h-7 w-7 [&>svg]:w-7 [&>svg]:h-7"><%- settings.line_icon %></div>
+            </a>
+            <% } %>
+        </div>
+        <div class="mt-8 md:order-1 md:mt-0">
+            <p class="text-center text-sm leading-5 text-gray-500"><%= settings.footer_text %></p>
+        </div>
+    </div>
+</footer>
+
+<!-- Promotional Banner Modal (Carousel) -->
+<% if (settings.banner_active === 'true') { %>
+    <% 
+        let parsedBanners = [];
+        try { parsedBanners = JSON.parse(settings.banner_list || '[]'); } catch(e) {}
+    %>
+    
+    <% if (parsedBanners.length > 0) { %>
+        <!-- เก็บค่า config ไว้ให้ JavaScript อ่าน -->
+        <div id="promo-config" 
+              data-type="<%= settings.banner_display_type %>" 
+              data-limit="<%= settings.banner_display_limit %>"
+              data-version="<%= settings.banner_version %>"
+              class="hidden"></div>
+    
+        <div id="promo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+            <div class="relative w-full max-w-lg scale-95 transform rounded-2xl bg-white shadow-2xl transition-all duration-300 flex flex-col max-h-[90vh] overflow-hidden" id="promo-modal-content">
+                
+                <!-- ปุ่มปิด -->
+                <button id="close-promo" class="absolute right-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-500 hover:bg-white hover:text-gray-900 shadow-sm backdrop-blur transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+    
+                <!-- Swiper Carousel -->
+                <div class="swiper bannerSwiper w-full h-full flex-grow flex flex-col group">
+                    <div class="swiper-wrapper">
+                        <% parsedBanners.forEach(function(slide) { %>
+                            <div class="swiper-slide flex flex-col h-auto">
+                                <% if (slide.img_url) { %>
+                                    <div class="relative flex-shrink-0">
+                                        <% if (slide.link_url && slide.link_url.trim() !== '') { %>
+                                            <a href="<%= slide.link_url %>" target="_blank" class="block transition hover:opacity-90">
+                                                <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px]">
+                                            </a>
+                                        <% } else { %>
+                                            <img src="<%= slide.img_url %>" alt="Promotion" class="w-full h-auto object-cover max-h-[350px]">
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                
+                                <% if (slide.content && slide.content !== '<p><br></p>') { %>
+                                    <div class="p-6 prose max-w-none flex-grow overflow-y-auto custom-scrollbar">
+                                        <%- slide.content %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    </div>
+                    
+                    <!-- Navigation & Pagination (จะแสดงก็ต่อเมื่อมีสไลด์มากกว่า 1) -->
+                    <% if (parsedBanners.length > 1) { %>
+                        <div class="swiper-pagination !bottom-2"></div>
+                        
+                        <!-- ปุ่มเลื่อนขวา -->
+                        <div class="swiper-button-next !text-white !w-10 !h-10 bg-black/40 hover:bg-black/60 rounded-full !right-2 backdrop-blur-sm after:!hidden shadow-lg transition-all">
+                            <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                        
+                        <!-- ปุ่มเลื่อนซ้าย -->
+                        <div class="swiper-button-prev !text-white !w-10 !h-10 bg-black/40 hover:bg-black/60 rounded-full !left-2 backdrop-blur-sm after:!hidden shadow-lg transition-all">
+                            <svg class="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.getElementById('promo-modal');
+                const modalContent = document.getElementById('promo-modal-content');
+                const closeBtn = document.getElementById('close-promo');
+                const config = document.getElementById('promo-config');
+                
+                if (!modal || !config) return;
+    
+                const displayType = config.dataset.type;
+                const displayLimit = parseInt(config.dataset.limit) || 1;
+                const bannerVersion = config.dataset.version;
+                
+                const storageKey = `promo_views_v${bannerVersion}`;
+                let views = parseInt(localStorage.getItem(storageKey) || '0');
+                
+                const isLoopActive = <%= parsedBanners.length > 1 ? 'true' : 'false' %>;
+    
+                const showModal = () => {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    new Swiper('.bannerSwiper', {
+                        observer: true,
+                        observeParents: true,
+                        loop: isLoopActive,
+                        pagination: { el: '.swiper-pagination', clickable: true },
+                        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                        autoplay: { delay: 5000, disableOnInteraction: true }
+                    });
+                    
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        modalContent.classList.remove('scale-95');
+                    }, 50);
+                    
+                    if (displayType === 'limited') {
+                        localStorage.setItem(storageKey, (views + 1).toString());
+                    }
+                };
+    
+                const hideModal = () => {
+                    modal.classList.add('opacity-0');
+                    modalContent.classList.add('scale-95');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }, 300);
+                };
+    
+                if (displayType === 'always' || views < displayLimit) {
+                    setTimeout(showModal, 1500); 
+                }
+    
+                closeBtn.addEventListener('click', hideModal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) hideModal();
+                });
+            });
+        </script>
+        
+        <style>
+            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+            .swiper-pagination-bullet { background: #cbd5e1; opacity: 1; }
+            .swiper-pagination-bullet-active { background: #000; }
+            
+            /* ป้องกันการคลุมทับของ Swiper ต่อลูกศรที่เรากำหนดเอง */
+            .swiper-button-next::after, .swiper-button-prev::after {
+                display: none !important;
+            }
+        </style>
+    <% } %>
+<% } %>
+
 </body>
 </html>

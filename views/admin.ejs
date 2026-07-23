@@ -1,376 +1,601 @@
-<%
-// ฟังก์ชันช่วยดึงข้อมูล JSON แยกตามภาษาที่แอดมินเลือก
-function getVal(key) {
-    let val = settings[key] || '';
-    try {
-        let parsed = JSON.parse(val);
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && (parsed.th !== undefined || parsed.en !== undefined)) {
-            return parsed[currentLang] !== undefined ? parsed[currentLang] : '';
-        }
-    } catch(e) { }
-    return val;
-}
-%>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full bg-gray-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการหลังบ้าน - Lullapos</title>
+    <title>จัดการเว็บไซต์ - Lullapos Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; font-weight: 600; }
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <style> 
+        body { font-family: 'Prompt', sans-serif; } 
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: { colors: { primary: '<%= settings.theme_color %>' } }
+        }
+      }
+
+      // ฟังก์ชันสำหรับ Live Preview รูปภาพโดยไม่ต้องคลิกลิงก์
+      function previewImage(input, imgId) {
+          if (input.files && input.files[0]) {
+              var reader = new FileReader();
+              reader.onload = function(e) {
+                  document.getElementById(imgId).src = e.target.result;
+              }
+              reader.readAsDataURL(input.files[0]);
+          }
+      }
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="h-full overflow-hidden flex">
 
-    <!-- Navbar -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <span class="text-xl font-bold text-gray-800"><i class="fas fa-cog text-blue-600 mr-2"></i> Lullapos Admin</span>
-                </div>
-                <div class="flex items-center gap-6">
-                    <!-- Dropdown เปลี่ยนภาษา -->
-                    <div class="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">
-                        <i class="fas fa-language text-gray-500"></i>
-                        <label class="text-sm font-medium text-gray-700">ภาษา:</label>
-                        <select onchange="window.location.href='/admin?lang=' + this.value" class="bg-transparent text-sm font-bold text-blue-600 focus:outline-none cursor-pointer">
-                            <option value="th" <%= currentLang === 'th' ? 'selected' : '' %>>🇹🇭 ภาษาไทย</option>
-                            <option value="en" <%= currentLang === 'en' ? 'selected' : '' %>>🇬🇧 English</option>
-                        </select>
-                    </div>
-                    
-                    <a href="/" target="_blank" class="text-gray-600 hover:text-blue-600 font-medium transition-colors">
-                        <i class="fas fa-external-link-alt mr-1"></i> ดูเว็บไซต์
-                    </a>
-                </div>
-            </div>
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-gray-900/80 transition-opacity md:hidden" aria-hidden="true"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-gray-900 transition-transform duration-300 ease-in-out md:static md:translate-x-0">
+        <div class="flex h-16 shrink-0 items-center bg-gray-900 px-6 border-b border-gray-800">
+            <span class="text-2xl font-bold text-white tracking-wide">Lulla<span class="text-primary">pos</span> <span class="text-xs text-gray-400 font-normal ml-1">Admin</span></span>
+            <button id="close-sidebar-btn" type="button" class="ml-auto flex items-center justify-center text-gray-400 hover:text-white md:hidden">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
         </div>
-    </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <form action="/admin/save" method="POST" enctype="multipart/form-data" class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <input type="hidden" name="edit_lang" value="<%= currentLang %>">
+        <nav class="flex flex-1 flex-col overflow-y-auto no-scrollbar px-4 py-6">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                <li>
+                    <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">จัดการหน้า Landing Page</div>
+                    <ul role="list" class="-mx-2 space-y-1">
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-general">1. ทั่วไป & Footer</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-hero">2. ส่วนบนสุด (Hero)</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features3">3. วิสัยทัศน์</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features4">4. ฟีเจอร์หลัก</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-stats">5. ภารกิจและสถิติ</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-faq">6. คำถามที่พบบ่อย (FAQ)</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-cta">7. ส่วนเชิญชวน (CTA)</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-banner">8. โฆษณา Modal</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-seo">9. ตั้งค่า SEO</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </aside>
 
-            <!-- Tabs Header -->
-            <div class="border-b border-gray-200 bg-gray-50 overflow-x-auto">
-                <nav class="flex px-4" aria-label="Tabs" id="tabs-nav">
-                    <button type="button" class="tab-btn active whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab1">1. ทั่วไป & SEO</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab2">2. ส่วนหัว (Hero)</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab3">3. ฟีเจอร์หลัก</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab4">4. กริดฟีเจอร์</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab5">5. สถิติ</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab6">6. FAQ</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab7">7. CTA & Footer</button>
-                    <button type="button" class="tab-btn whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="tab8">8. แบนเนอร์</button>
-                </nav>
+    <div class="flex flex-col flex-1 w-0 overflow-hidden bg-gray-50">
+        <header class="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 shadow-sm sm:px-6 lg:px-8 shrink-0 relative z-10">
+            <button id="open-sidebar-btn" type="button" class="text-gray-500 hover:text-gray-700 md:hidden">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+            </button>
+            <h1 class="hidden text-xl font-bold text-gray-800 md:block" id="page-title-display">1. ทั่วไป & Footer</h1>
+            
+            <div class="flex items-center ml-auto space-x-4">
+                <div class="relative ml-3">
+                    <button id="user-menu-btn" type="button" class="flex items-center bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-primary">
+                        <img class="w-9 h-9 rounded-full object-cover border border-gray-200" src="https://ui-avatars.com/api/?name=Admin&background=random&color=fff" alt="Admin">
+                    </button>
+                    <div id="user-dropdown-panel" class="absolute right-0 z-10 hidden w-48 py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                        <a href="/" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">ดูหน้าเว็บไซต์จริง</a>
+                        <a href="/admin/login" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">ออกจากระบบ</a>
+                    </div>
+                </div>
             </div>
+        </header>
 
-            <!-- Tabs Content Container -->
-            <div class="p-6">
+        <main class="flex-1 relative overflow-y-auto focus:outline-none">
+            <div class="py-6 px-4 sm:px-6 lg:px-8 mx-auto max-w-5xl">
                 
-                <!-- Tab 1: ทั่วไป & SEO -->
-                <div id="tab1" class="tab-content active space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">ตั้งค่าทั่วไป <span class="text-sm font-normal text-red-500 ml-2">(ใช้ร่วมกันทุกภาษา)</span></h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="block text-sm font-medium text-gray-700">สีธีม</label><input type="text" name="theme_color" value="<%= settings.theme_color %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">อัปโหลด Favicon</label><input type="file" name="favicon" accept="image/*" class="mt-1 block w-full text-sm"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">อัปโหลดโลโก้</label><input type="file" name="logo" accept="image/*" class="mt-1 block w-full text-sm"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">ลิงก์ Facebook</label><input type="text" name="facebook_url" value="<%= settings.facebook_url %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">ลิงก์ LINE</label><input type="text" name="line_url" value="<%= settings.line_url %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                    </div>
-
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2 mt-8">SEO (รองรับหลายภาษา)</h2>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div><label class="block text-sm font-medium">SEO Title</label><input type="text" name="seo_title" value="<%= getVal('seo_title') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div><label class="block text-sm font-medium">SEO Description</label><textarea name="seo_description" rows="3" class="mt-1 block w-full border rounded-md p-2"><%= getVal('seo_description') %></textarea></div>
-                        <div><label class="block text-sm font-medium">SEO Keywords</label><input type="text" name="seo_keywords" value="<%= getVal('seo_keywords') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div><label class="block text-sm font-medium">SEO Thumbnail Image <span class="text-red-500 font-normal">(ใช้ร่วมกันทุกภาษา)</span></label><input type="file" name="seo_thumbnail" accept="image/*" class="mt-1 block w-full text-sm"></div>
-                    </div>
-                </div>
-
-                <!-- Tab 2: ส่วนหัว (Hero) -->
-                <div id="tab2" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">ตั้งค่าส่วนหัว (Hero Section)</h2>
-                    <div><label class="block text-sm font-medium">รูปภาพหน้าปก <span class="text-red-500 font-normal">(ใช้ร่วมกันทุกภาษา)</span></label><input type="file" name="hero_img" accept="image/*" class="mt-1 block w-full text-sm"></div>
-                    <div><label class="block text-sm font-medium">ป้ายกำกับ</label><input type="text" name="hero_badge" value="<%= getVal('hero_badge') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                    <div><label class="block text-sm font-medium">หัวข้อหลัก</label><input type="text" name="hero_title" value="<%= getVal('hero_title') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                    <div><label class="block text-sm font-medium">คำบรรยาย</label><textarea name="hero_desc" rows="4" class="mt-1 block w-full border rounded-md p-2"><%= getVal('hero_desc') %></textarea></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-medium">ข้อความปุ่ม</label><input type="text" name="btn_text" value="<%= getVal('btn_text') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div><label class="block text-sm font-medium">ลิงก์ปุ่ม</label><input type="text" name="btn_url" value="<%= getVal('btn_url') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                    </div>
-                </div>
-
-                <!-- Tab 3: ฟีเจอร์หลัก -->
-                <div id="tab3" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">ฟีเจอร์หลัก 3 คอลัมน์</h2>
-                    <div><label class="block text-sm font-medium">หัวข้อฟีเจอร์</label><input type="text" name="feature_title" value="<%= getVal('feature_title') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                    <div><label class="block text-sm font-medium">คำบรรยายฟีเจอร์</label><textarea name="feature_subtitle" rows="2" class="mt-1 block w-full border rounded-md p-2"><%= getVal('feature_subtitle') %></textarea></div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                        <% for(let i=1; i<=3; i++) { %>
-                        <div class="p-4 bg-gray-50 rounded-lg border">
-                            <h3 class="font-bold mb-2">คอลัมน์ที่ <%= i %></h3>
-                            <input type="text" name="col<%= i %>_title" value="<%= getVal('col' + i + '_title') %>" class="mb-2 mt-1 w-full border rounded p-2 text-sm" placeholder="หัวข้อ">
-                            <textarea name="col<%= i %>_desc" rows="3" class="w-full border rounded p-2 text-sm" placeholder="คำบรรยาย"><%= getVal('col' + i + '_desc') %></textarea>
-                            <textarea name="col<%= i %>_icon" rows="2" class="w-full border rounded p-2 text-xs font-mono mt-2" placeholder="SVG Icon"><%= getVal('col' + i + '_icon') %></textarea>
-                        </div>
-                        <% } %>
-                    </div>
-                </div>
-
-                <!-- Tab 4: กริดฟีเจอร์ (Grid) -->
-                <div id="tab4" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">กริดฟีเจอร์ (6 กล่อง)</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="md:col-span-1"><label class="block text-sm font-medium">ป้ายกำกับ</label><input type="text" name="grid_badge" value="<%= getVal('grid_badge') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div class="md:col-span-2"><label class="block text-sm font-medium">หัวข้อหลัก</label><input type="text" name="grid_title" value="<%= getVal('grid_title') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                        <div class="md:col-span-3"><label class="block text-sm font-medium">คำบรรยาย</label><textarea name="grid_desc" rows="2" class="mt-1 block w-full border rounded-md p-2"><%= getVal('grid_desc') %></textarea></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <% for(let i=1; i<=6; i++) { %>
-                        <div class="p-4 bg-gray-50 border rounded-lg flex flex-col gap-2">
-                            <h4 class="font-bold text-sm text-blue-600">กล่องที่ <%= i %></h4>
-                            <input type="text" name="grid<%= i %>_title" placeholder="หัวข้อ" value="<%= getVal('grid' + i + '_title') %>" class="w-full border rounded p-2 text-sm">
-                            <input type="text" name="grid<%= i %>_desc" placeholder="คำบรรยายสั้นๆ" value="<%= getVal('grid' + i + '_desc') %>" class="w-full border rounded p-2 text-sm">
-                            <textarea name="grid<%= i %>_icon" placeholder="SVG Icon Code" rows="1" class="w-full border rounded p-2 text-xs font-mono"><%= getVal('grid' + i + '_icon') %></textarea>
-                        </div>
-                        <% } %>
-                    </div>
-                </div>
-
-                <!-- Tab 5: สถิติ (Stats) -->
-                <div id="tab5" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">ส่วนแสดงสถิติ</h2>
-                    <div><label class="block text-sm font-medium">รูปภาพพื้นหลัง <span class="text-red-500 font-normal">(ส่วนกลาง)</span></label><input type="file" name="stats_img" accept="image/*" class="mt-1 block w-full text-sm"></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-medium">ป้ายกำกับ</label><input type="text" name="stats_badge" value="<%= getVal('stats_badge') %>" class="mt-1 w-full border rounded p-2"></div>
-                        <div><label class="block text-sm font-medium">หัวข้อ</label><input type="text" name="stats_title" value="<%= getVal('stats_title') %>" class="mt-1 w-full border rounded p-2"></div>
-                    </div>
-                    <div><label class="block text-sm font-medium">คำบรรยาย</label><textarea name="stats_desc" rows="2" class="mt-1 w-full border rounded p-2"><%= getVal('stats_desc') %></textarea></div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border">
-                        <% for(let i=1; i<=4; i++) { %>
+                <form action="/admin/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-20 rounded-t-xl">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500">Label <%= i %></label>
-                            <input type="text" name="stat<%= i %>_label" value="<%= getVal('stat' + i + '_label') %>" class="mt-1 w-full border rounded p-2 text-sm mb-2">
-                            <label class="block text-xs font-medium text-gray-500">Value <%= i %></label>
-                            <input type="text" name="stat<%= i %>_value" value="<%= getVal('stat' + i + '_value') %>" class="mt-1 w-full border rounded p-2 text-sm font-bold">
+                            <p class="text-sm text-gray-500">กรุณากดบันทึกทุกครั้งเมื่อแก้ไขข้อมูลเสร็จสิ้น</p>
                         </div>
-                        <% } %>
-                    </div>
-                </div>
-
-                <!-- Tab 6: FAQ -->
-                <div id="tab6" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">คำถามที่พบบ่อย (FAQ)</h2>
-                    <div><label class="block text-sm font-medium">หัวข้อส่วน FAQ</label><input type="text" name="faq_title" value="<%= getVal('faq_title') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                    <div><label class="block text-sm font-medium">รายการคำถาม (JSON Format)</label><textarea name="faq_list" rows="10" class="mt-1 block w-full border rounded-md p-2 font-mono text-sm"><%= getVal('faq_list') %></textarea></div>
-                </div>
-
-                <!-- Tab 7: CTA & Footer -->
-                <div id="tab7" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">Call to Action & Footer</h2>
-                    <div class="bg-gray-50 p-4 rounded-lg border mb-6">
-                        <h3 class="font-bold mb-4">Call to Action</h3>
-                        <div><label class="block text-sm font-medium">หัวข้อ</label><input type="text" name="cta_title" value="<%= getVal('cta_title') %>" class="mt-1 w-full border rounded p-2"></div>
-                        <div class="mt-4"><label class="block text-sm font-medium">คำบรรยาย</label><textarea name="cta_desc" rows="2" class="mt-1 w-full border rounded p-2"><%= getVal('cta_desc') %></textarea></div>
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div><label class="block text-xs font-medium">ปุ่มที่ 1 (Text)</label><input type="text" name="cta_btn1_text" value="<%= getVal('cta_btn1_text') %>" class="mt-1 w-full border rounded p-2"></div>
-                            <div><label class="block text-xs font-medium">ปุ่มที่ 1 (URL)</label><input type="text" name="cta_btn1_url" value="<%= getVal('cta_btn1_url') %>" class="mt-1 w-full border rounded p-2"></div>
-                            <div><label class="block text-xs font-medium">ปุ่มที่ 2 (Text)</label><input type="text" name="cta_btn2_text" value="<%= getVal('cta_btn2_text') %>" class="mt-1 w-full border rounded p-2"></div>
-                            <div><label class="block text-xs font-medium">ปุ่มที่ 2 (URL)</label><input type="text" name="cta_btn2_url" value="<%= getVal('cta_btn2_url') %>" class="mt-1 w-full border rounded p-2"></div>
-                        </div>
-                    </div>
-                    <div><label class="block text-sm font-medium">ข้อความ Footer</label><input type="text" name="footer_text" value="<%= getVal('footer_text') %>" class="mt-1 block w-full border rounded-md p-2"></div>
-                </div>
-
-                <!-- Tab 8: แบนเนอร์ (Modal/Carousel) -->
-                <div id="tab8" class="tab-content space-y-6">
-                    <h2 class="text-lg font-bold text-gray-900 border-b pb-2">ระบบจัดการแบนเนอร์โฆษณา</h2>
-                    
-                    <!-- การตั้งค่า Global (ใช้ร่วมกันทุกภาษา) -->
-                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
-                        <h3 class="font-bold text-blue-800 mb-2">การตั้งค่าการแสดงผล <span class="text-red-500 text-xs font-normal">(ใช้ร่วมกันทุกภาษา)</span></h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex items-center mt-6">
-                                <input type="checkbox" name="banner_active" id="banner_active" <%= settings.banner_active === 'true' ? 'checked' : '' %> class="h-4 w-4 text-blue-600 rounded">
-                                <label for="banner_active" class="ml-2 block text-sm font-medium text-gray-700">เปิดใช้งาน Banner</label>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium">เงื่อนไขการแสดง</label>
-                                <select name="banner_display_type" class="mt-1 block w-full p-2 rounded-md border">
-                                    <option value="always" <%= settings.banner_display_type === 'always' ? 'selected' : '' %>>แสดงทุกครั้ง</option>
-                                    <option value="once_per_session" <%= settings.banner_display_type === 'once_per_session' ? 'selected' : '' %>>ครั้งเดียวต่อ Session</option>
-                                    <option value="limited_times" <%= settings.banner_display_type === 'limited_times' ? 'selected' : '' %>>จำกัดจำนวนครั้ง</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium">จำนวนครั้งสูงสุด</label>
-                                <input type="number" name="banner_display_limit" value="<%= settings.banner_display_limit || 1 %>" class="mt-1 block w-full border rounded-md p-2">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ระบบจัดการสไลด์รูปภาพ -->
-                    <div class="bg-white border rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-gray-800">
-                                จัดการรูปภาพสไลด์ 
-                                <span class="text-blue-600 text-sm font-normal">(อิงตามภาษา <%= currentLang === 'th' ? 'ไทย' : 'English' %>)</span>
-                            </h3>
-                        </div>
-
-                        <!-- ซ่อน Textarea ไว้เก็บ JSON ตอนส่งเข้า Form -->
-                        <textarea name="banner_list" id="banner_list_input" class="hidden"><%= getVal('banner_list') %></textarea>
-
-                        <!-- ส่วนอัปโหลด -->
-                        <div class="flex items-center gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300">
-                            <input type="file" id="slide_upload" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
-                            <button type="button" id="btn_add_slide" class="whitespace-nowrap bg-blue-100 text-blue-700 px-4 py-2 rounded hover:bg-blue-200 font-medium transition-colors">
-                                <i class="fas fa-upload mr-1"></i> อัปโหลดเพิ่มสไลด์
+                        <div class="mt-4 sm:mt-0">
+                            <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-80 transition-all transform hover:scale-105">
+                                💾 บันทึกการเปลี่ยนแปลง
                             </button>
                         </div>
-                        <div id="slide_loading" class="hidden text-sm text-blue-600 mb-4 animate-pulse"><i class="fas fa-spinner fa-spin mr-2"></i>กำลังอัปโหลดรูปภาพ...</div>
+                    </div>
 
-                        <!-- คอนเทนเนอร์แสดงสไลด์ที่มีอยู่ -->
-                        <div id="slides_container" class="space-y-3">
-                            <!-- JS จะดึงภาพมาแสดงตรงนี้ -->
+                    <!-- เนื้อหาฟอร์ม -->
+                    <div class="p-6">
+                        
+                        <!-- Tab 1: General -->
+                        <div id="tab-general" class="tab-content space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon (PNG/ICO)</label>
+                                    <input type="file" name="favicon" accept="image/*" onchange="previewImage(this, 'preview-favicon')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <div class="mt-3">
+                                        <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                        <img id="preview-favicon" src="<%= settings.favicon_url %>" class="h-10 w-auto object-contain rounded border border-gray-200 shadow-sm bg-white p-1">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Logo โปร่งใส (PNG)</label>
+                                    <input type="file" name="logo" accept="image/png" onchange="previewImage(this, 'preview-logo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <div class="mt-3">
+                                        <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                        <img id="preview-logo" src="<%= settings.logo_url %>" class="h-12 w-auto object-contain rounded border border-gray-200 shadow-sm bg-gray-100 p-1">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">สีธีมหลัก (เช่น <code>rgb(244 97 100 / 98%)</code> หรือ <code>#F46164</code>)</label>
+                                <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2" required>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-gray-200">
+                                <h4 class="text-base font-semibold text-gray-900 mb-4">ตั้งค่า Footer & โซเชียล</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ลิงก์ Facebook</label><input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ไอคอน Facebook (SVG)</label><textarea name="facebook_icon" rows="2" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-xs font-mono"><%= settings.facebook_icon %></textarea></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ลิงก์ LINE</label><input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ไอคอน LINE (SVG)</label><textarea name="line_icon" rows="2" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-xs font-mono"><%= settings.line_icon %></textarea></div>
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Copyright</label>
+                                    <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Hero -->
+                        <div id="tab-hero" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label><input type="text" name="hero_badge" value="<%= settings.hero_badge %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก (Title)</label><input type="text" name="hero_title" value="<%= settings.hero_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด (Description)</label>
+                                    <input type="hidden" name="hero_desc" id="hero_desc">
+                                    <div class="quill-editor bg-white rounded-b-md" data-target="hero_desc" style="height: 150px;"><%- settings.hero_desc %></div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพหน้าจอระบบ (Hero Image)</label>
+                                <input type="file" name="hero_img" accept="image/*" onchange="previewImage(this, 'preview-hero')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-hero" src="<%= settings.hero_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
+                            </div>
+                            <div class="pt-6 border-t border-gray-200">
+                                <h4 class="text-base font-semibold text-gray-900 mb-4">ปุ่มสมัครใช้งาน</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ</label><input type="text" name="btn_text" value="<%= settings.btn_text %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">URL ลิงก์</label><input type="text" name="btn_url" value="<%= settings.btn_url %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ขนาดอักษร</label>
+                                        <select name="btn_size" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                            <option value="text-sm" <%= settings.btn_size === 'text-sm' ? 'selected' : '' %>>เล็ก (text-sm)</option>
+                                            <option value="text-base" <%= settings.btn_size === 'text-base' ? 'selected' : '' %>>ปกติ (text-base)</option>
+                                            <option value="text-lg" <%= settings.btn_size === 'text-lg' ? 'selected' : '' %>>ใหญ่ (text-lg)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Features 3 Columns -->
+                        <div id="tab-features3" class="tab-content space-y-6 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="feature_title" value="<%= settings.feature_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">คำโปรยย่อย (Subtitle)</label><input type="text" name="feature_subtitle" value="<%= settings.feature_subtitle %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+                                <div class="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2">คอลัมน์ 1</h4>
+                                    <textarea name="col1_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono" placeholder="ไอคอน SVG" required><%= settings.col1_icon %></textarea>
+                                    <input type="text" name="col1_title" value="<%= settings.col1_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required>
+                                    <input type="hidden" name="col1_desc" id="col1_desc"><div class="quill-editor bg-white rounded-b-md" data-target="col1_desc" style="height: 100px;"><%- settings.col1_desc %></div>
+                                </div>
+                                <div class="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2">คอลัมน์ 2</h4>
+                                    <textarea name="col2_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono" required><%= settings.col2_icon %></textarea>
+                                    <input type="text" name="col2_title" value="<%= settings.col2_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required>
+                                    <input type="hidden" name="col2_desc" id="col2_desc"><div class="quill-editor bg-white rounded-b-md" data-target="col2_desc" style="height: 100px;"><%- settings.col2_desc %></div>
+                                </div>
+                                <div class="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                                    <h4 class="font-semibold text-gray-900 border-b pb-2">คอลัมน์ 3</h4>
+                                    <textarea name="col3_icon" rows="2" class="w-full border-gray-300 rounded-md border p-2 text-xs font-mono" required><%= settings.col3_icon %></textarea>
+                                    <input type="text" name="col3_title" value="<%= settings.col3_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required>
+                                    <input type="hidden" name="col3_desc" id="col3_desc"><div class="quill-editor bg-white rounded-b-md" data-target="col3_desc" style="height: 100px;"><%- settings.col3_desc %></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: Features 4 Grids -->
+                        <div id="tab-features4" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label><input type="text" name="grid_badge" value="<%= settings.grid_badge %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="grid_title" value="<%= settings.grid_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label><input type="hidden" name="grid_desc" id="grid_desc"><div class="quill-editor bg-white rounded-b-md" data-target="grid_desc" style="height: 100px;"><%- settings.grid_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 1</h4><textarea name="grid1_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid1_icon %></textarea><input type="text" name="grid1_title" value="<%= settings.grid1_title %>" class="w-full border p-2 text-sm" required><textarea name="grid1_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid1_desc %></textarea></div>
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 2</h4><textarea name="grid2_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid2_icon %></textarea><input type="text" name="grid2_title" value="<%= settings.grid2_title %>" class="w-full border p-2 text-sm" required><textarea name="grid2_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid2_desc %></textarea></div>
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 3</h4><textarea name="grid3_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid3_icon %></textarea><input type="text" name="grid3_title" value="<%= settings.grid3_title %>" class="w-full border p-2 text-sm" required><textarea name="grid3_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid3_desc %></textarea></div>
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 4</h4><textarea name="grid4_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid4_icon %></textarea><input type="text" name="grid4_title" value="<%= settings.grid4_title %>" class="w-full border p-2 text-sm" required><textarea name="grid4_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid4_desc %></textarea></div>
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 5</h4><textarea name="grid5_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid5_icon %></textarea><input type="text" name="grid5_title" value="<%= settings.grid5_title %>" class="w-full border p-2 text-sm" required><textarea name="grid5_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid5_desc %></textarea></div>
+                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 6</h4><textarea name="grid6_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid6_icon %></textarea><input type="text" name="grid6_title" value="<%= settings.grid6_title %>" class="w-full border p-2 text-sm" required><textarea name="grid6_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid6_desc %></textarea></div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 5: Stats -->
+                        <div id="tab-stats" class="tab-content space-y-6 hidden">
+                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100 mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพประกอบ (ฝั่งซ้าย)</label>
+                                <input type="file" name="stats_img" accept="image/*" onchange="previewImage(this, 'preview-stats')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-stats" src="<%= settings.stats_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm">ข้อความ Badge</label><input type="text" name="stats_badge" value="<%= settings.stats_badge %>" class="w-full border p-2 rounded" required></div>
+                                    <div><label class="block text-sm">หัวข้อหลัก</label><input type="text" name="stats_title" value="<%= settings.stats_title %>" class="w-full border p-2 rounded" required></div>
+                                </div>
+                                <div><label class="block text-sm">รายละเอียด</label><input type="hidden" name="stats_desc" id="stats_desc"><div class="quill-editor bg-white rounded-b-md" data-target="stats_desc" style="height: 120px;"><%- settings.stats_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 1</label><input type="text" name="stat1_value" value="<%= settings.stat1_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat1_label" value="<%= settings.stat1_label %>" class="w-full border p-2 text-sm" required></div>
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 2</label><input type="text" name="stat2_value" value="<%= settings.stat2_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat2_label" value="<%= settings.stat2_label %>" class="w-full border p-2 text-sm" required></div>
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 3</label><input type="text" name="stat3_value" value="<%= settings.stat3_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat3_label" value="<%= settings.stat3_label %>" class="w-full border p-2 text-sm" required></div>
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 4</label><input type="text" name="stat4_value" value="<%= settings.stat4_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat4_label" value="<%= settings.stat4_label %>" class="w-full border p-2 text-sm" required></div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: FAQ -->
+                        <div id="tab-faq" class="tab-content space-y-6 hidden">
+                            <div><label class="block text-sm">หัวข้อหลัก (Title)</label><input type="text" name="faq_title" value="<%= settings.faq_title %>" class="w-full border p-2 rounded" required></div>
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-4"><h4 class="font-semibold">รายการคำถาม</h4><button type="button" id="add-faq-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มคำถาม</button></div>
+                                <div id="faq-container" class="space-y-4"></div><input type="hidden" name="faq_list" id="faq_list_input" value="<%= settings.faq_list %>">
+                            </div>
+                        </div>
+
+                        <!-- Tab 7: CTA -->
+                        <div id="tab-cta" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div><label class="block text-sm">หัวข้อหลัก</label><input type="text" name="cta_title" value="<%= settings.cta_title %>" class="w-full border p-2 rounded" required></div>
+                                <div><label class="block text-sm">รายละเอียด</label><input type="hidden" name="cta_desc" id="cta_desc"><div class="quill-editor bg-white rounded-b-md" data-target="cta_desc" style="height: 120px;"><%- settings.cta_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded"><h4 class="font-semibold mb-2">ปุ่มหลัก</h4><input type="text" name="cta_btn1_text" value="<%= settings.cta_btn1_text %>" class="w-full border p-2 mb-2 text-sm" placeholder="ข้อความบนปุ่ม" required><input type="text" name="cta_btn1_url" value="<%= settings.cta_btn1_url %>" class="w-full border p-2 text-sm" placeholder="URL" required></div>
+                                <div class="bg-gray-50 p-4 rounded"><h4 class="font-semibold mb-2">ปุ่มรอง</h4><input type="text" name="cta_btn2_text" value="<%= settings.cta_btn2_text %>" class="w-full border p-2 mb-2 text-sm" placeholder="ข้อความบนปุ่ม" required><input type="text" name="cta_btn2_url" value="<%= settings.cta_btn2_url %>" class="w-full border p-2 text-sm" placeholder="URL" required></div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 8: Banner -->
+                        <div id="tab-banner" class="tab-content space-y-6 hidden">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าการแสดงผลโฆษณา (Modal Carousel)</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <div class="relative">
+                                                <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                            </div>
+                                            <span class="font-semibold text-gray-700">เปิดใช้งานแบนเนอร์โฆษณา</span>
+                                        </label>
+                                        <p class="text-xs text-gray-500 mt-2">หากปิดไว้ ระบบจะไม่แสดงหน้าต่างโฆษณาเลย</p>
+                                    </div>
+                                    <div class="space-y-4 border-l pl-6">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">รูปแบบการแสดงผล</label>
+                                            <select name="banner_display_type" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                                <option value="always" <%= settings.banner_display_type === 'always' ? 'selected' : '' %>>แสดงทุกครั้งที่โหลดหน้าเว็บ</option>
+                                                <option value="limited" <%= settings.banner_display_type === 'limited' ? 'selected' : '' %>>จำกัดจำนวนครั้งต่อผู้ใช้ 1 คน</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">แสดงผลสูงสุด (ครั้ง)</label>
+                                            <input type="number" name="banner_display_limit" value="<%= settings.banner_display_limit %>" min="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                                    <h3 class="text-lg font-bold">จัดการสไลด์โฆษณา (Carousel)</h3>
+                                    <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">
+                                        + เพิ่มสไลด์ใหม่
+                                    </button>
+                                </div>
+                                
+                                <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
+                                <div id="banner-container" class="space-y-4">
+                                    <!-- รายการสไลด์แบนเนอร์จะถูกสร้างที่นี่ด้วย JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 9: SEO -->
+                        <div id="tab-seo" class="tab-content space-y-6 hidden">
+                            <div class="bg-blue-50/50 p-6 rounded-lg mb-6 border border-blue-100">
+                                <label class="block text-sm font-semibold mb-2">รูปภาพ Thumbnail (แชร์ลง Facebook/LINE)</label>
+                                <input type="file" name="seo_thumbnail" accept="image/*" onchange="previewImage(this, 'preview-seo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-seo" src="<%= settings.seo_thumbnail_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div><label class="block text-sm">SEO Title</label><input type="text" name="seo_title" value="<%= settings.seo_title %>" class="w-full border p-2 rounded text-sm" required></div>
+                                <div><label class="block text-sm">SEO Description</label><textarea name="seo_description" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.seo_description %></textarea></div>
+                                <div><label class="block text-sm">SEO Keywords</label><input type="text" name="seo_keywords" value="<%= settings.seo_keywords %>" class="w-full border p-2 rounded text-sm" required></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const pageTitleDisplay = document.getElementById('page-title-display');
+        
+        function showTab(tabId, menuTitle) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-menu-btn').forEach(el => {
+                el.classList.remove('bg-gray-800', 'text-white');
+                el.classList.add('text-gray-400');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            let activeBtn = document.querySelector(`[data-target="${tabId}"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-gray-800', 'text-white');
+                activeBtn.classList.remove('text-gray-400');
+                if(menuTitle) pageTitleDisplay.innerText = menuTitle;
+            }
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
+            }
+        }
+
+        document.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.dataset.target;
+                const menuTitle = e.currentTarget.innerText;
+                showTab(targetId, menuTitle);
+            });
+        });
+        showTab('tab-general', '1. ทั่วไป & Footer');
+
+        document.getElementById('open-sidebar-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('mobile-sidebar-backdrop').classList.remove('hidden');
+        });
+        document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
+        });
+
+        document.getElementById('user-menu-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('user-dropdown-panel').classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => document.getElementById('user-dropdown-panel').classList.add('hidden'));
+
+        document.querySelectorAll('.quill-editor').forEach(function(editorDiv) {
+            var targetId = editorDiv.getAttribute('data-target');
+            var input = document.getElementById(targetId);
+            var quill = new Quill(editorDiv, { theme: 'snow', modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] } });
+            quill.on('text-change', function() { input.value = quill.root.innerHTML; });
+            input.value = quill.root.innerHTML;
+        });
+
+        // --- ระบบ FAQ ---
+        const faqContainer = document.getElementById('faq-container');
+        const faqInput = document.getElementById('faq_list_input');
+        let faqs = [];
+        try { faqs = JSON.parse(faqInput.value || '[]'); } catch(e) { faqs = []; }
+
+        function renderFaqs() {
+            faqContainer.innerHTML = '';
+            faqs.forEach((faq, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-5 rounded border relative mt-2';
+                const safeQuestion = faq.question ? faq.question.replace(/"/g, '&quot;') : '';
+                
+                // สร้างปุ่ม เลื่อนขึ้น เลื่อนลง และ ลบ
+                let actionButtons = `
+                    <div class="absolute top-2 right-2 flex space-x-2">
+                        ${index > 0 ? `<button type="button" onclick="moveFaq(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                        ${index < faqs.length - 1 ? `<button type="button" onclick="moveFaq(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeFaq(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                    </div>
+                `;
+
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-32"> <!-- เว้นที่ว่างด้านขวาไม่ให้ข้อความทับปุ่ม -->
+                        <label class="block text-sm font-semibold mb-1">คำถาม</label>
+                        <input type="text" class="w-full border p-2 text-sm mb-2" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)">
+                    </div>
+                    <label class="block text-sm font-semibold mb-1">คำตอบ</label>
+                    <div id="faq_editor_${index}" class="bg-white h-24"></div>
+                `;
+                faqContainer.appendChild(div);
+                
+                const quillFaq = new Quill(document.getElementById(`faq_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+                quillFaq.root.innerHTML = faq.answer || '';
+                quillFaq.on('text-change', () => { 
+                    faqs[index].answer = quillFaq.root.innerHTML; 
+                    faqInput.value = JSON.stringify(faqs); 
+                });
+            });
+            faqInput.value = JSON.stringify(faqs);
+        }
+
+        // ฟังก์ชันสำหรับเลื่อนตำแหน่ง (สลับ Array)
+        window.moveFaq = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < faqs.length) {
+                const temp = faqs[index];
+                faqs[index] = faqs[newIndex];
+                faqs[newIndex] = temp;
+                renderFaqs(); // โหลดรายการใหม่หลังจากสลับตำแหน่ง
+            }
+        };
+
+        window.updateFaq = (index, key, value) => { faqs[index][key] = value; faqInput.value = JSON.stringify(faqs); };
+        window.removeFaq = (index) => { if(confirm('ลบคำถามนี้?')) { faqs.splice(index, 1); renderFaqs(); } };
+        document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
+        
+        renderFaqs();
+
+        // --- ระบบ Banner Carousel ---
+        const bannerContainer = document.getElementById('banner-container');
+        const bannerInput = document.getElementById('banner_list_input');
+        let banners = [];
+        try { banners = JSON.parse(bannerInput.value || '[]'); } catch(e) { banners = []; }
+        let quillBanners = []; // เก็บ instance ของ Quill
+
+        function renderBanners() {
+            bannerContainer.innerHTML = '';
+            quillBanners = []; // รีเซ็ต
+
+            if (banners.length === 0) {
+                bannerContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ยังไม่มีสไลด์โฆษณา กดปุ่ม "+ เพิ่มสไลด์ใหม่" ด้านบน</p>';
+                bannerInput.value = '[]';
+                return;
+            }
+
+            banners.forEach((banner, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 p-5 rounded-lg border border-gray-200 relative mb-4';
+                
+                let actionButtons = `
+                    <div class="absolute top-3 right-3 flex space-x-2 z-10">
+                        ${index > 0 ? `<button type="button" onclick="moveBanner(${index}, -1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▲ ขึ้น</button>` : ''}
+                        ${index < banners.length - 1 ? `<button type="button" onclick="moveBanner(${index}, 1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeBanner(${index})" class="bg-white text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition shadow-sm">✖ ลบ</button>
+                    </div>
+                `;
+
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-40 mb-4 flex items-center space-x-2">
+                        <span class="bg-primary text-white font-bold w-6 h-6 flex items-center justify-center rounded-full text-xs"> ${index + 1} </span>
+                        <h4 class="font-bold text-gray-700">สไลด์ที่ ${index + 1}</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">รูปภาพแบนเนอร์</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="img_input_${index}" class="flex-1 border border-gray-300 p-2 text-sm rounded bg-gray-50 focus:bg-white transition" value="${banner.img_url || ''}" onchange="updateBanner(${index}, 'img_url', this.value)" placeholder="อัปโหลดรูป หรือ วางลิงก์...">
+                                <label class="bg-blue-600 text-white px-3 py-2 rounded shadow-sm hover:bg-blue-700 cursor-pointer text-sm font-semibold flex items-center justify-center whitespace-nowrap transition">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                    อัปโหลด
+                                    <input type="file" class="hidden" accept="image/*" onchange="uploadSlideImage(event, ${index})">
+                                </label>
+                            </div>
+                            ${banner.img_url ? `<img src="${banner.img_url}" class="mt-3 h-24 w-auto rounded border border-gray-200 object-cover shadow-sm">` : ''}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">ลิงก์ปลายทางเมื่อคลิกรูป (ถ้ามี)</label>
+                            <input type="url" class="w-full border border-gray-300 p-2 text-sm rounded focus:border-primary transition" value="${banner.link_url || ''}" onchange="updateBanner(${index}, 'link_url', this.value)" placeholder="https://...">
                         </div>
                     </div>
-                </div>
 
-            </div>
-
-            <!-- Action Bar (Sticky Bottom) -->
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between sticky bottom-0">
-                <span class="text-sm text-gray-500">กำลังแก้ไขข้อมูลสำหรับภาษา: <strong><%= currentLang === 'th' ? 'ภาษาไทย' : 'English' %></strong></span>
-                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-bold shadow-md transition-transform hover:scale-105 flex items-center gap-2">
-                    <i class="fas fa-save"></i> บันทึกข้อมูล
-                </button>
-            </div>
-        </form>
-    </main>
-
-    <!-- Scripts -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. ระบบจัดการ Tabs
-            const tabs = document.querySelectorAll('.tab-btn');
-            const contents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active', 'border-b', 'border-blue-500', 'text-blue-600'));
-                    contents.forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active', 'border-b', 'border-blue-500', 'text-blue-600');
-                    document.getElementById(tab.getAttribute('data-target')).classList.add('active');
-                });
-            });
-
-            // 2. ระบบจัดการแบนเนอร์ (Slide Carousel)
-            const bannerInput = document.getElementById('banner_list_input');
-            const slidesContainer = document.getElementById('slides_container');
-            const uploadInput = document.getElementById('slide_upload');
-            const btnAddSlide = document.getElementById('btn_add_slide');
-            const slideLoading = document.getElementById('slide_loading');
-
-            // ดึงค่า JSON เริ่มต้น
-            let slides = [];
-            try {
-                slides = JSON.parse(bannerInput.value || '[]');
-            } catch(e) {
-                slides = [];
-            }
-
-            // ฟังก์ชันวาด UI สไลด์
-            function renderSlides() {
-                slidesContainer.innerHTML = '';
+                    <label class="block text-sm font-semibold mb-1">ข้อความรายละเอียดด้านล่างรูป</label>
+                    <div id="banner_editor_${index}" class="bg-white h-24 rounded-b border-gray-300"></div>
+                `;
+                bannerContainer.appendChild(div);
                 
-                if(slides.length === 0) {
-                    slidesContainer.innerHTML = '<div class="text-center text-gray-400 py-6">ยังไม่มีรูปภาพแบนเนอร์สำหรับภาษานี้</div>';
-                }
-
-                slides.forEach((slide, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-start md:items-center flex-col md:flex-row gap-4 p-4 border rounded-lg bg-gray-50 shadow-sm';
-                    div.innerHTML = `
-                        <div class="flex-shrink-0 relative">
-                            <span class="absolute -top-2 -left-2 bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">${index + 1}</span>
-                            <img src="${slide.url}" class="h-20 w-32 object-cover rounded border border-gray-300">
-                        </div>
-                        <div class="flex-1 w-full">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">ลิงก์เมื่อคลิกรูปนี้ (ใส่ URL หรือปล่อยว่างได้)</label>
-                            <input type="text" value="${slide.link || ''}" onchange="updateSlideLink(${index}, this.value)" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="https://example.com/promotion">
-                        </div>
-                        <button type="button" onclick="removeSlide(${index})" class="flex-shrink-0 text-red-500 hover:text-white hover:bg-red-500 border border-red-500 px-3 py-2 rounded transition-colors text-sm font-medium">
-                            <i class="fas fa-trash"></i> ลบรูปนี้
-                        </button>
-                    `;
-                    slidesContainer.appendChild(div);
+                const quillBanner = new Quill(document.getElementById(`banner_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'color': []}], [{ 'align': [] }], ['clean'] ] }
                 });
-
-                // อัปเดตกลับลง textarea ทันที
-                bannerInput.value = JSON.stringify(slides);
-            }
-
-            // ฟังก์ชันอัปเดตลิงก์
-            window.updateSlideLink = function(index, value) {
-                slides[index].link = value;
-                bannerInput.value = JSON.stringify(slides);
-            }
-
-            // ฟังก์ชันลบสไลด์
-            window.removeSlide = function(index) {
-                if(confirm('ต้องการลบรูปภาพนี้ใช่หรือไม่?')) {
-                    slides.splice(index, 1);
-                    renderSlides();
-                }
-            }
-
-            // ฟังก์ชันอัปโหลดเมื่อกดปุ่ม
-            btnAddSlide.addEventListener('click', async () => {
-                const file = uploadInput.files[0];
-                if (!file) return alert('กรุณาเลือกไฟล์รูปภาพก่อนกดอัปโหลด');
-
-                const formData = new FormData();
-                formData.append('slide_image', file);
-
-                btnAddSlide.disabled = true;
-                slideLoading.classList.remove('hidden');
-
-                try {
-                    // เรียก API ที่อยู่ใน server.js
-                    const res = await fetch('/admin/api/upload-slide', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const data = await res.json();
-                    if (data.success) {
-                        // อัปโหลดสำเร็จ เพิ่มเข้า Array และ Render ใหม่
-                        slides.push({ url: data.url, link: '' });
-                        renderSlides();
-                        uploadInput.value = ''; // เคลียร์ช่องเลือกไฟล์
-                    } else {
-                        alert('อัปโหลดไม่สำเร็จ: ' + data.message);
-                    }
-                } catch (err) {
-                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-                } finally {
-                    btnAddSlide.disabled = false;
-                    slideLoading.classList.add('hidden');
-                }
+                quillBanner.root.innerHTML = banner.content || '';
+                quillBanner.on('text-change', () => { 
+                    banners[index].content = quillBanner.root.innerHTML; 
+                    bannerInput.value = JSON.stringify(banners); 
+                });
+                quillBanners.push(quillBanner);
             });
+            bannerInput.value = JSON.stringify(banners);
+        }
 
-            // รันครั้งแรกเมื่อโหลดหน้าจอ
-            renderSlides();
+        window.moveBanner = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < banners.length) {
+                const temp = banners[index];
+                banners[index] = banners[newIndex];
+                banners[newIndex] = temp;
+                renderBanners();
+            }
+        };
+
+        window.updateBanner = (index, key, value) => { 
+            banners[index][key] = value; 
+            bannerInput.value = JSON.stringify(banners);
+            if (key === 'img_url') renderBanners(); // รีเฟรชเพื่อโชว์พรีวิวรูป
+        };
+        
+        window.removeBanner = (index) => { 
+            if(confirm('ลบสไลด์นี้?')) { 
+                banners.splice(index, 1); 
+                renderBanners(); 
+            } 
+        };
+        
+        document.getElementById('add-banner-btn').addEventListener('click', () => { 
+            banners.push({ img_url: '', link_url: '', content: '' }); 
+            renderBanners(); 
         });
+
+        // ฟังก์ชันจัดการการอัปโหลดไฟล์รูปภาพทีละรูป (AJAX)
+        window.uploadSlideImage = async (event, index) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const inputEl = document.getElementById(`img_input_${index}`);
+            const originalVal = inputEl.value;
+            inputEl.value = 'กำลังอัปโหลด... ⏳'; // เปลี่ยนข้อความให้รู้ว่ากำลังโหลด
+
+            const formData = new FormData();
+            formData.append('slide_image', file);
+
+            try {
+                const response = await fetch('/admin/api/upload-slide', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateBanner(index, 'img_url', data.url); // อัปเดตข้อมูลและแสดงรูปทันที
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + data.message);
+                    inputEl.value = originalVal;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่ออัปโหลดได้');
+                inputEl.value = originalVal;
+            }
+            
+            event.target.value = ''; // เคลียร์ค่า input ให้สามารถเลือกไฟล์เดิมซ้ำได้ถ้าต้องการ
+        };
+        
+        renderBanners();
     </script>
 </body>
 </html>

@@ -43,43 +43,6 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// ==========================================
-// การตั้งค่าระบบหลายภาษา (i18n Settings)
-// ==========================================
-
-// 1. กำหนดภาษาที่ระบบรองรับ
-const SUPPORTED_LANGS = ['th', 'en'];
-
-// 2. รายการ Key ที่เป็นข้อมูลส่วนกลาง (ใช้ร่วมกันทุกภาษา)
-const GLOBAL_KEYS = [
-    'favicon_url', 'logo_url', 'theme_color', 'hero_img_url', 
-    'stats_img_url', 'seo_thumbnail_url', 'facebook_url', 'facebook_icon', 
-    'line_url', 'line_icon', 'banner_active', 'banner_display_type', 
-    'banner_display_limit', 'banner_version', 'btn_size', 'banner_img_url'
-];
-
-// 3. รายการ Key ที่ต้องเก็บแยกเป็นภาษา (JSON Object)
-const LOCALIZED_KEYS = [
-    'hero_badge', 'hero_title', 'hero_desc', 'btn_text', 'btn_url',
-    'feature_title', 'feature_subtitle',
-    'col1_title', 'col1_desc', 'col1_icon', 
-    'col2_title', 'col2_desc', 'col2_icon', 
-    'col3_title', 'col3_desc', 'col3_icon',
-    'grid_badge', 'grid_title', 'grid_desc',
-    'grid1_title', 'grid1_desc', 'grid1_icon',
-    'grid2_title', 'grid2_desc', 'grid2_icon',
-    'grid3_title', 'grid3_desc', 'grid3_icon',
-    'grid4_title', 'grid4_desc', 'grid4_icon',
-    'grid5_title', 'grid5_desc', 'grid5_icon',
-    'grid6_title', 'grid6_desc', 'grid6_icon',
-    'stats_badge', 'stats_title', 'stats_desc',
-    'stat1_label', 'stat1_value', 'stat2_label', 'stat2_value',
-    'stat3_label', 'stat3_value', 'stat4_label', 'stat4_value',
-    'faq_title', 'faq_list',
-    'cta_title', 'cta_desc', 'cta_btn1_text', 'cta_btn1_url', 'cta_btn2_text', 'cta_btn2_url',
-    'footer_text', 'seo_title', 'seo_description', 'seo_keywords', 'banner_list'
-];
-
 async function initDB() {
     try {
         await pool.query(`
@@ -200,17 +163,10 @@ const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
 
-// หน้าแรกของเว็บไซต์ (Landing Page)
 app.get('/', async (req, res, next) => {
     try {
         const settings = await getSettings();
-        
-        // 1. เพิ่มบรรทัดนี้ เพื่อรับค่าภาษาจาก URL (ถ้าไม่มีให้ใช้ th)
-        const currentLang = req.query.lang || 'th'; // <--- เพิ่มบรรทัดนี้
-        
-        // 2. แก้บรรทัดนี้ โดยเพิ่ม currentLang เข้าไปในปีกกาด้วย
-        res.render('index', { settings, currentLang }); // <--- แก้บรรทัดนี้
-        
+        res.render('index', { settings });
     } catch (err) {
         next(err);
     }
@@ -233,11 +189,7 @@ app.post('/admin/login', loginLimiter, (req, res) => {
 app.get('/admin', requireAuth, async (req, res, next) => {
     try {
         const settings = await getSettings();
-        // รับค่าจาก URL (เช่น /admin?lang=en) ถ้าไม่มีค่าจะใช้ 'th' เป็นค่าเริ่มต้น
-        const currentLang = req.query.lang || 'th'; 
-        
-        // ส่ง currentLang ไปให้หน้า EJS ด้วย
-        res.render('admin', { settings, currentLang }); 
+        res.render('admin', { settings });
     } catch (err) {
         next(err);
     }
@@ -253,14 +205,62 @@ app.post('/admin/save', requireAuth, upload.fields([
 ]), async (req, res, next) => {
     try {
         const body = req.body;
-        // รับค่าภาษาที่แอดมินกำลังแก้ไขอยู่ (ถ้าไม่มีค่า default เป็น th)
-        const currentLang = body.edit_lang || 'th'; 
         
-        // ดึงข้อมูลเดิมจากฐานข้อมูลมาเตรียมไว้ก่อน
-        const currentSettings = await getSettings();
-        const updates = {};
+        let cleanFaqList = body.faq_list;
+        try {
+            let parsedFaq = JSON.parse(body.faq_list || '[]');
+            parsedFaq = parsedFaq.map(f => ({
+                question: f.question, 
+                answer: sanitizeHtml(f.answer) 
+            }));
+            cleanFaqList = JSON.stringify(parsedFaq);
+        } catch (e) { console.error("FAQ Parse Error"); }
 
-        // 1. จัดการจัดการอัปโหลดไฟล์ (เป็น Global Keys เสมอ)
+        const updates = { 
+            theme_color: body.theme_color,
+            hero_badge: body.hero_badge, hero_title: body.hero_title, 
+            hero_desc: sanitizeHtml(body.hero_desc),
+            feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
+            
+            col1_title: body.col1_title, col1_desc: sanitizeHtml(body.col1_desc), col1_icon: body.col1_icon, 
+            col2_title: body.col2_title, col2_desc: sanitizeHtml(body.col2_desc), col2_icon: body.col2_icon, 
+            col3_title: body.col3_title, col3_desc: sanitizeHtml(body.col3_desc), col3_icon: body.col3_icon, 
+            
+            footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url,
+            facebook_icon: body.facebook_icon, line_icon: body.line_icon,
+            
+            grid_badge: body.grid_badge, grid_title: body.grid_title, 
+            grid_desc: sanitizeHtml(body.grid_desc),
+            grid1_title: body.grid1_title, grid1_desc: body.grid1_desc, grid1_icon: body.grid1_icon, 
+            grid2_title: body.grid2_title, grid2_desc: body.grid2_desc, grid2_icon: body.grid2_icon, 
+            grid3_title: body.grid3_title, grid3_desc: body.grid3_desc, grid3_icon: body.grid3_icon, 
+            grid4_title: body.grid4_title, grid4_desc: body.grid4_desc, grid4_icon: body.grid4_icon, 
+            grid5_title: body.grid5_title, grid5_desc: body.grid5_desc, grid5_icon: body.grid5_icon, 
+            grid6_title: body.grid6_title, grid6_desc: body.grid6_desc, grid6_icon: body.grid6_icon, 
+            
+            btn_text: body.btn_text, btn_url: body.btn_url, btn_size: body.btn_size,
+            stats_badge: body.stats_badge, stats_title: body.stats_title, 
+            stats_desc: sanitizeHtml(body.stats_desc),
+            stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
+            stat3_label: body.stat3_label, stat3_value: body.stat3_value, stat4_label: body.stat4_label, stat4_value: body.stat4_value,
+            
+            faq_title: body.faq_title, faq_list: cleanFaqList,
+
+            cta_title: body.cta_title, 
+            cta_desc: sanitizeHtml(body.cta_desc),
+            cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url,
+            cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
+
+            seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
+            
+            // --- Banner Updates ---
+            banner_active: body.banner_active === 'on' ? 'true' : 'false', 
+            banner_display_type: body.banner_display_type || 'always',
+            banner_display_limit: body.banner_display_limit || '1',
+            banner_version: Date.now().toString(),
+            banner_list: body.banner_list || '[]'
+        };
+
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
         if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0]);
         if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
@@ -268,74 +268,13 @@ app.post('/admin/save', requireAuth, upload.fields([
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0]);
         if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0]);
 
-        // จัดการ Banner Settings (Global)
-        updates.banner_active = body.banner_active === 'on' ? 'true' : 'false';
-        updates.banner_display_type = body.banner_display_type || 'always';
-        updates.banner_display_limit = body.banner_display_limit || '1';
-        updates.banner_version = Date.now().toString();
-
-        // 2. จัดการ Global Keys ทั่วไป
-        GLOBAL_KEYS.forEach(key => {
-            if (body[key] !== undefined) {
-                updates[key] = body[key];
-            }
-        });
-
-        // จัดการเรื่อง DOMPurify เฉพาะฟิลด์ที่อนุญาตให้มี HTML
-        const sanitizeFields = ['hero_desc', 'col1_desc', 'col2_desc', 'col3_desc', 'grid_desc', 'stats_desc', 'cta_desc'];
-        
-        // 3. จัดการ Localized Keys (รวมข้อมูลลง JSON ตามภาษาที่เลือก)
-        LOCALIZED_KEYS.forEach(key => {
-            if (body[key] !== undefined) {
-                let newValue = body[key];
-                
-                // คลีน HTML ถ้าอยู่ในลิสต์
-                if (sanitizeFields.includes(key)) {
-                    newValue = sanitizeHtml(newValue);
-                }
-
-                // กรณีพิเศษ: FAQ
-                if (key === 'faq_list') {
-                    try {
-                        let parsedFaq = JSON.parse(newValue || '[]');
-                        parsedFaq = parsedFaq.map(f => ({ question: f.question, answer: sanitizeHtml(f.answer) }));
-                        newValue = JSON.stringify(parsedFaq);
-                    } catch (e) { console.error("FAQ Parse Error"); newValue = '[]'; }
-                }
-
-                // ตรวจสอบข้อมูลเก่าใน DB ว่าเป็น JSON หรือข้อความธรรมดา
-                let oldDataObj = {};
-                if (currentSettings[key]) {
-                    try {
-                        oldDataObj = JSON.parse(currentSettings[key]);
-                        // เช็คเพิ่มว่าถ้าเก่าเป็น String ปกติ พอ parse อาจจะได้แค่ String ไม่ใช่ออบเจกต์
-                        if (typeof oldDataObj !== 'object' || oldDataObj === null) {
-                            oldDataObj = { th: currentSettings[key] };
-                        }
-                    } catch (e) {
-                        // ถ้า parse ไม่ได้ แปลว่าเป็นข้อความธรรมดา (ข้อมูลเก่า) ให้ย้ายไปใส่คีย์ 'th' อัตโนมัติ
-                        oldDataObj = { th: currentSettings[key] };
-                    }
-                }
-
-                // นำค่าใหม่ไปอัปเดตใส่ภาษาที่กำลังแก้ไข (ทับแค่ภาษาเดียว ไม่ทับภาษาอื่น)
-                oldDataObj[currentLang] = newValue;
-                
-                // แปลงกลับเป็น String เพื่อบันทึกลง DB
-                updates[key] = JSON.stringify(oldDataObj);
-            }
-        });
-
-        // 4. บันทึกลงฐานข้อมูล
         for (const [key, value] of Object.entries(updates)) {
             await pool.query(
                 `INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
                 [key, value]
             );
         }
-        
-        // เมื่อเซฟเสร็จ ให้ redirect กลับไปพร้อมกับพารามิเตอร์ภาษาเดิมที่แก้ไข
-        res.redirect(`/admin?lang=${currentLang}`);
+        res.redirect('/admin');
     } catch (error) {
         next(error); 
     }
@@ -348,7 +287,7 @@ app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), a
             return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
         }
         
-        // ส่งไฟล์ขึ้น Cloudflare R2
+        // ส่งไฟล์ขึ้น Cloudflare R2 แทนที่จะอ่านค่าจาก path เปล่าๆ
         const fileUrl = await uploadToR2(req.file); 
         
         res.json({ success: true, url: fileUrl });
