@@ -200,10 +200,17 @@ const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
 
+// หน้าแรกของเว็บไซต์ (Landing Page)
 app.get('/', async (req, res, next) => {
     try {
         const settings = await getSettings();
-        res.render('index', { settings });
+        
+        // 1. เพิ่มบรรทัดนี้ เพื่อรับค่าภาษาจาก URL (ถ้าไม่มีให้ใช้ th)
+        const currentLang = req.query.lang || 'th'; // <--- เพิ่มบรรทัดนี้
+        
+        // 2. แก้บรรทัดนี้ โดยเพิ่ม currentLang เข้าไปในปีกกาด้วย
+        res.render('index', { settings, currentLang }); // <--- แก้บรรทัดนี้
+        
     } catch (err) {
         next(err);
     }
