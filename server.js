@@ -172,6 +172,11 @@ app.get('/', async (req, res, next) => {
     }
 });
 
+// Route สำหรับให้ Cronjob ยิงมาปลุกเซิร์ฟเวอร์
+app.get('/wakeup', (req, res) => {
+    res.status(200).send('OK');
+});
+
 app.get('/admin/login', (req, res) => {
     res.render('login', { error: null });
 });
