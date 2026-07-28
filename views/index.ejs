@@ -9,6 +9,8 @@
     <meta name="description" content="<%= settings.seo_description %>">
     <meta name="keywords" content="<%= settings.seo_keywords %>">
     
+    <link rel="canonical" href="https://lullapos.com/">
+    
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://lullapos.com/">
     <meta property="og:title" content="<%= settings.seo_title %>">
@@ -22,6 +24,29 @@
     <meta property="twitter:image" content="<%= settings.seo_thumbnail_url %>">
 
     <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "<%= settings.seo_title %>",
+      "operatingSystem": "Web Browser",
+      "applicationCategory": "BusinessApplication",
+      "description": "<%= settings.seo_description %>",
+      "url": "https://lullapos.com/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "THB"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Lullapos",
+        "url": "https://lullapos.com/",
+        "logo": "<%= settings.logo_url %>"
+      }
+    }
+    </script>
     
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     
@@ -52,186 +77,185 @@
 <body class="bg-gray-50 text-gray-800">
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5P828RK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
  
-<div class="overflow-hidden bg-white py-15 sm:py-30">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mb-12">
-        <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
-    </div>
-    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
-      <div class="lg:pr-[150px] lg:pt-4 relative z-10 bg-white/80 lg:bg-transparent rounded-2xl p-4 lg:p-0">
-        <div class="lg:max-w-lg">
-          <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h2>
-          <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
-          <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
-          <div class="mt-10 flex items-center gap-x-6">
-            <a href="<%= settings.btn_url %>" class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.btn_text %></a>
+<main> <div class="overflow-hidden bg-white py-15 sm:py-30">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mb-12">
+            <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
+        </div>
+        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+          <div class="lg:pr-[150px] lg:pt-4 relative z-10 bg-white/80 lg:bg-transparent rounded-2xl p-4 lg:p-0">
+            <div class="lg:max-w-lg">
+              <h1 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h1> <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
+              <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
+              <div class="mt-10 flex items-center gap-x-6">
+                <a href="<%= settings.btn_url %>" class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.btn_text %></a>
+              </div>
+            </div>
+          </div>
+          <div class="relative flex items-center justify-center mt-10 lg:mt-0">
+            <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
           </div>
         </div>
       </div>
-      <div class="relative flex items-center justify-center mt-10 lg:mt-0">
-        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
+    </div>
+
+    <div class="bg-primary-50 py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:text-center">
+          <h2 class="text-base font-semibold leading-7 text-primary">วิสัยทัศน์ของเรา</h2>
+          <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
+          <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
+        </div>
+        <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+          <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+            <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+              <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+                <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col1_icon %></div>
+                <%= settings.col1_title %>
+              </dt>
+              <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col1_desc %></p></dd>
+            </div>
+            <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+              <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+                <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col2_icon %></div>
+                <%= settings.col2_title %>
+              </dt>
+              <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col2_desc %></p></dd>
+            </div>
+            <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-primary hover:shadow-md transition relative overflow-hidden">
+              <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
+              <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
+                <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col3_icon %></div>
+                <%= settings.col3_title %>
+              </dt>
+              <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col3_desc %></p></dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div class="bg-primary-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-primary">วิสัยทัศน์ของเรา</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
-      <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col1_icon %></div>
-            <%= settings.col1_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col1_desc %></p></dd>
+    <div class="bg-red-50 py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:text-center">
+          <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.grid_badge %></h2>
+          <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.grid_title %></p>
+          <p class="mt-6 text-lg leading-8 text-gray-600"><%- settings.grid_desc %></p>
         </div>
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col2_icon %></div>
-            <%= settings.col2_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col2_desc %></p></dd>
+        <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+          <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+            <div class="relative pl-16">
+              <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid1_icon %></div><%- settings.grid1_title %></dt>
+              <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid1_desc %></dd>
+            </div>
+            <div class="relative pl-16">
+              <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid2_icon %></div><%- settings.grid2_title %></dt>
+              <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid2_desc %></dd>
+            </div>
+            <div class="relative pl-16">
+              <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid3_icon %></div><%- settings.grid3_title %></dt>
+              <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid3_desc %></dd>
+            </div>
+            <div class="relative pl-16">
+              <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid4_icon %></div><%- settings.grid4_title %></dt>
+              <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid4_desc %></dd>
+            </div>
+            <div class="relative pl-16">
+              <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid5_icon %></div><%- settings.grid5_title %></dt>
+              <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid5_desc %></dd>
+            </div>
+            <div class="relative pl-16">
+              <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid6_icon %></div><%- settings.grid6_title %></dt>
+              <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid6_desc %></dd>
+            </div>
+          </dl>
         </div>
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-primary hover:shadow-md transition relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col3_icon %></div>
-            <%= settings.col3_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col3_desc %></p></dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-</div>
-
-<div class="bg-red-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.grid_badge %></h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.grid_title %></p>
-      <p class="mt-6 text-lg leading-8 text-gray-600"><%- settings.grid_desc %></p>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid1_icon %></div><%- settings.grid1_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid1_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid2_icon %></div><%- settings.grid2_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid2_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid3_icon %></div><%- settings.grid3_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid3_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid4_icon %></div><%- settings.grid4_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid4_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid5_icon %></div><%- settings.grid5_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid5_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid6_icon %></div><%- settings.grid6_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid6_desc %></dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-</div>
-
-<div class="relative bg-white">
-  <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
-      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
-      <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
-      <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd></div>
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd></div>
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd></div>
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd></div>
-      </dl>
-    </div>
-  </div>
-</div>
-
-<!-- FAQ Section -->
-<div class="bg-gray-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto text-center mb-12">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.faq_title %></h2>
-    </div>
-    
-    <dl class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
-      <% 
-          let faqs = [];
-          try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
-          faqs.forEach(function(faq, index) { 
-      %>
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 faq-item self-start hover:shadow-md transition-shadow">
-        <dt>
-          <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
-            <span class="text-base font-semibold leading-7 pr-4 flex items-center gap-3"><%- faq.question %></span>
-            <span class="flex h-7 items-center shrink-0">
-              <svg class="h-5 w-5 faq-icon-plus transition-transform duration-200 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
-              <svg class="h-5 w-5 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
-            </span>
-          </button>
-        </dt>
-        <dd class="mt-4 hidden faq-answer transition-all duration-300 border-t border-gray-100 pt-4">
-          <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
-        </dd>
       </div>
-      <% }); %>
-    </dl>
-  </div>
-</div>
+    </div>
 
-<script>
-    const faqButtons = document.querySelectorAll('.faq-toggle-btn');
-    faqButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const answer = button.parentElement.nextElementSibling;
-            const iconPlus = button.querySelector('.faq-icon-plus');
-            const iconMinus = button.querySelector('.faq-icon-minus');
-            const isOpen = !answer.classList.contains('hidden');
-            
-            document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
-            document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
-            document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
-            
-            if (!isOpen) {
-                answer.classList.remove('hidden');
-                iconPlus.classList.add('hidden');
-                iconMinus.classList.remove('hidden');
-            }
+    <div class="relative bg-white">
+      <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
+          <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
+          <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
+          <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
+          <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
+            <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd></div>
+            <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd></div>
+            <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd></div>
+            <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto text-center mb-12">
+          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.faq_title %></h2>
+        </div>
+        
+        <dl class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
+          <% 
+              let faqs = [];
+              try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
+              faqs.forEach(function(faq, index) { 
+          %>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 faq-item self-start hover:shadow-md transition-shadow">
+            <dt>
+              <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
+                <span class="text-base font-semibold leading-7 pr-4 flex items-center gap-3"><%- faq.question %></span>
+                <span class="flex h-7 items-center shrink-0">
+                  <svg class="h-5 w-5 faq-icon-plus transition-transform duration-200 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+                  <svg class="h-5 w-5 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
+                </span>
+              </button>
+            </dt>
+            <dd class="mt-4 hidden faq-answer transition-all duration-300 border-t border-gray-100 pt-4">
+              <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
+            </dd>
+          </div>
+          <% }); %>
+        </dl>
+      </div>
+    </div>
+
+    <script>
+        const faqButtons = document.querySelectorAll('.faq-toggle-btn');
+        faqButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.parentElement.nextElementSibling;
+                const iconPlus = button.querySelector('.faq-icon-plus');
+                const iconMinus = button.querySelector('.faq-icon-minus');
+                const isOpen = !answer.classList.contains('hidden');
+                
+                document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
+                document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
+                document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
+                
+                if (!isOpen) {
+                    answer.classList.remove('hidden');
+                    iconPlus.classList.add('hidden');
+                    iconMinus.classList.remove('hidden');
+                }
+            });
         });
-    });
-</script>
+    </script>
 
-<div class="bg-red-50 py-16 sm:py-24 lg:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.cta_title %></h2>
-      <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.cta_desc %></div>
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.cta_btn1_text %></a>
-        <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group"><%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span></a>
+    <div class="bg-red-50 py-16 sm:py-24 lg:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.cta_title %></h2>
+          <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.cta_desc %></div>
+          <div class="mt-10 flex items-center justify-center gap-x-6">
+            <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.cta_btn1_text %></a>
+            <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group"><%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span></a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+</main>
 
 <footer class="bg-white border-t border-gray-200 py-12">
     <div class="mx-auto max-w-7xl px-6 md:flex md:items-center md:justify-between lg:px-8">
@@ -255,7 +279,6 @@
     </div>
 </footer>
 
-<!-- Promotional Banner Modal (Carousel) -->
 <% if (settings.banner_active === 'true') { %>
     <% 
         let parsedBanners = [];
@@ -263,7 +286,6 @@
     %>
     
     <% if (parsedBanners.length > 0) { %>
-        <!-- เก็บค่า config ไว้ให้ JavaScript อ่าน -->
         <div id="promo-config" 
               data-type="<%= settings.banner_display_type %>" 
               data-limit="<%= settings.banner_display_limit %>"
@@ -273,12 +295,10 @@
         <div id="promo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
             <div class="relative w-full max-w-lg scale-95 transform rounded-2xl bg-white shadow-2xl transition-all duration-300 flex flex-col max-h-[90vh] overflow-hidden" id="promo-modal-content">
                 
-                <!-- ปุ่มปิด -->
                 <button id="close-promo" class="absolute right-4 top-4 z-50 rounded-full bg-white/80 p-2 text-gray-500 hover:bg-white hover:text-gray-900 shadow-sm backdrop-blur transition-colors">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
     
-                <!-- Swiper Carousel -->
                 <div class="swiper bannerSwiper w-full h-full flex-grow flex flex-col group">
                     <div class="swiper-wrapper">
                         <% parsedBanners.forEach(function(slide) { %>
@@ -304,16 +324,13 @@
                         <% }); %>
                     </div>
                     
-                    <!-- Navigation & Pagination (จะแสดงก็ต่อเมื่อมีสไลด์มากกว่า 1) -->
                     <% if (parsedBanners.length > 1) { %>
                         <div class="swiper-pagination !bottom-2"></div>
                         
-                        <!-- ปุ่มเลื่อนขวา -->
                         <div class="swiper-button-next !text-white !w-10 !h-10 bg-black/40 hover:bg-black/60 rounded-full !right-2 backdrop-blur-sm after:!hidden shadow-lg transition-all">
                             <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                         </div>
                         
-                        <!-- ปุ่มเลื่อนซ้าย -->
                         <div class="swiper-button-prev !text-white !w-10 !h-10 bg-black/40 hover:bg-black/60 rounded-full !left-2 backdrop-blur-sm after:!hidden shadow-lg transition-all">
                             <svg class="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
                         </div>
@@ -330,7 +347,6 @@
                 const config = document.getElementById('promo-config');
                 
                 if (!modal || !config) return;
-    
                 const displayType = config.dataset.type;
                 const displayLimit = parseInt(config.dataset.limit) || 1;
                 const bannerVersion = config.dataset.version;
@@ -339,7 +355,7 @@
                 let views = parseInt(localStorage.getItem(storageKey) || '0');
                 
                 const isLoopActive = <%= parsedBanners.length > 1 ? 'true' : 'false' %>;
-    
+                
                 const showModal = () => {
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
@@ -351,7 +367,6 @@
                         navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
                         autoplay: { delay: 5000, disableOnInteraction: true }
                     });
-                    
                     setTimeout(() => {
                         modal.classList.remove('opacity-0');
                         modalContent.classList.remove('scale-95');
@@ -361,7 +376,7 @@
                         localStorage.setItem(storageKey, (views + 1).toString());
                     }
                 };
-    
+                
                 const hideModal = () => {
                     modal.classList.add('opacity-0');
                     modalContent.classList.add('scale-95');
@@ -372,7 +387,7 @@
                 };
     
                 if (displayType === 'always' || views < displayLimit) {
-                    setTimeout(showModal, 1500); 
+                    setTimeout(showModal, 1500);
                 }
     
                 closeBtn.addEventListener('click', hideModal);

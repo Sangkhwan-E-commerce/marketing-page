@@ -163,6 +163,25 @@ const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
 
+// --- เริ่มส่วนที่เพิ่มเข้ามาใหม่สำหรับ SEO (robots.txt และ sitemap.xml) ---
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send("User-agent: *\nAllow: /\nSitemap: https://lullapos.com/sitemap.xml");
+});
+
+app.get('/sitemap.xml', (req, res) => {
+    res.type('application/xml');
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://lullapos.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`);
+});
+// --- สิ้นสุดส่วนที่เพิ่มเข้ามาใหม่สำหรับ SEO ---
+
 app.get('/', async (req, res, next) => {
     try {
         const settings = await getSettings();
