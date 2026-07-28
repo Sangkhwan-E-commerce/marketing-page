@@ -12,7 +12,6 @@
         body { font-family: 'Prompt', sans-serif; } 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .ql-editor { min-height: 200px; }
     </style>
     <script>
       tailwind.config = {
@@ -20,13 +19,10 @@
           extend: { colors: { primary: '<%= settings.theme_color %>' } }
         }
       }
-
       function previewImage(input, imgId) {
           if (input.files && input.files[0]) {
               var reader = new FileReader();
-              reader.onload = function(e) {
-                  document.getElementById(imgId).src = e.target.result;
-              }
+              reader.onload = function(e) { document.getElementById(imgId).src = e.target.result; }
               reader.readAsDataURL(input.files[0]);
           }
       }
@@ -58,12 +54,13 @@
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-cta">7. ส่วนเชิญชวน (CTA)</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-banner">8. โฆษณา Modal</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-seo">9. ตั้งค่า SEO</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-article-cta">10. CTA หน้าบทความ</button></li>
                     </ul>
                 </li>
                 <li>
                     <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">บทความ & คอนเทนต์</div>
                     <ul role="list" class="-mx-2 space-y-1">
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-primary bg-primary/10 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-blog" id="btn-blog">📝 10. จัดการบทความ (Blog)</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-primary bg-primary/10 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-blog" id="btn-blog">📝 11. จัดการบทความ (Blog)</button></li>
                     </ul>
                 </li>
             </ul>
@@ -106,6 +103,7 @@
                     </div>
 
                     <div class="p-6">
+                        
                         <div id="tab-general" class="tab-content space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
                                 <div>
@@ -301,7 +299,9 @@
                             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                                 <div class="flex justify-between items-center border-b pb-4 mb-4">
                                     <h3 class="text-lg font-bold">จัดการสไลด์โฆษณา (Carousel)</h3>
-                                    <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">+ เพิ่มสไลด์ใหม่</button>
+                                    <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">
+                                        + เพิ่มสไลด์ใหม่
+                                    </button>
                                 </div>
                                 <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
                                 <div id="banner-container" class="space-y-4"></div>
@@ -323,6 +323,29 @@
                                 <div><label class="block text-sm">SEO Keywords</label><input type="text" name="seo_keywords" value="<%= settings.seo_keywords %>" class="w-full border p-2 rounded text-sm" required></div>
                             </div>
                         </div>
+
+                        <div id="tab-article-cta" class="tab-content space-y-6 hidden">
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                                <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าส่วนเชิญชวน (CTA) ส่วนท้ายหน้าอ่านบทความ</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">ข้อความหัวข้อหลัก (Title)</label>
+                                        <input type="text" name="article_cta_title" value="<%= settings.article_cta_title %>" class="w-full border-gray-300 border p-2 rounded text-sm" required>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">ข้อความบนปุ่ม</label>
+                                            <input type="text" name="article_cta_btn_text" value="<%= settings.article_cta_btn_text %>" class="w-full border-gray-300 border p-2 rounded text-sm" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">URL ลิงก์ปลายทาง</label>
+                                            <input type="text" name="article_cta_btn_url" value="<%= settings.article_cta_btn_url %>" class="w-full border-gray-300 border p-2 rounded text-sm" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </form>
 
@@ -416,21 +439,16 @@
         
         function showTab(tabId, menuTitle) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // รีเซ็ตสีปุ่ม Sidebar
             document.querySelectorAll('.sidebar-menu-btn').forEach(el => {
-                if(el.id !== 'btn-blog') {
-                    el.classList.remove('bg-gray-800', 'text-white');
-                    el.classList.add('text-gray-400');
-                }
+                el.classList.remove('bg-gray-800', 'text-white');
+                el.classList.add('text-gray-400');
             });
-            
-            // แสดง Tab ที่เลือก
             document.getElementById(tabId).classList.remove('hidden');
             let activeBtn = document.querySelector(`[data-target="${tabId}"]`);
-            if(activeBtn && tabId !== 'tab-blog') {
+            if(activeBtn) {
                 activeBtn.classList.add('bg-gray-800', 'text-white');
                 activeBtn.classList.remove('text-gray-400');
+                if(menuTitle) pageTitleDisplay.innerText = menuTitle;
             }
             
             // สลับการซ่อน/แสดง ฟอร์มหลัก กับ ระบบ Blog
@@ -445,8 +463,6 @@
                 }
             }
 
-            if(menuTitle) pageTitleDisplay.innerText = menuTitle;
-            
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
@@ -455,7 +471,9 @@
 
         document.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                showTab(e.currentTarget.dataset.target, e.currentTarget.innerText);
+                const targetId = e.currentTarget.dataset.target;
+                const menuTitle = e.currentTarget.innerText;
+                showTab(targetId, menuTitle);
             });
         });
         showTab('tab-general', '1. ทั่วไป & Footer');
@@ -464,19 +482,16 @@
             document.getElementById('sidebar').classList.remove('-translate-x-full');
             document.getElementById('mobile-sidebar-backdrop').classList.remove('hidden');
         });
-
         document.getElementById('close-sidebar-btn').addEventListener('click', () => {
             document.getElementById('sidebar').classList.add('-translate-x-full');
             document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
         });
-
         document.getElementById('user-menu-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('user-dropdown-panel').classList.toggle('hidden');
         });
         document.addEventListener('click', () => document.getElementById('user-dropdown-panel').classList.add('hidden'));
 
-        // โหลด Quill Editor สำหรับหน้าตั้งค่าเดิม
         document.querySelectorAll('.quill-editor').forEach(function(editorDiv) {
             var targetId = editorDiv.getAttribute('data-target');
             var input = document.getElementById(targetId);
@@ -497,24 +512,51 @@
                 const div = document.createElement('div');
                 div.className = 'bg-white p-5 rounded border relative mt-2';
                 const safeQuestion = faq.question ? faq.question.replace(/"/g, '&quot;') : '';
+                
                 let actionButtons = `
                     <div class="absolute top-2 right-2 flex space-x-2">
-                        ${index > 0 ? `<button type="button" onclick="moveFaq(${index}, -1)" class="text-blue-600 border border-blue-600 px-2 py-1 rounded text-xs">▲ ขึ้น</button>` : ''}
-                        ${index < faqs.length - 1 ? `<button type="button" onclick="moveFaq(${index}, 1)" class="text-blue-600 border border-blue-600 px-2 py-1 rounded text-xs">▼ ลง</button>` : ''}
-                        <button type="button" onclick="removeFaq(${index})" class="text-red-500 border border-red-500 px-2 py-1 rounded text-xs">✖ ลบ</button>
-                    </div>`;
-                div.innerHTML = `${actionButtons}<div class="pr-32"><label class="block text-sm font-semibold mb-1">คำถาม</label><input type="text" class="w-full border p-2 text-sm mb-2" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)"></div><label class="block text-sm font-semibold mb-1">คำตอบ</label><div id="faq_editor_${index}" class="bg-white h-24"></div>`;
+                        ${index > 0 ? `<button type="button" onclick="moveFaq(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                        ${index < faqs.length - 1 ? `<button type="button" onclick="moveFaq(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeFaq(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                    </div>
+                `;
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-32">
+                        <label class="block text-sm font-semibold mb-1">คำถาม</label>
+                        <input type="text" class="w-full border p-2 text-sm mb-2" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)">
+                    </div>
+                    <label class="block text-sm font-semibold mb-1">คำตอบ</label>
+                    <div id="faq_editor_${index}" class="bg-white h-24"></div>
+                `;
                 faqContainer.appendChild(div);
-                const quillFaq = new Quill(document.getElementById(`faq_editor_${index}`), { theme: 'snow', modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] } });
+                
+                const quillFaq = new Quill(document.getElementById(`faq_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
                 quillFaq.root.innerHTML = faq.answer || '';
-                quillFaq.on('text-change', () => { faqs[index].answer = quillFaq.root.innerHTML; faqInput.value = JSON.stringify(faqs); });
+                quillFaq.on('text-change', () => { 
+                    faqs[index].answer = quillFaq.root.innerHTML; 
+                    faqInput.value = JSON.stringify(faqs); 
+                });
             });
             faqInput.value = JSON.stringify(faqs);
         }
-        window.moveFaq = (index, direction) => { const newIndex = index + direction; if (newIndex >= 0 && newIndex < faqs.length) { const temp = faqs[index]; faqs[index] = faqs[newIndex]; faqs[newIndex] = temp; renderFaqs(); } };
+
+        window.moveFaq = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < faqs.length) {
+                const temp = faqs[index];
+                faqs[index] = faqs[newIndex];
+                faqs[newIndex] = temp;
+                renderFaqs();
+            }
+        };
         window.updateFaq = (index, key, value) => { faqs[index][key] = value; faqInput.value = JSON.stringify(faqs); };
         window.removeFaq = (index) => { if(confirm('ลบคำถามนี้?')) { faqs.splice(index, 1); renderFaqs(); } };
         document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
+        
         renderFaqs();
 
         // --- ระบบ Banner Carousel ---
@@ -527,28 +569,126 @@
         function renderBanners() {
             bannerContainer.innerHTML = '';
             quillBanners = [];
-            if (banners.length === 0) { bannerContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ยังไม่มีสไลด์โฆษณา</p>'; bannerInput.value = '[]'; return; }
+
+            if (banners.length === 0) {
+                bannerContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ยังไม่มีสไลด์โฆษณา กดปุ่ม "+ เพิ่มสไลด์ใหม่" ด้านบน</p>';
+                bannerInput.value = '[]';
+                return;
+            }
+
             banners.forEach((banner, index) => {
                 const div = document.createElement('div');
                 div.className = 'bg-gray-50 p-5 rounded-lg border border-gray-200 relative mb-4';
-                let actionButtons = `<div class="absolute top-3 right-3 flex space-x-2 z-10">${index > 0 ? `<button type="button" onclick="moveBanner(${index}, -1)" class="bg-white text-blue-600 border border-blue-600 px-2 py-1 rounded text-xs">▲ ขึ้น</button>` : ''}${index < banners.length - 1 ? `<button type="button" onclick="moveBanner(${index}, 1)" class="bg-white text-blue-600 border border-blue-600 px-2 py-1 rounded text-xs">▼ ลง</button>` : ''}<button type="button" onclick="removeBanner(${index})" class="bg-white text-red-500 border border-red-500 px-2 py-1 rounded text-xs">✖ ลบ</button></div>`;
-                div.innerHTML = `${actionButtons}<div class="pr-40 mb-4 flex items-center space-x-2"><span class="bg-primary text-white font-bold w-6 h-6 flex items-center justify-center rounded-full text-xs">${index + 1}</span><h4 class="font-bold text-gray-700">สไลด์ที่ ${index + 1}</h4></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label class="block text-sm font-semibold mb-1">รูปภาพแบนเนอร์</label><div class="flex space-x-2"><input type="text" id="img_input_${index}" class="flex-1 border border-gray-300 p-2 text-sm rounded bg-gray-50" value="${banner.img_url || ''}" onchange="updateBanner(${index}, 'img_url', this.value)" placeholder="ลิงก์รูปภาพ"><label class="bg-blue-600 text-white px-3 py-2 rounded text-sm cursor-pointer">อัปโหลด<input type="file" class="hidden" accept="image/*" onchange="uploadSlideImage(event, ${index})"></label></div>${banner.img_url ? `<img src="${banner.img_url}" class="mt-3 h-24 w-auto rounded border object-cover">` : ''}</div><div><label class="block text-sm font-semibold mb-1">ลิงก์ปลายทาง (ถ้ามี)</label><input type="url" class="w-full border p-2 text-sm rounded" value="${banner.link_url || ''}" onchange="updateBanner(${index}, 'link_url', this.value)"></div></div><label class="block text-sm font-semibold mb-1">ข้อความรายละเอียด</label><div id="banner_editor_${index}" class="bg-white h-24 rounded-b border-gray-300"></div>`;
+                
+                let actionButtons = `
+                    <div class="absolute top-3 right-3 flex space-x-2 z-10">
+                        ${index > 0 ? `<button type="button" onclick="moveBanner(${index}, -1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▲ ขึ้น</button>` : ''}
+                        ${index < banners.length - 1 ? `<button type="button" onclick="moveBanner(${index}, 1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeBanner(${index})" class="bg-white text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition shadow-sm">✖ ลบ</button>
+                    </div>
+                `;
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-40 mb-4 flex items-center space-x-2">
+                        <span class="bg-primary text-white font-bold w-6 h-6 flex items-center justify-center rounded-full text-xs"> ${index + 1} </span>
+                        <h4 class="font-bold text-gray-700">สไลด์ที่ ${index + 1}</h4>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">รูปภาพแบนเนอร์</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="img_input_${index}" class="flex-1 border border-gray-300 p-2 text-sm rounded bg-gray-50 focus:bg-white transition" value="${banner.img_url || ''}" onchange="updateBanner(${index}, 'img_url', this.value)" placeholder="อัปโหลดรูป หรือ วางลิงก์...">
+                                <label class="bg-blue-600 text-white px-3 py-2 rounded shadow-sm hover:bg-blue-700 cursor-pointer text-sm font-semibold flex items-center justify-center whitespace-nowrap transition">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                    อัปโหลด
+                                    <input type="file" class="hidden" accept="image/*" onchange="uploadSlideImage(event, ${index})">
+                                </label>
+                            </div>
+                            ${banner.img_url ? `<img src="${banner.img_url}" class="mt-3 h-24 w-auto rounded border border-gray-200 object-cover shadow-sm">` : ''}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">ลิงก์ปลายทางเมื่อคลิกรูป (ถ้ามี)</label>
+                            <input type="url" class="w-full border border-gray-300 p-2 text-sm rounded focus:border-primary transition" value="${banner.link_url || ''}" onchange="updateBanner(${index}, 'link_url', this.value)" placeholder="https://...">
+                        </div>
+                    </div>
+                    <label class="block text-sm font-semibold mb-1">ข้อความรายละเอียดด้านล่างรูป</label>
+                    <div id="banner_editor_${index}" class="bg-white h-24 rounded-b border-gray-300"></div>
+                `;
                 bannerContainer.appendChild(div);
-                const quillBanner = new Quill(document.getElementById(`banner_editor_${index}`), { theme: 'snow', modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'color': []}], [{ 'align': [] }], ['clean'] ] } });
+                
+                const quillBanner = new Quill(document.getElementById(`banner_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'color': []}], [{ 'align': [] }], ['clean'] ] }
+                });
                 quillBanner.root.innerHTML = banner.content || '';
-                quillBanner.on('text-change', () => { banners[index].content = quillBanner.root.innerHTML; bannerInput.value = JSON.stringify(banners); });
+                quillBanner.on('text-change', () => { 
+                    banners[index].content = quillBanner.root.innerHTML; 
+                    bannerInput.value = JSON.stringify(banners); 
+                });
                 quillBanners.push(quillBanner);
             });
             bannerInput.value = JSON.stringify(banners);
         }
-        window.moveBanner = (index, direction) => { const newIndex = index + direction; if (newIndex >= 0 && newIndex < banners.length) { const temp = banners[index]; banners[index] = banners[newIndex]; banners[newIndex] = temp; renderBanners(); } };
-        window.updateBanner = (index, key, value) => { banners[index][key] = value; bannerInput.value = JSON.stringify(banners); if (key === 'img_url') renderBanners(); };
-        window.removeBanner = (index) => { if(confirm('ลบสไลด์นี้?')) { banners.splice(index, 1); renderBanners(); } };
-        document.getElementById('add-banner-btn').addEventListener('click', () => { banners.push({ img_url: '', link_url: '', content: '' }); renderBanners(); });
-        window.uploadSlideImage = async (event, index) => { const file = event.target.files[0]; if (!file) return; const inputEl = document.getElementById(`img_input_${index}`); const originalVal = inputEl.value; inputEl.value = 'กำลังอัปโหลด...'; const formData = new FormData(); formData.append('slide_image', file); try { const response = await fetch('/admin/api/upload-slide', { method: 'POST', body: formData }); const data = await response.json(); if (data.success) { updateBanner(index, 'img_url', data.url); } else { inputEl.value = originalVal; } } catch (err) { inputEl.value = originalVal; } event.target.value = ''; };
+
+        window.moveBanner = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < banners.length) {
+                const temp = banners[index];
+                banners[index] = banners[newIndex];
+                banners[newIndex] = temp;
+                renderBanners();
+            }
+        };
+        window.updateBanner = (index, key, value) => { 
+            banners[index][key] = value;
+            bannerInput.value = JSON.stringify(banners);
+            if (key === 'img_url') renderBanners(); 
+        };
+        window.removeBanner = (index) => { 
+            if(confirm('ลบสไลด์นี้?')) { 
+                banners.splice(index, 1);
+                renderBanners(); 
+            } 
+        };
+        document.getElementById('add-banner-btn').addEventListener('click', () => { 
+            banners.push({ img_url: '', link_url: '', content: '' }); 
+            renderBanners(); 
+        });
+
+        window.uploadSlideImage = async (event, index) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const inputEl = document.getElementById(`img_input_${index}`);
+            const originalVal = inputEl.value;
+            inputEl.value = 'กำลังอัปโหลด... ⏳';
+
+            const formData = new FormData();
+            formData.append('slide_image', file);
+            try {
+                const response = await fetch('/admin/api/upload-slide', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateBanner(index, 'img_url', data.url);
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + data.message);
+                    inputEl.value = originalVal;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่ออัปโหลดได้');
+                inputEl.value = originalVal;
+            }
+            event.target.value = '';
+        };
+        
         renderBanners();
 
-        // --- ระบบ Blog Management (Tab 10) ---
+        // --- ระบบ Blog Management (Tab 11) ---
         const blogUI = {
             currentPage: 1, totalPages: 1, quillBlog: null, categories: [],
             initEditor: function() {

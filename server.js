@@ -45,7 +45,6 @@ const pool = new Pool({
 
 async function initDB() {
     try {
-        // ตารางตั้งค่าเว็บไซต์
         await pool.query(`
             CREATE TABLE IF NOT EXISTS LANDING_settings (
                 key VARCHAR(50) PRIMARY KEY,
@@ -53,7 +52,6 @@ async function initDB() {
             );
         `);
 
-        // ตารางหมวดหมู่บทความ
         await pool.query(`
             CREATE TABLE IF NOT EXISTS landing_categories (
                 id SERIAL PRIMARY KEY,
@@ -62,7 +60,6 @@ async function initDB() {
             );
         `);
 
-        // ตารางบทความ
         await pool.query(`
             CREATE TABLE IF NOT EXISTS landing_articles (
                 id SERIAL PRIMARY KEY,
@@ -129,7 +126,12 @@ async function initDB() {
             banner_display_type: 'always', 
             banner_display_limit: '1',
             banner_version: '1',
-            banner_list: '[]'
+            banner_list: '[]',
+            
+            // --- เพิ่มการตั้งค่าใหม่สำหรับ CTA ท้ายหน้าบทความ ---
+            article_cta_title: 'พร้อมเปลี่ยนระบบร้านค้าของคุณหรือยัง?',
+            article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
+            article_cta_btn_url: '#'
         };
 
         for (const [key, value] of Object.entries(defaultSettings)) {
@@ -187,7 +189,6 @@ const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
 
-// SEO Routes
 app.get('/robots.txt', (req, res) => {
     res.type('text/plain');
     res.send("User-agent: *\nAllow: /\nSitemap: https://lullapos.com/sitemap.xml");
@@ -217,7 +218,6 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
-// หน้าแรก - ดึงบทความล่าสุดไปแสดงด้วย
 app.get('/', async (req, res, next) => {
     try {
         const settings = await getSettings();
@@ -234,7 +234,6 @@ app.get('/', async (req, res, next) => {
     }
 });
 
-// หน้าอ่านบทความ
 app.get('/article/:slug', async (req, res, next) => {
     try {
         const settings = await getSettings();
@@ -256,12 +255,16 @@ app.get('/article/:slug', async (req, res, next) => {
 const wakeupLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 3, message: 'Too Many Requests' });
 app.get('/wakeup', wakeupLimiter, (req, res) => res.status(200).send('OK'));
 
-app.get('/admin/login', (req, res) => res.render('login', { error: null }));
+app.get('/admin/login', (req, res) => { res.render('login', { error: null }); });
+
 app.post('/admin/login', loginLimiter, (req, res) => {
-    if (req.body.email === process.env.ADMIN_EMAIL && req.body.password === process.env.ADMIN_PASSWORD) {
+    const { email, password } = req.body;
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
         req.session.isLoggedIn = true;
         res.redirect('/admin');
-    } else res.render('login', { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
+    } else {
+        res.render('login', { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
+    }
 });
 
 app.get('/admin', requireAuth, async (req, res, next) => {
@@ -273,7 +276,6 @@ app.get('/admin', requireAuth, async (req, res, next) => {
     }
 });
 
-// Settings Save
 app.post('/admin/save', requireAuth, upload.fields([
     { name: 'favicon', maxCount: 1 }, { name: 'logo', maxCount: 1 },
     { name: 'hero_img', maxCount: 1 }, { name: 'stats_img', maxCount: 1 },
@@ -281,6 +283,7 @@ app.post('/admin/save', requireAuth, upload.fields([
 ]), async (req, res, next) => {
     try {
         const body = req.body;
+        
         let cleanFaqList = body.faq_list;
         try {
             let parsedFaq = JSON.parse(body.faq_list || '[]');
@@ -310,7 +313,12 @@ app.post('/admin/save', requireAuth, upload.fields([
             cta_title: body.cta_title, cta_desc: sanitizeHtml(body.cta_desc), cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url, cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
             banner_active: body.banner_active === 'on' ? 'true' : 'false', banner_display_type: body.banner_display_type || 'always',
-            banner_display_limit: body.banner_display_limit || '1', banner_version: Date.now().toString(), banner_list: body.banner_list || '[]'
+            banner_display_limit: body.banner_display_limit || '1', banner_version: Date.now().toString(), banner_list: body.banner_list || '[]',
+            
+            // --- อัปเดตข้อมูลของ CTA ท้ายหน้าบทความ ---
+            article_cta_title: body.article_cta_title,
+            article_cta_btn_text: body.article_cta_btn_text,
+            article_cta_btn_url: body.article_cta_btn_url
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
@@ -318,15 +326,18 @@ app.post('/admin/save', requireAuth, upload.fields([
         if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0]);
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0]);
+        if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0]);
 
         for (const [key, value] of Object.entries(updates)) {
-            await pool.query(`INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [key, value]);
+            await pool.query(
+                `INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+                [key, value]
+            );
         }
         res.redirect('/admin');
     } catch (error) { next(error); }
 });
 
-// API ทั่วไปสำหรับอัปโหลดรูป
 app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์' });
@@ -334,15 +345,15 @@ app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (
         res.json({ success: true, url: fileUrl });
     } catch (error) { res.status(500).json({ success: false }); }
 });
+
 app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ success: false });
+        if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
         const fileUrl = await uploadToR2(req.file); 
         res.json({ success: true, url: fileUrl });
-    } catch (error) { res.status(500).json({ success: false }); }
+    } catch (error) { res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' }); }
 });
 
-// --- API สำหรับจัดการบทความ (Blog) ---
 app.get('/admin/api/categories', requireAuth, async (req, res) => {
     const result = await pool.query('SELECT * FROM landing_categories ORDER BY id DESC');
     res.json(result.rows);
@@ -381,7 +392,6 @@ app.post('/admin/api/articles', requireAuth, upload.single('cover_image'), async
         if (req.file) cover_image = await uploadToR2(req.file);
         
         const { category_id, title, seo_description, content, is_published } = req.body;
-        // Generate random slug to avoid collision and Thai character issues easily
         const slug = Math.random().toString(36).substring(2, 15) + '-' + Date.now();
         
         await pool.query(`
@@ -416,9 +426,9 @@ app.delete('/admin/api/articles/:id', requireAuth, async (req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).send('ไฟล์มีขนาดใหญ่เกินไป');
+        return res.status(400).send('ไฟล์มีขนาดใหญ่เกินไป (จำกัดไม่เกิน 5MB)');
     }
-    res.status(500).send('Server Error');
+    res.status(500).send('เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
