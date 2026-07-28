@@ -25,7 +25,7 @@ const loginLimiter = rateLimit({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-change-me-in-production',
@@ -45,10 +45,35 @@ const pool = new Pool({
 
 async function initDB() {
     try {
+        // ตารางตั้งค่าเว็บไซต์
         await pool.query(`
             CREATE TABLE IF NOT EXISTS LANDING_settings (
                 key VARCHAR(50) PRIMARY KEY,
                 value TEXT
+            );
+        `);
+
+        // ตารางหมวดหมู่บทความ
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS landing_categories (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // ตารางบทความ
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS landing_articles (
+                id SERIAL PRIMARY KEY,
+                category_id INTEGER REFERENCES landing_categories(id) ON DELETE SET NULL,
+                title VARCHAR(255) NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                cover_image TEXT,
+                seo_description TEXT,
+                content TEXT NOT NULL,
+                is_published BOOLEAN DEFAULT true,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
         
@@ -100,12 +125,11 @@ async function initDB() {
             
             seo_title: 'Lullapos - ระบบ POS สำหรับร้านค้าขนาดเล็ก ใช้ฟรี จ่ายตามจริง', seo_description: 'ระบบจัดการหน้าร้าน Lullapos เริ่มต้นใช้งานฟรี', seo_keywords: 'ระบบ pos, ระบบ pos ฟรี', seo_thumbnail_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
             
-            // --- Banner Settings ---
             banner_active: 'false',
             banner_display_type: 'always', 
             banner_display_limit: '1',
             banner_version: '1',
-            banner_list: '[]' // เก็บข้อมูลสไลด์เป็น JSON Array
+            banner_list: '[]'
         };
 
         for (const [key, value] of Object.entries(defaultSettings)) {
@@ -144,7 +168,7 @@ const upload = multer({
 
 async function uploadToR2(file) {
     const fileExt = path.extname(file.originalname);
-    const fileName = `landing_${Date.now()}${fileExt}`;
+    const fileName = `landing_${Date.now()}_${Math.floor(Math.random() * 1000)}${fileExt}`;
     await s3.send(new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
         Key: fileName,
@@ -163,60 +187,81 @@ const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
 
-// --- เริ่มส่วนที่เพิ่มเข้ามาใหม่สำหรับ SEO (robots.txt และ sitemap.xml) ---
+// SEO Routes
 app.get('/robots.txt', (req, res) => {
     res.type('text/plain');
     res.send("User-agent: *\nAllow: /\nSitemap: https://lullapos.com/sitemap.xml");
 });
 
-app.get('/sitemap.xml', (req, res) => {
-    res.type('application/xml');
-    res.send(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const articles = await pool.query('SELECT slug, created_at FROM landing_articles WHERE is_published = true ORDER BY created_at DESC');
+        let urls = `
   <url>
     <loc>https://lullapos.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>
-</urlset>`);
+  </url>`;
+        articles.rows.forEach(a => {
+            urls += `
+  <url>
+    <loc>https://lullapos.com/article/${encodeURIComponent(a.slug)}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+        });
+        res.type('application/xml');
+        res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}\n</urlset>`);
+    } catch (e) {
+        res.status(500).send('');
+    }
 });
-// --- สิ้นสุดส่วนที่เพิ่มเข้ามาใหม่สำหรับ SEO ---
 
+// หน้าแรก - ดึงบทความล่าสุดไปแสดงด้วย
 app.get('/', async (req, res, next) => {
     try {
         const settings = await getSettings();
-        res.render('index', { settings });
+        const articlesRes = await pool.query(`
+            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
+            FROM landing_articles a 
+            LEFT JOIN landing_categories c ON a.category_id = c.id 
+            WHERE a.is_published = true 
+            ORDER BY a.created_at DESC LIMIT 6
+        `);
+        res.render('index', { settings, latest_articles: articlesRes.rows });
     } catch (err) {
         next(err);
     }
 });
 
-// สร้างตัวจำกัด Request สำหรับหน้า wakeup (2 ครั้ง / 10 นาที)
-const wakeupLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // ระยะเวลา 10 นาที (มิลลิวินาที)
-    max: 3, // อนุญาตให้ยิงเข้ามาได้สูงสุด 2 ครั้งต่อ 1 IP
-    message: 'Too Many Requests', // ข้อความที่จะส่งกลับไปเมื่อยิงเกินโควต้า
-    standardHeaders: true, // ส่งข้อมูล Rate limit กลับไปใน Header
-    legacyHeaders: false, // ปิดการส่ง Header แบบเก่า
+// หน้าอ่านบทความ
+app.get('/article/:slug', async (req, res, next) => {
+    try {
+        const settings = await getSettings();
+        const articleRes = await pool.query(`
+            SELECT a.*, c.name as category_name 
+            FROM landing_articles a 
+            LEFT JOIN landing_categories c ON a.category_id = c.id 
+            WHERE a.slug = $1 AND a.is_published = true
+        `, [req.params.slug]);
+
+        if (articleRes.rows.length === 0) return res.status(404).send('ไม่พบบทความ');
+        
+        res.render('article', { settings, article: articleRes.rows[0] });
+    } catch (err) {
+        next(err);
+    }
 });
 
-// Route สำหรับให้ Cronjob ยิงมาปลุกเซิร์ฟเวอร์ พร้อมระบบป้องกัน
-app.get('/wakeup', wakeupLimiter, (req, res) => {
-    res.status(200).send('OK');
-});
+const wakeupLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 3, message: 'Too Many Requests' });
+app.get('/wakeup', wakeupLimiter, (req, res) => res.status(200).send('OK'));
 
-app.get('/admin/login', (req, res) => {
-    res.render('login', { error: null });
-});
-
+app.get('/admin/login', (req, res) => res.render('login', { error: null }));
 app.post('/admin/login', loginLimiter, (req, res) => {
-    const { email, password } = req.body;
-    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+    if (req.body.email === process.env.ADMIN_EMAIL && req.body.password === process.env.ADMIN_PASSWORD) {
         req.session.isLoggedIn = true;
         res.redirect('/admin');
-    } else {
-        res.render('login', { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
-    }
+    } else res.render('login', { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
 });
 
 app.get('/admin', requireAuth, async (req, res, next) => {
@@ -228,70 +273,44 @@ app.get('/admin', requireAuth, async (req, res, next) => {
     }
 });
 
+// Settings Save
 app.post('/admin/save', requireAuth, upload.fields([
-    { name: 'favicon', maxCount: 1 },
-    { name: 'logo', maxCount: 1 },
-    { name: 'hero_img', maxCount: 1 },
-    { name: 'stats_img', maxCount: 1 },
-    { name: 'seo_thumbnail', maxCount: 1 },
-    { name: 'banner_img', maxCount: 1 }
+    { name: 'favicon', maxCount: 1 }, { name: 'logo', maxCount: 1 },
+    { name: 'hero_img', maxCount: 1 }, { name: 'stats_img', maxCount: 1 },
+    { name: 'seo_thumbnail', maxCount: 1 }, { name: 'banner_img', maxCount: 1 }
 ]), async (req, res, next) => {
     try {
         const body = req.body;
-        
         let cleanFaqList = body.faq_list;
         try {
             let parsedFaq = JSON.parse(body.faq_list || '[]');
-            parsedFaq = parsedFaq.map(f => ({
-                question: f.question, 
-                answer: sanitizeHtml(f.answer) 
-            }));
+            parsedFaq = parsedFaq.map(f => ({ question: f.question, answer: sanitizeHtml(f.answer) }));
             cleanFaqList = JSON.stringify(parsedFaq);
-        } catch (e) { console.error("FAQ Parse Error"); }
+        } catch (e) { }
 
         const updates = { 
-            theme_color: body.theme_color,
-            hero_badge: body.hero_badge, hero_title: body.hero_title, 
-            hero_desc: sanitizeHtml(body.hero_desc),
+            theme_color: body.theme_color, hero_badge: body.hero_badge, hero_title: body.hero_title, hero_desc: sanitizeHtml(body.hero_desc),
             feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
-            
             col1_title: body.col1_title, col1_desc: sanitizeHtml(body.col1_desc), col1_icon: body.col1_icon, 
             col2_title: body.col2_title, col2_desc: sanitizeHtml(body.col2_desc), col2_icon: body.col2_icon, 
             col3_title: body.col3_title, col3_desc: sanitizeHtml(body.col3_desc), col3_icon: body.col3_icon, 
-            
-            footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url,
-            facebook_icon: body.facebook_icon, line_icon: body.line_icon,
-            
-            grid_badge: body.grid_badge, grid_title: body.grid_title, 
-            grid_desc: sanitizeHtml(body.grid_desc),
+            footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,
+            grid_badge: body.grid_badge, grid_title: body.grid_title, grid_desc: sanitizeHtml(body.grid_desc),
             grid1_title: body.grid1_title, grid1_desc: body.grid1_desc, grid1_icon: body.grid1_icon, 
             grid2_title: body.grid2_title, grid2_desc: body.grid2_desc, grid2_icon: body.grid2_icon, 
             grid3_title: body.grid3_title, grid3_desc: body.grid3_desc, grid3_icon: body.grid3_icon, 
             grid4_title: body.grid4_title, grid4_desc: body.grid4_desc, grid4_icon: body.grid4_icon, 
             grid5_title: body.grid5_title, grid5_desc: body.grid5_desc, grid5_icon: body.grid5_icon, 
             grid6_title: body.grid6_title, grid6_desc: body.grid6_desc, grid6_icon: body.grid6_icon, 
-            
             btn_text: body.btn_text, btn_url: body.btn_url, btn_size: body.btn_size,
-            stats_badge: body.stats_badge, stats_title: body.stats_title, 
-            stats_desc: sanitizeHtml(body.stats_desc),
+            stats_badge: body.stats_badge, stats_title: body.stats_title, stats_desc: sanitizeHtml(body.stats_desc),
             stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
             stat3_label: body.stat3_label, stat3_value: body.stat3_value, stat4_label: body.stat4_label, stat4_value: body.stat4_value,
-            
             faq_title: body.faq_title, faq_list: cleanFaqList,
-
-            cta_title: body.cta_title, 
-            cta_desc: sanitizeHtml(body.cta_desc),
-            cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url,
-            cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
-
+            cta_title: body.cta_title, cta_desc: sanitizeHtml(body.cta_desc), cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url, cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
-            
-            // --- Banner Updates ---
-            banner_active: body.banner_active === 'on' ? 'true' : 'false', 
-            banner_display_type: body.banner_display_type || 'always',
-            banner_display_limit: body.banner_display_limit || '1',
-            banner_version: Date.now().toString(),
-            banner_list: body.banner_list || '[]'
+            banner_active: body.banner_active === 'on' ? 'true' : 'false', banner_display_type: body.banner_display_type || 'always',
+            banner_display_limit: body.banner_display_limit || '1', banner_version: Date.now().toString(), banner_list: body.banner_list || '[]'
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
@@ -299,43 +318,107 @@ app.post('/admin/save', requireAuth, upload.fields([
         if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0]);
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0]);
-        if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0]);
 
         for (const [key, value] of Object.entries(updates)) {
-            await pool.query(
-                `INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
-                [key, value]
-            );
+            await pool.query(`INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [key, value]);
         }
         res.redirect('/admin');
-    } catch (error) {
-        next(error); 
-    }
+    } catch (error) { next(error); }
 });
 
-// --- API สำหรับอัปโหลดรูปภาพสไลด์โฆษณา (AJAX) ---
+// API ทั่วไปสำหรับอัปโหลดรูป
+app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์' });
+        const fileUrl = await uploadToR2(req.file); 
+        res.json({ success: true, url: fileUrl });
+    } catch (error) { res.status(500).json({ success: false }); }
+});
 app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
-        }
-        
-        // ส่งไฟล์ขึ้น Cloudflare R2 แทนที่จะอ่านค่าจาก path เปล่าๆ
+        if (!req.file) return res.status(400).json({ success: false });
         const fileUrl = await uploadToR2(req.file); 
-        
         res.json({ success: true, url: fileUrl });
-    } catch (error) {
-        console.error('Upload Error:', error);
-        res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' });
-    }
+    } catch (error) { res.status(500).json({ success: false }); }
+});
+
+// --- API สำหรับจัดการบทความ (Blog) ---
+app.get('/admin/api/categories', requireAuth, async (req, res) => {
+    const result = await pool.query('SELECT * FROM landing_categories ORDER BY id DESC');
+    res.json(result.rows);
+});
+app.post('/admin/api/categories', requireAuth, async (req, res) => {
+    await pool.query('INSERT INTO landing_categories (name) VALUES ($1)', [req.body.name]);
+    res.json({ success: true });
+});
+app.delete('/admin/api/categories/:id', requireAuth, async (req, res) => {
+    await pool.query('DELETE FROM landing_categories WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+});
+
+app.get('/admin/api/articles', requireAuth, async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+    const countRes = await pool.query('SELECT COUNT(*) FROM landing_articles');
+    const total = parseInt(countRes.rows[0].count);
+    const result = await pool.query(`
+        SELECT a.id, a.title, a.is_published, a.created_at, c.name as category_name 
+        FROM landing_articles a LEFT JOIN landing_categories c ON a.category_id = c.id 
+        ORDER BY a.created_at DESC LIMIT $1 OFFSET $2
+    `, [limit, offset]);
+    res.json({ articles: result.rows, totalPages: Math.ceil(total / limit), currentPage: page });
+});
+
+app.get('/admin/api/articles/:id', requireAuth, async (req, res) => {
+    const result = await pool.query('SELECT * FROM landing_articles WHERE id = $1', [req.params.id]);
+    res.json(result.rows[0]);
+});
+
+app.post('/admin/api/articles', requireAuth, upload.single('cover_image'), async (req, res) => {
+    try {
+        let cover_image = null;
+        if (req.file) cover_image = await uploadToR2(req.file);
+        
+        const { category_id, title, seo_description, content, is_published } = req.body;
+        // Generate random slug to avoid collision and Thai character issues easily
+        const slug = Math.random().toString(36).substring(2, 15) + '-' + Date.now();
+        
+        await pool.query(`
+            INSERT INTO landing_articles (category_id, title, slug, cover_image, seo_description, content, is_published)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `, [category_id || null, title, slug, cover_image, seo_description, sanitizeHtml(content), is_published === 'true']);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+app.put('/admin/api/articles/:id', requireAuth, upload.single('cover_image'), async (req, res) => {
+    try {
+        const { category_id, title, seo_description, content, is_published } = req.body;
+        let query = `UPDATE landing_articles SET category_id=$1, title=$2, seo_description=$3, content=$4, is_published=$5 WHERE id=$6`;
+        let params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', req.params.id];
+        
+        if (req.file) {
+            const cover_image = await uploadToR2(req.file);
+            query = `UPDATE landing_articles SET category_id=$1, title=$2, seo_description=$3, content=$4, is_published=$5, cover_image=$6 WHERE id=$7`;
+            params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', cover_image, req.params.id];
+        }
+        await pool.query(query, params);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+app.delete('/admin/api/articles/:id', requireAuth, async (req, res) => {
+    await pool.query('DELETE FROM landing_articles WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
 });
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).send('ไฟล์มีขนาดใหญ่เกินไป (จำกัดไม่เกิน 5MB)');
+        return res.status(400).send('ไฟล์มีขนาดใหญ่เกินไป');
     }
-    res.status(500).send('เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
+    res.status(500).send('Server Error');
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
