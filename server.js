@@ -172,6 +172,15 @@ app.get('/', async (req, res, next) => {
     }
 });
 
+// สร้างตัวจำกัด Request สำหรับหน้า wakeup (2 ครั้ง / 10 นาที)
+const wakeupLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // ระยะเวลา 10 นาที (มิลลิวินาที)
+    max: 3, // อนุญาตให้ยิงเข้ามาได้สูงสุด 2 ครั้งต่อ 1 IP
+    message: 'Too Many Requests', // ข้อความที่จะส่งกลับไปเมื่อยิงเกินโควต้า
+    standardHeaders: true, // ส่งข้อมูล Rate limit กลับไปใน Header
+    legacyHeaders: false, // ปิดการส่ง Header แบบเก่า
+});
+
 // Route สำหรับให้ Cronjob ยิงมาปลุกเซิร์ฟเวอร์
 app.get('/wakeup', (req, res) => {
     res.status(200).send('OK');
