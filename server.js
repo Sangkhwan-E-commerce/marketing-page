@@ -181,8 +181,8 @@ const wakeupLimiter = rateLimit({
     legacyHeaders: false, // ปิดการส่ง Header แบบเก่า
 });
 
-// Route สำหรับให้ Cronjob ยิงมาปลุกเซิร์ฟเวอร์
-app.get('/wakeup', (req, res) => {
+// Route สำหรับให้ Cronjob ยิงมาปลุกเซิร์ฟเวอร์ พร้อมระบบป้องกัน
+app.get('/wakeup', wakeupLimiter, (req, res) => {
     res.status(200).send('OK');
 });
 
