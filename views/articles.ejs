@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทความทั้งหมด - <%= settings.seo_title %></title>
+    <meta name="description" content="<%= settings.seo_description %>">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="บทความทั้งหมด - <%= settings.seo_title %>">
+    <meta property="og:description" content="แหล่งรวมความรู้และเทคนิคการจัดการร้านค้า">
+    <meta property="og:image" content="<%= settings.seo_thumbnail_url %>">
+    
+    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
+    
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '<%= settings.theme_color %>'
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Prompt', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
+            <a href="/" class="hover:opacity-80 transition"><img src="<%= settings.logo_url %>" alt="Lullapos" class="h-8 w-auto"></a>
+            <a href="/" class="text-sm font-semibold text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition">กลับหน้าหลัก</a>
+        </div>
+    </header>
+
+    <main class="flex-grow pb-24">
+        <div class="bg-primary/5 py-16 sm:py-24">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">บทความและเทคนิคธุรกิจ</h1>
+                <p class="mt-4 text-lg text-gray-600">รวบรวมเคล็ดลับที่จะช่วยให้ร้านค้าของคุณเติบโตได้อย่างยั่งยืน</p>
+            </div>
+        </div>
+
+        <div class="mx-auto max-w-7xl px-6 lg:px-8 mt-12">
+            <form action="/articles" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-12 flex flex-col sm:flex-row gap-4 items-center">
+                <div class="w-full sm:flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <input type="text" name="search" value="<%= search %>" placeholder="ค้นหาบทความ..." class="block w-full rounded-md border-0 py-2.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6">
+                </div>
+                
+                <div class="w-full sm:w-64">
+                    <select name="category" class="block w-full rounded-md border-0 py-3 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6 cursor-pointer bg-white">
+                        <option value="">-- ทุกหมวดหมู่ --</option>
+                        <% categories.forEach(function(cat) { %>
+                            <option value="<%= cat.id %>" <%= selectedCategory == cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full sm:w-auto rounded-md bg-primary px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition flex-shrink-0">ค้นหา</button>
+            </form>
+
+            <% if (articles.length === 0) { %>
+                <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h3 class="mt-2 text-sm font-semibold text-gray-900">ไม่พบบทความ</h3>
+                    <p class="mt-1 text-sm text-gray-500">ลองค้นหาด้วยคำอื่น หรือเลือกหมวดหมู่อื่น</p>
+                    <div class="mt-6">
+                        <a href="/articles" class="text-primary hover:underline font-medium">ล้างการค้นหา</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                    <% articles.forEach(function(article) { %>
+                    <article class="flex flex-col items-start justify-between bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="relative w-full">
+                            <% if(article.cover_image) { %>
+                                <img src="<%= article.cover_image %>" alt="<%= article.title %>" class="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]">
+                            <% } else { %>
+                                <div class="aspect-[16/9] w-full rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400">ไม่มีรูปภาพ</div>
+                            <% } %>
+                            <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10"></div>
+                        </div>
+                        <div class="max-w-xl w-full">
+                            <div class="mt-8 flex items-center gap-x-4 text-xs">
+                                <time datetime="<%= article.created_at %>" class="text-gray-500"><%= new Date(article.created_at).toLocaleDateString('th-TH') %></time>
+                                <% if(article.category_name) { %><span class="relative z-10 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary"><%= article.category_name %></span><% } %>
+                            </div>
+                            <div class="group relative">
+                                <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-primary transition-colors">
+                                    <a href="/article/<%= encodeURIComponent(article.slug) %>"><span class="absolute inset-0"></span><%= article.title %></a>
+                                </h3>
+                                <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600"><%= article.seo_description %></p>
+                            </div>
+                        </div>
+                    </article>
+                    <% }); %>
+                </div>
+
+                <% if (totalPages > 1) { %>
+                <div class="mt-16 flex items-center justify-center border-t border-gray-200 pt-8 gap-x-4">
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>&category=<%= encodeURIComponent(selectedCategory) %>" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">&laquo; ย้อนกลับ</a>
+                    <% } %>
+                    
+                    <span class="text-sm text-gray-600 font-medium bg-gray-100 px-4 py-2 rounded-md">หน้า <%= currentPage %> จาก <%= totalPages %></span>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>&category=<%= encodeURIComponent(selectedCategory) %>" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">หน้าถัดไป &raquo;</a>
+                    <% } %>
+                </div>
+                <% } %>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-8 mt-auto">
+        <div class="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500"><%= settings.footer_text %></div>
+    </footer>
+</body>
+</html>

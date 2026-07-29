@@ -128,7 +128,6 @@ async function initDB() {
             banner_version: '1',
             banner_list: '[]',
             
-            // --- เพิ่มการตั้งค่าใหม่สำหรับ CTA ท้ายหน้าบทความ ---
             article_cta_title: 'พร้อมเปลี่ยนระบบร้านค้าของคุณหรือยัง?',
             article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
             article_cta_btn_url: '#'
@@ -202,6 +201,11 @@ app.get('/sitemap.xml', async (req, res) => {
     <loc>https://lullapos.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://lullapos.com/articles</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>`;
         articles.rows.forEach(a => {
             urls += `
@@ -226,9 +230,68 @@ app.get('/', async (req, res, next) => {
             FROM landing_articles a 
             LEFT JOIN landing_categories c ON a.category_id = c.id 
             WHERE a.is_published = true 
-            ORDER BY a.created_at DESC LIMIT 6
+            ORDER BY a.created_at DESC LIMIT 9
         `);
         res.render('index', { settings, latest_articles: articlesRes.rows });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// --- หน้าสำหรับแสดงบทความทั้งหมด พร้อมค้นหาและหมวดหมู่ ---
+app.get('/articles', async (req, res, next) => {
+    try {
+        const settings = await getSettings();
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9; // แสดงหน้าละ 9 บทความ
+        const offset = (page - 1) * limit;
+        
+        const search = req.query.search || '';
+        const category = req.query.category || '';
+        
+        let queryStr = `
+            FROM landing_articles a 
+            LEFT JOIN landing_categories c ON a.category_id = c.id 
+            WHERE a.is_published = true
+        `;
+        let params = [];
+        
+        if (search) {
+            params.push(`%${search}%`);
+            queryStr += ` AND (a.title ILIKE $${params.length} OR a.seo_description ILIKE $${params.length} OR a.content ILIKE $${params.length})`;
+        }
+        
+        if (category) {
+            params.push(category);
+            queryStr += ` AND a.category_id = $${params.length}`;
+        }
+        
+        // นับจำนวนบทความทั้งหมดสำหรับ Pagination
+        const countRes = await pool.query(`SELECT COUNT(*) ${queryStr}`, params);
+        const total = parseInt(countRes.rows[0].count);
+        const totalPages = Math.ceil(total / limit);
+        
+        // ดึงข้อมูลบทความ
+        const articlesQuery = `
+            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
+            ${queryStr}
+            ORDER BY a.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+        const articlesRes = await pool.query(articlesQuery, params);
+        
+        // ดึงหมวดหมู่ทั้งหมดสำหรับทำ Dropdown filter
+        const catRes = await pool.query('SELECT * FROM landing_categories ORDER BY name ASC');
+        
+        res.render('articles', { 
+            settings, 
+            articles: articlesRes.rows,
+            categories: catRes.rows,
+            currentPage: page,
+            totalPages: totalPages,
+            search: search,
+            selectedCategory: category
+        });
     } catch (err) {
         next(err);
     }
@@ -314,11 +377,7 @@ app.post('/admin/save', requireAuth, upload.fields([
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
             banner_active: body.banner_active === 'on' ? 'true' : 'false', banner_display_type: body.banner_display_type || 'always',
             banner_display_limit: body.banner_display_limit || '1', banner_version: Date.now().toString(), banner_list: body.banner_list || '[]',
-            
-            // --- อัปเดตข้อมูลของ CTA ท้ายหน้าบทความ ---
-            article_cta_title: body.article_cta_title,
-            article_cta_btn_text: body.article_cta_btn_text,
-            article_cta_btn_url: body.article_cta_btn_url
+            article_cta_title: body.article_cta_title, article_cta_btn_text: body.article_cta_btn_text, article_cta_btn_url: body.article_cta_btn_url
         };
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
