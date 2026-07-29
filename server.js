@@ -238,13 +238,12 @@ app.get('/', async (req, res, next) => {
     }
 });
 
-// --- หน้าสำหรับแสดงบทความทั้งหมด พร้อมค้นหาและหมวดหมู่ ---
 app.get('/articles', async (req, res, next) => {
     try {
         const settings = await getSettings();
         
         const page = parseInt(req.query.page) || 1;
-        const limit = 9; // แสดงหน้าละ 9 บทความ
+        const limit = 9;
         const offset = (page - 1) * limit;
         
         const search = req.query.search || '';
@@ -267,12 +266,10 @@ app.get('/articles', async (req, res, next) => {
             queryStr += ` AND a.category_id = $${params.length}`;
         }
         
-        // นับจำนวนบทความทั้งหมดสำหรับ Pagination
         const countRes = await pool.query(`SELECT COUNT(*) ${queryStr}`, params);
         const total = parseInt(countRes.rows[0].count);
         const totalPages = Math.ceil(total / limit);
         
-        // ดึงข้อมูลบทความ
         const articlesQuery = `
             SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
             ${queryStr}
@@ -280,7 +277,6 @@ app.get('/articles', async (req, res, next) => {
         `;
         const articlesRes = await pool.query(articlesQuery, params);
         
-        // ดึงหมวดหมู่ทั้งหมดสำหรับทำ Dropdown filter
         const catRes = await pool.query('SELECT * FROM landing_categories ORDER BY name ASC');
         
         res.render('articles', { 
@@ -297,9 +293,12 @@ app.get('/articles', async (req, res, next) => {
     }
 });
 
+// --- อัปเดตส่วนดึงบทความสำหรับแสดงในหน้าบทความเดี่ยว ---
 app.get('/article/:slug', async (req, res, next) => {
     try {
         const settings = await getSettings();
+        
+        // 1. ดึงข้อมูลบทความหลัก
         const articleRes = await pool.query(`
             SELECT a.*, c.name as category_name 
             FROM landing_articles a 
@@ -308,8 +307,23 @@ app.get('/article/:slug', async (req, res, next) => {
         `, [req.params.slug]);
 
         if (articleRes.rows.length === 0) return res.status(404).send('ไม่พบบทความ');
-        
-        res.render('article', { settings, article: articleRes.rows[0] });
+        const article = articleRes.rows[0];
+
+        // 2. ดึงบทความที่เกี่ยวข้อง 6 บทความ (สุ่ม/เน้นหมวดเดียวกัน ไม่เอาบทความปัจจุบัน)
+        const relatedRes = await pool.query(`
+            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
+            FROM landing_articles a 
+            LEFT JOIN landing_categories c ON a.category_id = c.id 
+            WHERE a.is_published = true AND a.id != $1
+            ORDER BY CASE WHEN a.category_id = $2 THEN 1 ELSE 0 END DESC, RANDOM() 
+            LIMIT 6
+        `, [article.id, article.category_id || 0]);
+
+        res.render('article', { 
+            settings, 
+            article: article,
+            related_articles: relatedRes.rows 
+        });
     } catch (err) {
         next(err);
     }

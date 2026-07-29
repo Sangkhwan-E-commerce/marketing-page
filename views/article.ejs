@@ -34,13 +34,16 @@
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
 
     <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div class="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
+        <div class="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
             <a href="/" class="hover:opacity-80 transition"><img src="<%= settings.logo_url %>" alt="Lullapos" class="h-8 w-auto"></a>
-            <a href="/" class="text-sm font-semibold text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition">กลับหน้าหลัก</a>
+            <div class="flex space-x-4">
+                <a href="/articles" class="text-sm font-semibold text-gray-600 hover:text-primary transition flex items-center">อ่านบทความทั้งหมด</a>
+                <a href="/" class="text-sm font-semibold text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition hidden sm:inline-block">กลับหน้าหลัก</a>
+            </div>
         </div>
     </header>
 
-    <main class="flex-grow pt-10 pb-24">
+    <main class="flex-grow pt-10 pb-16">
         <article class="mx-auto max-w-3xl px-6 lg:px-8">
             <div class="text-center mb-10">
                 <% if(article.category_name) { %>
@@ -58,17 +61,57 @@
                 <%- article.content %>
             </div>
             
-            <div class="mt-16 pt-8 border-t border-gray-200 text-center">
-                <h3 class="text-xl font-bold mb-4"><%= settings.article_cta_title %></h3>
-                <a href="<%= settings.article_cta_btn_url %>" class="inline-block bg-primary text-white font-bold px-8 py-3 rounded-full hover:opacity-90 shadow-lg transition transform hover:scale-105">
+            <div class="mt-16 pt-10 border-t border-gray-200 text-center">
+                <h3 class="text-2xl font-bold mb-6 text-gray-900"><%= settings.article_cta_title %></h3>
+                <a href="<%= settings.article_cta_btn_url %>" class="inline-block bg-primary text-white font-bold px-10 py-4 rounded-full hover:opacity-90 shadow-lg transition transform hover:-translate-y-1">
                     <%= settings.article_cta_btn_text %>
                 </a>
             </div>
         </article>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-8 mt-auto">
-        <div class="mx-auto max-w-5xl text-center text-sm text-gray-500"><%= settings.footer_text %></div>
+    <% if (typeof related_articles !== 'undefined' && related_articles.length > 0) { %>
+    <section class="bg-white py-16 border-t border-gray-100">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mb-10 flex items-center justify-between">
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900">บทความที่น่าสนใจเพิ่มเติม</h2>
+                <a href="/articles" class="text-sm font-semibold text-primary hover:underline hidden sm:block">ดูทั้งหมด &rarr;</a>
+            </div>
+            <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                <% related_articles.forEach(function(relArticle) { %>
+                <article class="flex flex-col items-start justify-between bg-gray-50 p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div class="relative w-full">
+                        <% if(relArticle.cover_image) { %>
+                            <img src="<%= relArticle.cover_image %>" alt="<%= relArticle.title %>" class="aspect-[16/9] w-full rounded-xl bg-gray-200 object-cover">
+                        <% } else { %>
+                            <div class="aspect-[16/9] w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-sm">ไม่มีรูปภาพ</div>
+                        <% } %>
+                        <div class="absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
+                    </div>
+                    <div class="max-w-xl w-full">
+                        <div class="mt-6 flex items-center gap-x-4 text-xs">
+                            <time datetime="<%= relArticle.created_at %>" class="text-gray-500"><%= new Date(relArticle.created_at).toLocaleDateString('th-TH') %></time>
+                            <% if(relArticle.category_name) { %><span class="relative z-10 rounded-full bg-white border border-gray-200 px-2.5 py-0.5 font-medium text-gray-600"><%= relArticle.category_name %></span><% } %>
+                        </div>
+                        <div class="group relative">
+                            <h3 class="mt-3 text-base font-semibold leading-6 text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                                <a href="/article/<%= encodeURIComponent(relArticle.slug) %>"><span class="absolute inset-0"></span><%= relArticle.title %></a>
+                            </h3>
+                            <p class="mt-2 line-clamp-2 text-sm leading-6 text-gray-600"><%= relArticle.seo_description %></p>
+                        </div>
+                    </div>
+                </article>
+                <% }); %>
+            </div>
+            <div class="mt-10 text-center sm:hidden">
+                <a href="/articles" class="text-sm font-semibold text-primary hover:underline">ดูบทความทั้งหมด &rarr;</a>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
+    <footer class="bg-gray-50 border-t border-gray-200 py-8 mt-auto">
+        <div class="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500"><%= settings.footer_text %></div>
     </footer>
 </body>
 </html>
