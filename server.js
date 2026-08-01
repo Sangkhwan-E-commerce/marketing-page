@@ -167,16 +167,17 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } 
 });
 
-async function uploadToR2(file) {
+async function uploadToR2(file, folder = '') {
     const fileExt = path.extname(file.originalname);
     const fileName = `landing_${Date.now()}_${Math.floor(Math.random() * 1000)}${fileExt}`;
+    const key = folder ? `${folder}/${fileName}` : fileName;
     await s3.send(new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
-        Key: fileName,
+        Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
     }));
-    return `${process.env.R2_PUBLIC_URL}/${fileName}`;
+    return `${process.env.R2_PUBLIC_URL}/${key}`;
 }
 
 function requireAuth(req, res, next) {
@@ -394,12 +395,12 @@ app.post('/admin/save', requireAuth, upload.fields([
             article_cta_title: body.article_cta_title, article_cta_btn_text: body.article_cta_btn_text, article_cta_btn_url: body.article_cta_btn_url
         };
 
-        if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0]);
-        if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0]);
-        if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0]);
-        if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0]);
-        if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0]);
-        if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0]);
+        if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0], 'landingpage');
+        if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0], 'landingpage');
+        if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0], 'landingpage');
+        if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0], 'landingpage');
+        if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0], 'landingpage');
+        if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0], 'landingpage');
 
         for (const [key, value] of Object.entries(updates)) {
             await pool.query(
@@ -414,7 +415,7 @@ app.post('/admin/save', requireAuth, upload.fields([
 app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์' });
-        const fileUrl = await uploadToR2(req.file); 
+        const fileUrl = await uploadToR2(req.file, 'landingpage/thumbnail');
         res.json({ success: true, url: fileUrl });
     } catch (error) { res.status(500).json({ success: false }); }
 });
@@ -422,7 +423,7 @@ app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (
 app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
-        const fileUrl = await uploadToR2(req.file); 
+        const fileUrl = await uploadToR2(req.file, 'landingpage');
         res.json({ success: true, url: fileUrl });
     } catch (error) { res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' }); }
 });
@@ -462,7 +463,7 @@ app.get('/admin/api/articles/:id', requireAuth, async (req, res) => {
 app.post('/admin/api/articles', requireAuth, upload.single('cover_image'), async (req, res) => {
     try {
         let cover_image = null;
-        if (req.file) cover_image = await uploadToR2(req.file);
+        if (req.file) cover_image = await uploadToR2(req.file, 'landingpage/thumbnail');
         
         const { category_id, title, seo_description, content, is_published } = req.body;
         const slug = Math.random().toString(36).substring(2, 15) + '-' + Date.now();
@@ -482,7 +483,7 @@ app.put('/admin/api/articles/:id', requireAuth, upload.single('cover_image'), as
         let params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', req.params.id];
         
         if (req.file) {
-            const cover_image = await uploadToR2(req.file);
+            const cover_image = await uploadToR2(req.file, 'landingpage/thumbnail');
             query = `UPDATE landing_articles SET category_id=$1, title=$2, seo_description=$3, content=$4, is_published=$5, cover_image=$6 WHERE id=$7`;
             params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', cover_image, req.params.id];
         }
