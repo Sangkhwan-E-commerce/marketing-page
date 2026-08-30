@@ -259,8 +259,13 @@
                 let views = parseInt(localStorage.getItem(storageKey) || '0');
                 
                 const isLoopActive = <%= parsedBanners.length > 1 ? 'true' : 'false' %>;
+                const IMAGE_SLIDE_MS = 5000;
                 let swiper = null;
                 let userInteracted = false;
+                let slideTimer = null;
+
+                const clearSlideTimer = () => { if (slideTimer) { clearTimeout(slideTimer); slideTimer = null; } };
+                const markInteracted = () => { userInteracted = true; clearSlideTimer(); };
 
                 const stopAllVideos = () => {
                     document.querySelectorAll('video.promo-video').forEach(v => {
@@ -269,40 +274,56 @@
                     });
                 };
 
-                // สไลด์วิดีโอคุมจังหวะเอง: หยุด autoplay ของ Swiper แล้วเล่นวิดีโอจนจบ
+                const goNext = () => {
+                    if (!swiper || userInteracted) return;
+                    if (swiper.slides.length > 1) swiper.slideNext();
+                };
+                const queueAdvance = () => {
+                    clearSlideTimer();
+                    if (userInteracted) return;
+                    slideTimer = setTimeout(goNext, IMAGE_SLIDE_MS);
+                };
+
+                // อ่านสไลด์ที่กำลังแสดงจากดัชนีของ Swiper โดยตรง เพราะคลาส swiper-slide-active
+                // ยังไม่ถูกอัปเดตในจังหวะที่ event ทำงาน
+                const activeSlide = () => {
+                    const byIndex = swiper && swiper.slides ? swiper.slides[swiper.activeIndex] : null;
+                    return byIndex || document.querySelector('.bannerSwiper .swiper-slide-active');
+                };
+
+                // สไลด์วิดีโอคุมจังหวะเอง เล่นจนจบแล้วค่อยเลื่อน ส่วนสไลด์รูปเดินตามตัวจับเวลา
                 const syncActiveSlide = () => {
                     if (!swiper) return;
+                    clearSlideTimer();
                     stopAllVideos();
-                    const active = document.querySelector('.bannerSwiper .swiper-slide-active');
+                    const active = activeSlide();
                     const video = active ? active.querySelector('video.promo-video') : null;
-                    if (video) {
-                        if (swiper.autoplay) swiper.autoplay.stop();
-                        const played = video.play();
-                        // ถ้าเบราว์เซอร์ปฏิเสธ ปล่อยให้ค้างเฟรมแรกแล้วเดินสไลด์ต่อตามปกติ
-                        if (played && played.catch) played.catch(() => { if (!userInteracted && swiper.autoplay) swiper.autoplay.start(); });
-                    } else if (!userInteracted && swiper.autoplay) {
-                        swiper.autoplay.start();
-                    }
+                    if (!video) { queueAdvance(); return; }
+                    const played = video.play();
+                    // ถ้าเบราว์เซอร์ปฏิเสธการเล่น ให้สไลด์เดินตามเวลาปกติแทน จะได้ไม่ค้าง
+                    if (played && played.catch) played.catch(queueAdvance);
                 };
 
                 const showModal = () => {
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
+                    // ไม่ใช้ autoplay ของ Swiper เพราะสไลด์วิดีโอต้องรอจนเล่นจบ จึงคุมจังหวะเองทั้งหมด
                     swiper = new Swiper('.bannerSwiper', {
                         observer: true,
                         observeParents: true,
                         loop: isLoopActive,
                         pagination: { el: '.swiper-pagination', clickable: true },
-                        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-                        autoplay: { delay: 5000, disableOnInteraction: true }
+                        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
                     });
-                    swiper.on('slideChange', syncActiveSlide);
-                    swiper.on('touchStart', () => { userInteracted = true; });
+                    // ต้องเป็น transitionEnd ไม่ใช่ slideChange เพราะ slideChange ทำงานก่อน Swiper
+                    // จะอัปเดตสไลด์ที่ active ทำให้ไปอ่านสไลด์เดิมแล้ววิดีโอตัวถัดไปไม่ถูกสั่งเล่น
+                    swiper.on('slideChangeTransitionEnd', syncActiveSlide);
+                    swiper.on('touchStart', markInteracted);
                     document.querySelectorAll('.bannerSwiper .swiper-button-next, .bannerSwiper .swiper-button-prev, .bannerSwiper .swiper-pagination')
-                        .forEach(el => el.addEventListener('click', () => { userInteracted = true; }));
+                        .forEach(el => el.addEventListener('click', markInteracted));
                     // 'ended' ไม่ bubble จึงต้องดักที่ capture phase เพื่อให้ครอบคลุมสไลด์ที่ Swiper โคลนมา
                     document.querySelector('.bannerSwiper').addEventListener('ended', (e) => {
-                        if (!e.target.classList.contains('promo-video')) return;
+                        if (!e.target.classList || !e.target.classList.contains('promo-video')) return;
                         if (swiper && !userInteracted && swiper.slides.length > 1) {
                             swiper.slideNext();
                         } else {
@@ -321,6 +342,7 @@
                     }
                 };
                 const hideModal = () => {
+                    clearSlideTimer();
                     stopAllVideos();
                     modal.classList.add('opacity-0');
                     modalContent.classList.add('scale-95');
