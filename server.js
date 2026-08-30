@@ -62,10 +62,10 @@ const pickTemplate = (group, value, fallback) => TEMPLATES[group].some(t => t.id
 const SECTIONS = [
     { type: 'hero', name: 'Hero Section', defaultBg: 'bg-white', bgEditable: false },
     { type: 'vision', name: 'Advocate Section', defaultBg: 'bg-gray-50', bgEditable: true },
-    { type: 'features', name: 'Feature section', defaultBg: 'bg-red-50', bgEditable: true },
+    { type: 'features', name: 'Feature Section', defaultBg: 'bg-red-50', bgEditable: true },
     { type: 'stats', name: 'State Section', defaultBg: 'bg-white', bgEditable: true },
-    { type: 'articles', name: 'Article Section', defaultBg: 'bg-white', bgEditable: true },
-    { type: 'faq', name: 'Function section', defaultBg: 'bg-gray-50', bgEditable: true },
+    { type: 'articles', name: 'บทความล่าสุด', defaultBg: 'bg-white', bgEditable: true },
+    { type: 'faq', name: 'Function Section', defaultBg: 'bg-gray-50', bgEditable: true },
     { type: 'cta', name: 'CTA Section', defaultBg: 'bg-red-50', bgEditable: true }
 ];
 const SECTION_BGS = [
@@ -186,6 +186,10 @@ async function initDB() {
             stats_badge: 'ภารกิจของเรา', stats_title: 'สถิติที่เติบโตไปพร้อมกับคุณ', stats_desc: 'Lullapos มุ่งมั่นที่จะเป็นส่วนหนึ่งในความสำเร็จของร้านค้าขนาดเล็ก เราพร้อมสนับสนุนคุณด้วยระบบที่เสถียร ใช้งานง่าย และยุติธรรมที่สุด', stats_img_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2850&q=80',
             stat1_label: 'ร้านค้าที่ไว้วางใจ', stat1_value: '8,000+', stat2_label: 'ค่าธรรมเนียมแรกเข้า', stat2_value: '0 ฿', stat3_label: 'ระบบเสถียร (Uptime)', stat3_value: '99.9%', stat4_label: 'ประหยัดต้นทุนเฉลี่ย', stat4_value: '100%',
             
+            articles_title: 'ความรู้และเทคนิคธุรกิจ',
+            articles_subtitle: 'เคล็ดลับการจัดการร้านค้า และเทคนิคเพิ่มยอดขายที่ผู้ประกอบการควรรู้',
+            articles_btn_text: 'ดูบทความทั้งหมด',
+
             faq_title: 'คำถามที่พบบ่อย (FAQ)',
             faq_list: JSON.stringify([
                 { question: "เริ่มต้นใช้งานฟรี 1,000 ออเดอร์ จริงไหม?", answer: "จริงครับ! ไม่มีข้อผูกมัดใดๆ แอบแฝง" },
@@ -579,6 +583,7 @@ app.post('/admin/save', requireAuth, upload.fields([
             stats_badge: body.stats_badge, stats_title: body.stats_title, stats_desc: sanitizeHtml(body.stats_desc),
             stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
             stat3_label: body.stat3_label, stat3_value: body.stat3_value, stat4_label: body.stat4_label, stat4_value: body.stat4_value,
+            articles_title: body.articles_title, articles_subtitle: body.articles_subtitle, articles_btn_text: body.articles_btn_text,
             faq_title: body.faq_title, faq_list: cleanFaqList,
             cta_title: body.cta_title, cta_desc: sanitizeHtml(body.cta_desc), cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url, cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
