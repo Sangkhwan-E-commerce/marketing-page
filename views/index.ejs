@@ -119,28 +119,22 @@
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+        <% 
+            let visionCols = [];
+            try { visionCols = JSON.parse(settings.col_list || '[]'); } catch(e) {}
+            visionCols.forEach(function(col) { 
+        %>
+        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm transition relative overflow-hidden hover:shadow-md <%= col.highlight ? 'border-2 border-primary' : 'border border-gray-100' %>">
+          <% if (col.highlight && col.badge) { %>
+          <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg"><%= col.badge %></div>
+          <% } %>
           <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col1_icon %></div>
-            <%= settings.col1_title %>
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- col.icon %></div>
+            <%= col.title %>
           </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col1_desc %></p></dd>
+          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- col.desc %></p></dd>
         </div>
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col2_icon %></div>
-            <%= settings.col2_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col2_desc %></p></dd>
-        </div>
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border-2 border-primary hover:shadow-md transition relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">คุ้มค่าที่สุด</div>
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.col3_icon %></div>
-            <%= settings.col3_title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- settings.col3_desc %></p></dd>
-        </div>
+        <% }); %>
       </dl>
     </div>
   </div>

@@ -84,15 +84,11 @@ async function initDB() {
             hero_img_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
             feature_title: 'ความฝันเล็กๆ สู่การเปลี่ยนแปลงที่ยิ่งใหญ่',
             feature_subtitle: 'หัวใจของการทำธุรกิจ ไม่ควรถูกจำกัดด้วยขนาดของร้านหรือทำเลที่ตั้ง Lullapos จึงเกิดมาเพื่อทลายกำแพงนั้น',
-            col1_title: 'สร้างจากหัวใจคนชนบท',
-            col1_desc: 'คุณอภิลักษณ์ แสงขวัญ ตั้งใจสร้างระบบนี้เพื่อให้ร้านค้าเล็กๆ นอกเมือง มีเครื่องมือดีๆ ใช้ในราคาที่สู้ไหว',
-            col1_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg>`,
-            col2_title: 'ใช้ฟรี 1,000 ออเดอร์แรก',
-            col2_desc: 'ให้คุณเริ่มต้นปรับตัวเข้าสู่เทคโนโลยีได้ทันทีโดยไม่มีความเสี่ยง ไม่ถึงพันบิล ไม่ต้องเสียเงินแม้แต่บาทเดียว',
-            col2_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path></svg>`,
-            col3_title: 'ยุติธรรม จ่ายเพียง 5 สตางค์',
-            col3_desc: 'เมื่อถึงเวลาเติบโต ออเดอร์ที่ 1,001 เป็นต้นไป จ่ายแค่ 5 สตางค์/ออเดอร์ เดือนไหนเงียบจ่ายน้อย แฟร์ที่สุด',
-            col3_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+            col_list: JSON.stringify([
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg>`, title: 'สร้างจากหัวใจคนชนบท', desc: 'คุณอภิลักษณ์ แสงขวัญ ตั้งใจสร้างระบบนี้เพื่อให้ร้านค้าเล็กๆ นอกเมือง มีเครื่องมือดีๆ ใช้ในราคาที่สู้ไหว', highlight: false, badge: '' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path></svg>`, title: 'ใช้ฟรี 1,000 ออเดอร์แรก', desc: 'ให้คุณเริ่มต้นปรับตัวเข้าสู่เทคโนโลยีได้ทันทีโดยไม่มีความเสี่ยง ไม่ถึงพันบิล ไม่ต้องเสียเงินแม้แต่บาทเดียว', highlight: false, badge: '' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`, title: 'ยุติธรรม จ่ายเพียง 5 สตางค์', desc: 'เมื่อถึงเวลาเติบโต ออเดอร์ที่ 1,001 เป็นต้นไป จ่ายแค่ 5 สตางค์/ออเดอร์ เดือนไหนเงียบจ่ายน้อย แฟร์ที่สุด', highlight: true, badge: 'คุ้มค่าที่สุด' },
+            ]),
             footer_text: '© 2026 Lullapos.com. โตไปด้วยกัน จ่ายตามจริง.',
             facebook_url: 'https://facebook.com/',
             facebook_icon: `<svg fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>`,
@@ -134,6 +130,31 @@ async function initDB() {
             article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
             article_cta_btn_url: '#'
         };
+
+        // แปลงวิสัยทัศน์แบบตายตัว (col1..col3) ของข้อมูลเดิม ให้เป็นลิสต์ที่เพิ่ม/ลดได้ (col_list)
+        const colListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'col_list'");
+        if (colListRow.rows.length === 0) {
+            const legacyColRes = await pool.query("SELECT key, value FROM LANDING_settings WHERE key ~ '^col[0-9]+_(title|desc|icon)$'");
+            const legacyCol = {};
+            legacyColRes.rows.forEach(row => { legacyCol[row.key] = row.value; });
+            const migratedCols = [];
+            for (let i = 1; i <= 3; i++) {
+                if (!legacyCol['col' + i + '_title']) continue;
+                migratedCols.push({
+                    icon: legacyCol['col' + i + '_icon'] || '',
+                    title: legacyCol['col' + i + '_title'],
+                    desc: legacyCol['col' + i + '_desc'] || '',
+                    highlight: i === 3,
+                    badge: i === 3 ? 'คุ้มค่าที่สุด' : ''
+                });
+            }
+            if (migratedCols.length > 0) {
+                await pool.query(
+                    "INSERT INTO LANDING_settings (key, value) VALUES ('col_list', $1) ON CONFLICT (key) DO NOTHING",
+                    [JSON.stringify(migratedCols)]
+                );
+            }
+        }
 
         // แปลงฟีเจอร์หลักแบบตายตัว (grid1..grid6) ของข้อมูลเดิม ให้เป็นลิสต์ที่เพิ่ม/ลดได้ (grid_list)
         const gridListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'grid_list'");
@@ -394,6 +415,19 @@ app.post('/admin/save', requireAuth, upload.fields([
             cleanFaqList = JSON.stringify(parsedFaq);
         } catch (e) { }
 
+        let cleanColList = body.col_list;
+        try {
+            let parsedCol = JSON.parse(body.col_list || '[]');
+            parsedCol = parsedCol.map(c => ({
+                icon: (c.icon || '').toString(),
+                title: (c.title || '').toString(),
+                desc: sanitizeHtml(c.desc || ''),
+                highlight: c.highlight === true,
+                badge: (c.badge || '').toString()
+            }));
+            cleanColList = JSON.stringify(parsedCol);
+        } catch (e) { }
+
         let cleanGridList = body.grid_list;
         try {
             let parsedGrid = JSON.parse(body.grid_list || '[]');
@@ -408,9 +442,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         const updates = { 
             theme_color: body.theme_color, hero_badge: body.hero_badge, hero_title: body.hero_title, hero_desc: sanitizeHtml(body.hero_desc),
             feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
-            col1_title: body.col1_title, col1_desc: sanitizeHtml(body.col1_desc), col1_icon: body.col1_icon, 
-            col2_title: body.col2_title, col2_desc: sanitizeHtml(body.col2_desc), col2_icon: body.col2_icon, 
-            col3_title: body.col3_title, col3_desc: sanitizeHtml(body.col3_desc), col3_icon: body.col3_icon, 
+            col_list: cleanColList,
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,
             grid_badge: body.grid_badge, grid_title: body.grid_title, grid_desc: sanitizeHtml(body.grid_desc),
             grid_list: cleanGridList,
