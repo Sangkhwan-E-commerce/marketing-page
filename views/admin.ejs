@@ -214,13 +214,14 @@
                                 </div>
                                 <div><label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label><input type="hidden" name="grid_desc" id="grid_desc"><div class="quill-editor bg-white rounded-b-md" data-target="grid_desc" style="height: 100px;"><%- settings.grid_desc %></div></div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
-                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 1</h4><textarea name="grid1_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid1_icon %></textarea><input type="text" name="grid1_title" value="<%= settings.grid1_title %>" class="w-full border p-2 text-sm" required><textarea name="grid1_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid1_desc %></textarea></div>
-                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 2</h4><textarea name="grid2_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid2_icon %></textarea><input type="text" name="grid2_title" value="<%= settings.grid2_title %>" class="w-full border p-2 text-sm" required><textarea name="grid2_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid2_desc %></textarea></div>
-                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 3</h4><textarea name="grid3_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid3_icon %></textarea><input type="text" name="grid3_title" value="<%= settings.grid3_title %>" class="w-full border p-2 text-sm" required><textarea name="grid3_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid3_desc %></textarea></div>
-                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 4</h4><textarea name="grid4_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid4_icon %></textarea><input type="text" name="grid4_title" value="<%= settings.grid4_title %>" class="w-full border p-2 text-sm" required><textarea name="grid4_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid4_desc %></textarea></div>
-                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 5</h4><textarea name="grid5_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid5_icon %></textarea><input type="text" name="grid5_title" value="<%= settings.grid5_title %>" class="w-full border p-2 text-sm" required><textarea name="grid5_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid5_desc %></textarea></div>
-                                <div class="space-y-2 bg-gray-50/50 p-4 rounded-lg"><h4 class="font-semibold">ฟีเจอร์ 6</h4><textarea name="grid6_icon" rows="1" class="w-full border p-2 text-xs" required><%= settings.grid6_icon %></textarea><input type="text" name="grid6_title" value="<%= settings.grid6_title %>" class="w-full border p-2 text-sm" required><textarea name="grid6_desc" rows="2" class="w-full border p-2 text-sm" required><%= settings.grid6_desc %></textarea></div>
+                            <div class="pt-6 border-t border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">รายการฟีเจอร์ (<span id="grid-count">0</span> รายการ)</h4>
+                                    <button type="button" id="add-grid-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มฟีเจอร์</button>
+                                </div>
+                                <p id="grid-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีฟีเจอร์ กดปุ่ม "+ เพิ่มฟีเจอร์" เพื่อเริ่มเพิ่มรายการ</p>
+                                <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                                <input type="hidden" name="grid_list" id="grid_list_input" value="<%= settings.grid_list %>">
                             </div>
                         </div>
 
@@ -558,6 +559,61 @@
         document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
         
         renderFaqs();
+
+        // --- ระบบฟีเจอร์หลัก (เพิ่ม/ลด/สลับลำดับได้) ---
+        const gridContainer = document.getElementById('grid-container');
+        const gridInput = document.getElementById('grid_list_input');
+        const gridEmpty = document.getElementById('grid-empty');
+        const gridCount = document.getElementById('grid-count');
+        let gridFeatures = [];
+        try { gridFeatures = JSON.parse(gridInput.value || '[]'); } catch(e) { gridFeatures = []; }
+
+        const gridEscAttr = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const gridEscText = (str) => (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        function renderGridFeatures() {
+            gridContainer.innerHTML = '';
+            gridEmpty.classList.toggle('hidden', gridFeatures.length > 0);
+            gridCount.innerText = gridFeatures.length;
+
+            gridFeatures.forEach((feature, index) => {
+                const div = document.createElement('div');
+                div.className = 'space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h4 class="font-semibold">ฟีเจอร์ ${index + 1}</h4>
+                        <div class="flex space-x-2">
+                            ${index > 0 ? `<button type="button" onclick="moveGridFeature(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                            ${index < gridFeatures.length - 1 ? `<button type="button" onclick="moveGridFeature(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                            <button type="button" onclick="removeGridFeature(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                        </div>
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600">ไอคอน (โค้ด SVG)</label>
+                    <textarea rows="2" class="w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateGridFeature(${index}, 'icon', this.value)">${gridEscText(feature.icon)}</textarea>
+                    <label class="block text-xs font-semibold text-gray-600">หัวข้อ</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${gridEscAttr(feature.title)}" oninput="updateGridFeature(${index}, 'title', this.value)">
+                    <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
+                    <textarea rows="2" class="w-full border p-2 text-sm" oninput="updateGridFeature(${index}, 'desc', this.value)">${gridEscText(feature.desc)}</textarea>
+                `;
+                gridContainer.appendChild(div);
+            });
+            gridInput.value = JSON.stringify(gridFeatures);
+        }
+
+        window.moveGridFeature = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < gridFeatures.length) {
+                const temp = gridFeatures[index];
+                gridFeatures[index] = gridFeatures[newIndex];
+                gridFeatures[newIndex] = temp;
+                renderGridFeatures();
+            }
+        };
+        window.updateGridFeature = (index, key, value) => { gridFeatures[index][key] = value; gridInput.value = JSON.stringify(gridFeatures); };
+        window.removeGridFeature = (index) => { if(confirm('ลบฟีเจอร์นี้?')) { gridFeatures.splice(index, 1); renderGridFeatures(); } };
+        document.getElementById('add-grid-btn').addEventListener('click', () => { gridFeatures.push({ icon: '', title: '', desc: '' }); renderGridFeatures(); });
+
+        renderGridFeatures();
 
         // --- ระบบ Banner Carousel ---
         const bannerContainer = document.getElementById('banner-container');

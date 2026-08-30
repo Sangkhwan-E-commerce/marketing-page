@@ -155,30 +155,16 @@
     </div>
     <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
       <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+        <% 
+            let gridFeatures = [];
+            try { gridFeatures = JSON.parse(settings.grid_list || '[]'); } catch(e) {}
+            gridFeatures.forEach(function(feature) { 
+        %>
         <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid1_icon %></div><%- settings.grid1_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid1_desc %></dd>
+          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- feature.icon %></div><%- feature.title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%= feature.desc %></dd>
         </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid2_icon %></div><%- settings.grid2_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid2_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid3_icon %></div><%- settings.grid3_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid3_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid4_icon %></div><%- settings.grid4_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid4_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid5_icon %></div><%- settings.grid5_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid5_desc %></dd>
-        </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- settings.grid6_icon %></div><%- settings.grid6_title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= settings.grid6_desc %></dd>
-        </div>
+        <% }); %>
       </dl>
     </div>
   </div>

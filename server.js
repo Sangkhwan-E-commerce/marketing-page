@@ -101,12 +101,14 @@ async function initDB() {
             grid_badge: 'ฟีเจอร์ที่ตอบโจทย์',
             grid_title: 'ฟีเจอร์ครบครัน สำหรับจัดการร้านค้า',
             grid_desc: 'ทุกสิ่งที่คุณต้องการในการบริหารร้านค้าให้อยู่หมัด รวบรวมไว้ในระบบเดียว ใช้งานง่าย ไม่ซับซ้อน',
-            grid1_title: 'ทำงานบนคลาวด์ 100%', grid1_desc: 'ไม่ต้องติดตั้งโปรแกรม ข้อมูลไม่หายแม้อุปกรณ์พัง', grid1_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"></path></svg>`,
-            grid2_title: 'ความปลอดภัยสูงสุด', grid2_desc: 'ปกป้องข้อมูลยอดขายและข้อมูลลูกค้าของคุณ', grid2_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"></path></svg>`,
-            grid3_title: 'อัปเดตข้อมูลแบบเรียลไทม์', grid3_desc: 'สต๊อกสินค้าซิงค์ตรงกันทุกอุปกรณ์ทันที', grid3_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path></svg>`,
-            grid4_title: 'ระบบจัดการสิทธิ์พนักงาน', grid4_desc: 'กำหนดสิทธิ์การเข้าถึงได้อย่างอิสระ', grid4_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33"></path></svg>`,
-            grid5_title: 'รายงานยอดขายอัจฉริยะ', grid5_desc: 'สรุปยอดขายรายวัน รายเดือน พร้อมกราฟ', grid5_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path></svg>`,
-            grid6_title: 'รองรับการชำระเงินหลายรูปแบบ', grid6_desc: 'เงินสด โอนเงิน พร้อมเพย์ หรือบัตรเครดิต', grid6_icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"></path></svg>`,
+            grid_list: JSON.stringify([
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"></path></svg>`, title: 'ทำงานบนคลาวด์ 100%', desc: 'ไม่ต้องติดตั้งโปรแกรม ข้อมูลไม่หายแม้อุปกรณ์พัง' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"></path></svg>`, title: 'ความปลอดภัยสูงสุด', desc: 'ปกป้องข้อมูลยอดขายและข้อมูลลูกค้าของคุณ' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path></svg>`, title: 'อัปเดตข้อมูลแบบเรียลไทม์', desc: 'สต๊อกสินค้าซิงค์ตรงกันทุกอุปกรณ์ทันที' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33"></path></svg>`, title: 'ระบบจัดการสิทธิ์พนักงาน', desc: 'กำหนดสิทธิ์การเข้าถึงได้อย่างอิสระ' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path></svg>`, title: 'รายงานยอดขายอัจฉริยะ', desc: 'สรุปยอดขายรายวัน รายเดือน พร้อมกราฟ' },
+                { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"></path></svg>`, title: 'รองรับการชำระเงินหลายรูปแบบ', desc: 'เงินสด โอนเงิน พร้อมเพย์ หรือบัตรเครดิต' },
+            ]),
             btn_text: 'สมัครใช้งานฟรี', btn_url: '#', btn_size: 'text-sm',
             
             stats_badge: 'ภารกิจของเรา', stats_title: 'สถิติที่เติบโตไปพร้อมกับคุณ', stats_desc: 'Lullapos มุ่งมั่นที่จะเป็นส่วนหนึ่งในความสำเร็จของร้านค้าขนาดเล็ก เราพร้อมสนับสนุนคุณด้วยระบบที่เสถียร ใช้งานง่าย และยุติธรรมที่สุด', stats_img_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2850&q=80',
@@ -132,6 +134,29 @@ async function initDB() {
             article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
             article_cta_btn_url: '#'
         };
+
+        // แปลงฟีเจอร์หลักแบบตายตัว (grid1..grid6) ของข้อมูลเดิม ให้เป็นลิสต์ที่เพิ่ม/ลดได้ (grid_list)
+        const gridListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'grid_list'");
+        if (gridListRow.rows.length === 0) {
+            const legacyRes = await pool.query("SELECT key, value FROM LANDING_settings WHERE key ~ '^grid[0-9]+_(title|desc|icon)$'");
+            const legacy = {};
+            legacyRes.rows.forEach(row => { legacy[row.key] = row.value; });
+            const migrated = [];
+            for (let i = 1; i <= 6; i++) {
+                if (!legacy[`grid${i}_title`]) continue;
+                migrated.push({
+                    icon: legacy[`grid${i}_icon`] || '',
+                    title: legacy[`grid${i}_title`],
+                    desc: legacy[`grid${i}_desc`] || ''
+                });
+            }
+            if (migrated.length > 0) {
+                await pool.query(
+                    "INSERT INTO LANDING_settings (key, value) VALUES ('grid_list', $1) ON CONFLICT (key) DO NOTHING",
+                    [JSON.stringify(migrated)]
+                );
+            }
+        }
 
         for (const [key, value] of Object.entries(defaultSettings)) {
             await pool.query(
@@ -369,6 +394,17 @@ app.post('/admin/save', requireAuth, upload.fields([
             cleanFaqList = JSON.stringify(parsedFaq);
         } catch (e) { }
 
+        let cleanGridList = body.grid_list;
+        try {
+            let parsedGrid = JSON.parse(body.grid_list || '[]');
+            parsedGrid = parsedGrid.map(g => ({
+                icon: (g.icon || '').toString(),
+                title: (g.title || '').toString(),
+                desc: (g.desc || '').toString()
+            }));
+            cleanGridList = JSON.stringify(parsedGrid);
+        } catch (e) { }
+
         const updates = { 
             theme_color: body.theme_color, hero_badge: body.hero_badge, hero_title: body.hero_title, hero_desc: sanitizeHtml(body.hero_desc),
             feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
@@ -377,12 +413,7 @@ app.post('/admin/save', requireAuth, upload.fields([
             col3_title: body.col3_title, col3_desc: sanitizeHtml(body.col3_desc), col3_icon: body.col3_icon, 
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,
             grid_badge: body.grid_badge, grid_title: body.grid_title, grid_desc: sanitizeHtml(body.grid_desc),
-            grid1_title: body.grid1_title, grid1_desc: body.grid1_desc, grid1_icon: body.grid1_icon, 
-            grid2_title: body.grid2_title, grid2_desc: body.grid2_desc, grid2_icon: body.grid2_icon, 
-            grid3_title: body.grid3_title, grid3_desc: body.grid3_desc, grid3_icon: body.grid3_icon, 
-            grid4_title: body.grid4_title, grid4_desc: body.grid4_desc, grid4_icon: body.grid4_icon, 
-            grid5_title: body.grid5_title, grid5_desc: body.grid5_desc, grid5_icon: body.grid5_icon, 
-            grid6_title: body.grid6_title, grid6_desc: body.grid6_desc, grid6_icon: body.grid6_icon, 
+            grid_list: cleanGridList,
             btn_text: body.btn_text, btn_url: body.btn_url, btn_size: body.btn_size,
             stats_badge: body.stats_badge, stats_title: body.stats_title, stats_desc: sanitizeHtml(body.stats_desc),
             stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
