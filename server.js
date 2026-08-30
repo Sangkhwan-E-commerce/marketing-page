@@ -60,13 +60,13 @@ const pickTemplate = (group, value, fallback) => TEMPLATES[group].some(t => t.id
 // ส่วนต่างๆ ของหน้าแรก เรียงลำดับ/ซ่อน/เลือกสีพื้นหลังได้จากหน้าแอดมิน
 // type ต้องตรงกับชื่อไฟล์ใน views/partials/sections/
 const SECTIONS = [
-    { type: 'hero', name: 'ส่วนบนสุด (Hero)', defaultBg: 'bg-white', bgEditable: false },
-    { type: 'vision', name: 'วิสัยทัศน์', defaultBg: 'bg-gray-50', bgEditable: true },
-    { type: 'features', name: 'ฟีเจอร์หลัก', defaultBg: 'bg-red-50', bgEditable: true },
-    { type: 'stats', name: 'ภารกิจและสถิติ', defaultBg: 'bg-white', bgEditable: true },
-    { type: 'articles', name: 'บทความล่าสุด', defaultBg: 'bg-white', bgEditable: true },
-    { type: 'faq', name: 'คำถามที่พบบ่อย (FAQ)', defaultBg: 'bg-gray-50', bgEditable: true },
-    { type: 'cta', name: 'ส่วนเชิญชวน (CTA)', defaultBg: 'bg-red-50', bgEditable: true }
+    { type: 'hero', name: 'Hero Section', defaultBg: 'bg-white', bgEditable: false },
+    { type: 'vision', name: 'Advocate Section', defaultBg: 'bg-gray-50', bgEditable: true },
+    { type: 'features', name: 'Feature section', defaultBg: 'bg-red-50', bgEditable: true },
+    { type: 'stats', name: 'State Section', defaultBg: 'bg-white', bgEditable: true },
+    { type: 'articles', name: 'Article Section', defaultBg: 'bg-white', bgEditable: true },
+    { type: 'faq', name: 'Function section', defaultBg: 'bg-gray-50', bgEditable: true },
+    { type: 'cta', name: 'CTA Section', defaultBg: 'bg-red-50', bgEditable: true }
 ];
 const SECTION_BGS = [
     { id: 'bg-white', name: 'ขาว' },

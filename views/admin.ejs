@@ -47,12 +47,12 @@
                     <ul role="list" class="-mx-2 space-y-1">
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-layout">⇅ โครงสร้างหน้าเว็บ</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-general">1. ทั่วไป & Footer</button></li>
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-hero">2. ส่วนบนสุด (Hero)</button></li>
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features3">3. วิสัยทัศน์</button></li>
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features4">4. ฟีเจอร์หลัก</button></li>
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-stats">5. ภารกิจและสถิติ</button></li>
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-faq">6. คำถามที่พบบ่อย (FAQ)</button></li>
-                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-cta">7. ส่วนเชิญชวน (CTA)</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-hero">2. Hero Section</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features3">3. Advocate Section</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features4">4. Feature section</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-stats">5. State Section</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-faq">6. Function section</button></li>
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-cta">7. CTA Section</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-banner">8. โฆษณา Modal</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-seo">9. ตั้งค่า SEO</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-article-cta">10. CTA หน้าบทความ</button></li>
@@ -177,7 +177,7 @@
                                         <option value="<%= t.id %>" <%= settings.col_template === t.id ? 'selected' : '' %>><%= t.name %></option>
                                         <% }); %>
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของส่วนวิสัยทัศน์</p>
+                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของ Advocate Section</p>
                                 </div>
                                 <div id="col_image_wrap" class="hidden">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">ภาพประกอบของเลย์เอาต์นี้</label>
@@ -214,7 +214,7 @@
                                         <option value="<%= t.id %>" <%= settings.grid_template === t.id ? 'selected' : '' %>><%= t.name %></option>
                                         <% }); %>
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของส่วนฟีเจอร์หลัก</p>
+                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของ Feature section</p>
                                 </div>
                                 <div id="grid_image_wrap" class="hidden">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">ภาพประกอบของเลย์เอาต์นี้</label>
@@ -780,7 +780,7 @@
 
         renderHeroBlocks();
 
-        // --- ภาพประกอบของเลย์เอาต์ที่ต้องใช้รูป (ส่วนวิสัยทัศน์ / ฟีเจอร์หลัก) ---
+        // --- ภาพประกอบของเลย์เอาต์ที่ต้องใช้รูป (Advocate Section / Feature section) ---
         window.toggleSectionImage = (prefix) => {
             const tplId = document.getElementById(`${prefix}_template`).value;
             const tpl = FEATURE_TPL.find(t => t.id === tplId);
@@ -811,7 +811,7 @@
         toggleSectionImage('col');
         toggleSectionImage('grid');
 
-        // --- ระบบวิสัยทัศน์ (เพิ่ม/ลด/สลับลำดับได้) ---
+        // --- Advocate Section (เพิ่ม/ลด/สลับลำดับได้) ---
         const colContainer = document.getElementById('col-container');
         const colInput = document.getElementById('col_list_input');
         const colEmpty = document.getElementById('col-empty');
@@ -881,7 +881,7 @@
 
         renderVisionCols();
 
-        // --- ระบบฟีเจอร์หลัก (เพิ่ม/ลด/สลับลำดับได้) ---
+        // --- Feature section (เพิ่ม/ลด/สลับลำดับได้) ---
         const gridContainer = document.getElementById('grid-container');
         const gridInput = document.getElementById('grid_list_input');
         const gridEmpty = document.getElementById('grid-empty');
