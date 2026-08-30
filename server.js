@@ -331,7 +331,7 @@ const upload = multer({
 });
 
 // สไลด์โฆษณารับวิดีโอสั้นได้ด้วย จึงต้องเพดานสูงกว่าฟอร์มตั้งค่าทั่วไป
-const SLIDE_MAX_BYTES = 25 * 1024 * 1024;
+const SLIDE_MAX_BYTES = 50 * 1024 * 1024;
 const SLIDE_VIDEO_TYPES = ['video/mp4', 'video/webm'];
 const uploadSlide = multer({
     storage: multer.memoryStorage(),
@@ -741,4 +741,7 @@ app.use((err, req, res, next) => {
     res.status(500).send('เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// อัปวิดีโอ 50MB บนเน็ตช้าอาจใช้เวลาเกิน requestTimeout ปริยายของ Node (5 นาที) แล้วโดนตัดกลางคัน
+server.requestTimeout = 15 * 60 * 1000;
