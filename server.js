@@ -330,6 +330,18 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } 
 });
 
+// สไลด์โฆษณารับวิดีโอสั้นได้ด้วย จึงต้องเพดานสูงกว่าฟอร์มตั้งค่าทั่วไป
+const SLIDE_MAX_BYTES = 25 * 1024 * 1024;
+const SLIDE_VIDEO_TYPES = ['video/mp4', 'video/webm'];
+const uploadSlide = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: SLIDE_MAX_BYTES },
+    fileFilter: (req, file, cb) => {
+        const ok = file.mimetype.startsWith('image/') || SLIDE_VIDEO_TYPES.includes(file.mimetype);
+        cb(ok ? null : new Error('UNSUPPORTED_SLIDE_TYPE'), ok);
+    }
+});
+
 async function uploadToR2(file, folder = '') {
     const fileExt = path.extname(file.originalname);
     const fileName = `landing_${Date.now()}_${Math.floor(Math.random() * 1000)}${fileExt}`;
@@ -637,11 +649,12 @@ app.post('/admin/api/upload-media', requireAuth, upload.single('media'), async (
     } catch (error) { res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' }); }
 });
 
-app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), async (req, res) => {
+app.post('/admin/api/upload-slide', requireAuth, uploadSlide.single('slide_image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
         const fileUrl = await uploadToR2(req.file, 'landingpage');
-        res.json({ success: true, url: fileUrl });
+        const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+        res.json({ success: true, url: fileUrl, media_type: mediaType });
     } catch (error) { res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' }); }
 });
 
@@ -717,7 +730,13 @@ app.delete('/admin/api/articles/:id', requireAuth, async (req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).send('ไฟล์มีขนาดใหญ่เกินไป (จำกัดไม่เกิน 5MB)');
+        const limitMb = req.path === '/admin/api/upload-slide' ? Math.round(SLIDE_MAX_BYTES / 1024 / 1024) : 5;
+        const message = `ไฟล์มีขนาดใหญ่เกินไป (จำกัดไม่เกิน ${limitMb}MB)`;
+        if (req.path.startsWith('/admin/api/')) return res.status(400).json({ success: false, message });
+        return res.status(400).send(message);
+    }
+    if (err && err.message === 'UNSUPPORTED_SLIDE_TYPE') {
+        return res.status(400).json({ success: false, message: 'รองรับเฉพาะไฟล์รูปภาพ, MP4 และ WebM' });
     }
     res.status(500).send('เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
 });

@@ -1,0 +1,10 @@
+<%
+  // locals: slide, isVideo
+  // วิดีโอไม่ใส่ autoplay ไว้ในแท็ก แต่ให้สคริปต์สั่งเล่นตอนสไลด์นั้นถูกแสดง
+  // จะได้ไม่มีวิดีโอหลายตัวเล่นพร้อมกันตอน Swiper โคลนสไลด์สำหรับโหมด loop
+%>
+<% if (isVideo) { %>
+<video src="<%= slide.img_url %>" class="promo-video w-full aspect-[16/9] object-cover bg-black" muted playsinline preload="metadata"></video>
+<% } else { %>
+<img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-[16/9] object-cover">
+<% } %>

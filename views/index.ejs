@@ -172,17 +172,23 @@
         try { parsedBanners = JSON.parse(settings.banner_list || '[]'); } catch(e) {}
 
         // สไลด์ที่ยังไม่ได้กรอกอะไรเลยจะกลายเป็นช่องว่างใน carousel จึงตัดทิ้งก่อน
-        var slideHasImage = function(s) { return !!(s && s.img_url && String(s.img_url).trim()); };
+        var slideHasMedia = function(s) { return !!(s && s.img_url && String(s.img_url).trim()); };
         var slideHasText = function(s) {
             return String((s && s.content) || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length > 0;
         };
-        parsedBanners = parsedBanners.filter(function(s) { return slideHasImage(s) || slideHasText(s); });
+        parsedBanners = parsedBanners.filter(function(s) { return slideHasMedia(s) || slideHasText(s); });
 
-        // ถ้าไม่มีสไลด์ไหนมีรูปภาพเลย ไม่ต้องแสดง carousel
-        var bannerHasImage = parsedBanners.some(slideHasImage);
+        // สไลด์ที่เก็บก่อนมีระบบวิดีโอจะไม่มี media_type จึงเดาจากนามสกุลไฟล์เป็นตัวสำรอง
+        var slideIsVideo = function(s) {
+            if (s && s.media_type === 'video') return true;
+            return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(String((s && s.img_url) || ''));
+        };
+
+        // ถ้าไม่มีสไลด์ไหนมีรูปหรือวิดีโอเลย ไม่ต้องแสดง carousel
+        var bannerHasMedia = parsedBanners.some(slideHasMedia);
     %>
 
-    <% if (parsedBanners.length > 0 && bannerHasImage) { %>
+    <% if (parsedBanners.length > 0 && bannerHasMedia) { %>
         <div id="promo-config" 
               data-type="<%= settings.banner_display_type %>" 
               data-limit="<%= settings.banner_display_limit %>"
@@ -205,10 +211,10 @@
                                     <div class="relative flex-shrink-0">
                                         <% if (slide.link_url && slide.link_url.trim() !== '') { %>
                                             <a href="<%= slide.link_url %>" target="_blank" class="block transition hover:opacity-90">
-                                                <img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-[16/9] object-cover">
+                                                <%- include('partials/_promo-media', { slide: slide, isVideo: slideIsVideo(slide) }) %>
                                             </a>
                                         <% } else { %>
-                                            <img src="<%= slide.img_url %>" alt="Promotion" class="w-full aspect-[16/9] object-cover">
+                                            <%- include('partials/_promo-media', { slide: slide, isVideo: slideIsVideo(slide) }) %>
                                         <% } %>
                                     </div>
                                 <% } %>
@@ -253,10 +259,36 @@
                 let views = parseInt(localStorage.getItem(storageKey) || '0');
                 
                 const isLoopActive = <%= parsedBanners.length > 1 ? 'true' : 'false' %>;
+                let swiper = null;
+                let userInteracted = false;
+
+                const stopAllVideos = () => {
+                    document.querySelectorAll('video.promo-video').forEach(v => {
+                        v.pause();
+                        try { v.currentTime = 0; } catch (e) {}
+                    });
+                };
+
+                // สไลด์วิดีโอคุมจังหวะเอง: หยุด autoplay ของ Swiper แล้วเล่นวิดีโอจนจบ
+                const syncActiveSlide = () => {
+                    if (!swiper) return;
+                    stopAllVideos();
+                    const active = document.querySelector('.bannerSwiper .swiper-slide-active');
+                    const video = active ? active.querySelector('video.promo-video') : null;
+                    if (video) {
+                        if (swiper.autoplay) swiper.autoplay.stop();
+                        const played = video.play();
+                        // ถ้าเบราว์เซอร์ปฏิเสธ ปล่อยให้ค้างเฟรมแรกแล้วเดินสไลด์ต่อตามปกติ
+                        if (played && played.catch) played.catch(() => { if (!userInteracted && swiper.autoplay) swiper.autoplay.start(); });
+                    } else if (!userInteracted && swiper.autoplay) {
+                        swiper.autoplay.start();
+                    }
+                };
+
                 const showModal = () => {
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
-                    new Swiper('.bannerSwiper', {
+                    swiper = new Swiper('.bannerSwiper', {
                         observer: true,
                         observeParents: true,
                         loop: isLoopActive,
@@ -264,6 +296,22 @@
                         navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
                         autoplay: { delay: 5000, disableOnInteraction: true }
                     });
+                    swiper.on('slideChange', syncActiveSlide);
+                    swiper.on('touchStart', () => { userInteracted = true; });
+                    document.querySelectorAll('.bannerSwiper .swiper-button-next, .bannerSwiper .swiper-button-prev, .bannerSwiper .swiper-pagination')
+                        .forEach(el => el.addEventListener('click', () => { userInteracted = true; }));
+                    // 'ended' ไม่ bubble จึงต้องดักที่ capture phase เพื่อให้ครอบคลุมสไลด์ที่ Swiper โคลนมา
+                    document.querySelector('.bannerSwiper').addEventListener('ended', (e) => {
+                        if (!e.target.classList.contains('promo-video')) return;
+                        if (swiper && !userInteracted && swiper.slides.length > 1) {
+                            swiper.slideNext();
+                        } else {
+                            e.target.currentTime = 0;
+                            const again = e.target.play();
+                            if (again && again.catch) again.catch(() => {});
+                        }
+                    }, true);
+                    syncActiveSlide();
                     setTimeout(() => {
                         modal.classList.remove('opacity-0');
                         modalContent.classList.remove('scale-95');
@@ -273,6 +321,7 @@
                     }
                 };
                 const hideModal = () => {
+                    stopAllVideos();
                     modal.classList.add('opacity-0');
                     modalContent.classList.add('scale-95');
                     setTimeout(() => {
