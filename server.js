@@ -78,6 +78,13 @@ const SECTION_BGS = [
 ];
 
 // เรียงตาม SECTIONS, เติมส่วนที่ยังไม่มีต่อท้าย และคัดค่าที่ไม่รู้จักทิ้ง
+// คืนค่าเป็นสตริงเสมอ เพราะตาราง settings เก็บเป็น TEXT
+function clampNumber(value, min, max, fallback) {
+    const n = parseInt(value, 10);
+    if (!Number.isFinite(n)) return String(fallback);
+    return String(Math.min(max, Math.max(min, n)));
+}
+
 function normalizeSectionOrder(raw) {
     let parsed = [];
     try { parsed = JSON.parse(raw || '[]'); } catch (e) { parsed = []; }
@@ -205,6 +212,8 @@ async function initDB() {
             banner_display_limit: '1',
             banner_version: '1',
             banner_list: '[]',
+            banner_width_percent: '80',
+            banner_max_width: '1200',
             
             article_cta_title: 'พร้อมเปลี่ยนระบบร้านค้าของคุณหรือยัง?',
             article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
@@ -588,6 +597,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             cta_title: body.cta_title, cta_desc: sanitizeHtml(body.cta_desc), cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url, cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
             seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
             banner_active: body.banner_active === 'on' ? 'true' : 'false', banner_display_type: body.banner_display_type || 'always',
+            banner_width_percent: clampNumber(body.banner_width_percent, 10, 100, 80),
+            banner_max_width: clampNumber(body.banner_max_width, 200, 3000, 1200),
             banner_display_limit: body.banner_display_limit || '1', banner_version: Date.now().toString(), banner_list: body.banner_list || '[]',
             article_cta_title: body.article_cta_title, article_cta_btn_text: body.article_cta_btn_text, article_cta_btn_url: body.article_cta_btn_url
         };

@@ -322,6 +322,18 @@
                                         + เพิ่มสไลด์ใหม่
                                     </button>
                                 </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">ความกว้างของสไลด์ (% ของหน้าจอ)</label>
+                                        <input type="number" name="banner_width_percent" value="<%= settings.banner_width_percent || 80 %>" min="10" max="100" step="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">ความกว้างสูงสุด (px)</label>
+                                        <input type="number" name="banner_max_width" value="<%= settings.banner_max_width || 1200 %>" min="200" max="3000" step="10" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                    </div>
+                                    <p class="md:col-span-2 text-xs text-gray-500">ตั้งครั้งเดียว มีผลกับทุกสไลด์ — สไลด์จะกว้างตาม % ของหน้าจอ แต่ไม่เกินค่า px ที่กำหนด</p>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-4">💡 แนะนำให้ใช้ภาพอัตราส่วน <strong>16:9</strong> (เช่น 1920×1080 px) ระบบจะครอบภาพให้เป็น 16:9 โดยอัตโนมัติก่อนอัปโหลด (ยกเว้นไฟล์ GIF และ SVG ที่อัปโหลดตามต้นฉบับ)</p>
                                 <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
                                 <div id="banner-container" class="space-y-4"></div>
                             </div>
@@ -1040,6 +1052,66 @@
             renderBanners(); 
         });
 
+        // ครอบภาพให้เป็น 16:9 (ตัดกึ่งกลาง) ในเบราว์เซอร์ก่อนส่งขึ้น R2
+        async function cropImageTo16x9(file) {
+            // GIF เสียภาพเคลื่อนไหวถ้าวาดลง canvas ส่วน SVG ไม่มีขนาดพิกเซลที่แน่นอน จึงปล่อยผ่าน
+            if (file.type === 'image/gif' || file.type === 'image/svg+xml') return { blob: file, filename: file.name };
+
+            const objectUrl = URL.createObjectURL(file);
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const im = new Image();
+                    im.onload = () => resolve(im);
+                    im.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'));
+                    im.src = objectUrl;
+                });
+
+                const RATIO = 16 / 9;
+                const MAX_WIDTH = 1920;
+                let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+                if (!sw || !sh) return { blob: file, filename: file.name };
+                if (sw / sh > RATIO) {
+                    const w = Math.round(sh * RATIO);
+                    sx = Math.round((sw - w) / 2);
+                    sw = w;
+                } else {
+                    const h = Math.round(sw / RATIO);
+                    sy = Math.round((sh - h) / 2);
+                    sh = h;
+                }
+
+                const outW = Math.min(sw, MAX_WIDTH);
+                const outH = Math.round(outW / RATIO);
+                const canvas = document.createElement('canvas');
+                canvas.width = outW;
+                canvas.height = outH;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingQuality = 'high';
+
+                const keepAlpha = file.type === 'image/png' || file.type === 'image/webp';
+                if (!keepAlpha) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, outW, outH);
+                }
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+
+                const toBlob = (type, quality) => new Promise(r => canvas.toBlob(r, type, quality));
+                let type = keepAlpha ? file.type : 'image/jpeg';
+                let blob = await toBlob(type, 0.9);
+                // PNG ที่ยังใหญ่เกินลิมิต 5MB ของเซิร์ฟเวอร์ ให้ถอยไปเป็น JPEG
+                if (blob && blob.size > 4 * 1024 * 1024 && type !== 'image/jpeg') {
+                    type = 'image/jpeg';
+                    blob = await toBlob(type, 0.9);
+                }
+                if (!blob) return { blob: file, filename: file.name };
+
+                const ext = type === 'image/png' ? '.png' : (type === 'image/webp' ? '.webp' : '.jpg');
+                return { blob, filename: 'slide' + ext };
+            } finally {
+                URL.revokeObjectURL(objectUrl);
+            }
+        }
+
         window.uploadSlideImage = async (event, index) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -1048,8 +1120,15 @@
             const originalVal = inputEl.value;
             inputEl.value = 'กำลังอัปโหลด... ⏳';
 
+            let upload = { blob: file, filename: file.name };
+            try {
+                upload = await cropImageTo16x9(file);
+            } catch (err) {
+                console.error('ครอบภาพไม่สำเร็จ ใช้ไฟล์ต้นฉบับแทน', err);
+            }
+
             const formData = new FormData();
-            formData.append('slide_image', file);
+            formData.append('slide_image', upload.blob, upload.filename);
             try {
                 const response = await fetch('/admin/api/upload-slide', {
                     method: 'POST',
