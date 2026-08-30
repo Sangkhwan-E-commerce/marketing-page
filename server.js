@@ -11,6 +11,7 @@ const { JSDOM } = require('jsdom');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SITE_URL = (process.env.SITE_URL || 'https://lullapos.com').replace(/\/+$/, '');
 
 app.set('trust proxy', 1);
 
@@ -138,6 +139,7 @@ async function initDB() {
         `);
         
         const defaultSettings = {
+            site_name: 'Lullapos',
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
             theme_color: 'rgb(244 97 100 / 98%)',
@@ -337,27 +339,32 @@ const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
 
 app.get('/robots.txt', (req, res) => {
     res.type('text/plain');
-    res.send("User-agent: *\nAllow: /\nSitemap: https://lullapos.com/sitemap.xml");
+    res.send(`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml`);
 });
 
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const articles = await pool.query('SELECT slug, created_at FROM landing_articles WHERE is_published = true ORDER BY created_at DESC');
+        const lastmod = (d) => new Date(d).toISOString().slice(0, 10);
+        const newest = articles.rows.length ? lastmod(articles.rows[0].created_at) : lastmod(Date.now());
         let urls = `
   <url>
-    <loc>https://lullapos.com/</loc>
+    <loc>${SITE_URL}/</loc>
+    <lastmod>${newest}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://lullapos.com/articles</loc>
+    <loc>${SITE_URL}/articles</loc>
+    <lastmod>${newest}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>`;
         articles.rows.forEach(a => {
             urls += `
   <url>
-    <loc>https://lullapos.com/article/${encodeURIComponent(a.slug)}</loc>
+    <loc>${SITE_URL}/article/${encodeURIComponent(a.slug)}</loc>
+    <lastmod>${lastmod(a.created_at)}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>`;
@@ -379,7 +386,7 @@ app.get('/', async (req, res, next) => {
             WHERE a.is_published = true 
             ORDER BY a.created_at DESC LIMIT 9
         `);
-        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS });
+        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS, siteUrl: SITE_URL });
     } catch (err) {
         next(err);
     }
@@ -427,6 +434,7 @@ app.get('/articles', async (req, res, next) => {
         const catRes = await pool.query('SELECT * FROM landing_categories ORDER BY name ASC');
         
         res.render('articles', { 
+            siteUrl: SITE_URL,
             settings, 
             articles: articlesRes.rows,
             categories: catRes.rows,
@@ -467,6 +475,7 @@ app.get('/article/:slug', async (req, res, next) => {
         `, [article.id, article.category_id || 0]);
 
         res.render('article', { 
+            siteUrl: SITE_URL,
             settings, 
             article: article,
             related_articles: relatedRes.rows 
@@ -561,7 +570,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         } catch (e) { }
 
         const updates = { 
-            theme_color: body.theme_color, section_order: cleanSectionOrder, hero_list: cleanHeroList,
+            site_name: body.site_name, theme_color: body.theme_color, section_order: cleanSectionOrder, hero_list: cleanHeroList,
             feature_badge: body.feature_badge, feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
             col_list: cleanColList, col_template: pickTemplate('features', body.col_template, 'three-column-icons'), col_img_url: body.col_img_url || '',
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,

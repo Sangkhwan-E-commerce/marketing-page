@@ -1,0 +1,6 @@
+<%
+  // locals: graph (array of schema.org nodes)
+  // "<" is escaped so a stray </script> inside any field cannot break out of the tag
+  var _ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+%>
+<script type="application/ld+json"><%- _ld %></script>

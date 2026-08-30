@@ -1,0 +1,32 @@
+<%
+  // locals: pageTitle, pageDescription, pageUrl, pageImage, ogType, siteUrl, settings
+  var siteName = settings.site_name || 'Lullapos';
+  var _img = pageImage || settings.seo_thumbnail_url || '';
+  var _desc = pageDescription || settings.seo_description || '';
+  var _type = (typeof ogType !== 'undefined' && ogType) ? ogType : 'website';
+  var _noindex = (typeof noindex !== 'undefined') && noindex;
+%>
+<title><%= pageTitle %></title>
+<meta name="description" content="<%= _desc %>">
+<link rel="canonical" href="<%= pageUrl %>">
+<meta name="robots" content="<%= _noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' %>">
+
+<meta property="og:type" content="<%= _type %>">
+<meta property="og:site_name" content="<%= siteName %>">
+<meta property="og:locale" content="th_TH">
+<meta property="og:url" content="<%= pageUrl %>">
+<meta property="og:title" content="<%= pageTitle %>">
+<meta property="og:description" content="<%= _desc %>">
+<% if (_img) { %>
+<meta property="og:image" content="<%= _img %>">
+<meta property="og:image:alt" content="<%= pageTitle %>">
+<% } %>
+
+<meta name="twitter:card" content="<%= _img ? 'summary_large_image' : 'summary' %>">
+<meta name="twitter:url" content="<%= pageUrl %>">
+<meta name="twitter:title" content="<%= pageTitle %>">
+<meta name="twitter:description" content="<%= _desc %>">
+<% if (_img) { %>
+<meta name="twitter:image" content="<%= _img %>">
+<meta name="twitter:image:alt" content="<%= pageTitle %>">
+<% } %>

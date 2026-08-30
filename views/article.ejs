@@ -3,28 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= article.title %> - Lullapos</title>
-    <meta name="description" content="<%= article.seo_description || settings.seo_description %>">
-    
-    <link rel="canonical" href="https://lullapos.com/article/<%= encodeURIComponent(article.slug) %>">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://lullapos.com/article/<%= encodeURIComponent(article.slug) %>">
-    <meta property="og:title" content="<%= article.title %>">
-    <meta property="og:description" content="<%= article.seo_description || '' %>">
-    <% if(article.cover_image) { %><meta property="og:image" content="<%= article.cover_image %>"><% } %>
-
-    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
-    
-    <script type="application/ld+json">
+<%
+  var siteName = settings.site_name || 'Lullapos';
+  var articleUrl = siteUrl + '/article/' + encodeURIComponent(article.slug);
+  var articleImage = article.cover_image || settings.seo_thumbnail_url;
+  var articleDesc = article.seo_description || settings.seo_description;
+  var publishedAt = article.created_at ? new Date(article.created_at).toISOString() : undefined;
+  var articleGraph = [
     {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "<%= article.title %>",
-      "image": "<%= article.cover_image || settings.seo_thumbnail_url %>",
-      "author": { "@type": "Organization", "name": "Lullapos" },
-      "publisher": { "@type": "Organization", "name": "Lullapos", "logo": { "@type": "ImageObject", "url": "<%= settings.logo_url %>" } }
+      '@type': 'BlogPosting',
+      '@id': articleUrl + '#article',
+      mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+      headline: article.title,
+      description: articleDesc,
+      image: articleImage ? [articleImage] : undefined,
+      inLanguage: 'th-TH',
+      datePublished: publishedAt,
+      dateModified: publishedAt,
+      articleSection: article.category_name || undefined,
+      author: { '@type': 'Organization', name: siteName, url: siteUrl + '/' },
+      publisher: {
+        '@type': 'Organization',
+        name: siteName,
+        url: siteUrl + '/',
+        logo: { '@type': 'ImageObject', url: settings.logo_url }
+      }
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: siteUrl + '/' },
+        { '@type': 'ListItem', position: 2, name: 'บทความ', item: siteUrl + '/articles' },
+        { '@type': 'ListItem', position: 3, name: article.title, item: articleUrl }
+      ]
     }
-    </script>
+  ];
+%>
+<%- include('partials/seo/meta', {
+      pageTitle: article.title + ' - ' + siteName,
+      pageDescription: articleDesc,
+      pageUrl: articleUrl,
+      pageImage: articleImage,
+      ogType: 'article'
+    }) %>
+<% if (publishedAt) { %>
+<meta property="article:published_time" content="<%= publishedAt %>">
+<meta property="article:modified_time" content="<%= publishedAt %>">
+<% } %>
+<% if (article.category_name) { %><meta property="article:section" content="<%= article.category_name %>"><% } %>
+<%- include('partials/seo/jsonld', { graph: articleGraph }) %>
     
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script> tailwind.config = { theme: { extend: { colors: { primary: '<%= settings.theme_color %>' } } } } </script>

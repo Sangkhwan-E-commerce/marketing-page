@@ -4,49 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title><%= settings.seo_title %></title>
-    <meta name="title" content="<%= settings.seo_title %>">
-    <meta name="description" content="<%= settings.seo_description %>">
-    <meta name="keywords" content="<%= settings.seo_keywords %>">
-    
-    <link rel="canonical" href="https://lullapos.com/">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://lullapos.com/">
-    <meta property="og:title" content="<%= settings.seo_title %>">
-    <meta property="og:description" content="<%= settings.seo_description %>">
-    <meta property="og:image" content="<%= settings.seo_thumbnail_url %>">
-    
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://lullapos.com/">
-    <meta property="twitter:title" content="<%= settings.seo_title %>">
-    <meta property="twitter:description" content="<%= settings.seo_description %>">
-    <meta property="twitter:image" content="<%= settings.seo_thumbnail_url %>">
+<%
+  // ลำดับ/การซ่อนของแต่ละส่วน คำนวณตรงนี้เพราะ <head> ต้องรู้ว่าส่วน FAQ ถูกแสดงไหม
+  var knownSections = sectionCatalogue.map(function(s) { return s.type; });
+  var pageSections = [];
+  try { pageSections = JSON.parse(settings.section_order || '[]'); } catch(e) {}
+  pageSections = pageSections.filter(function(s) { return knownSections.indexOf(s.type) !== -1; });
+  knownSections.forEach(function(type) {
+    if (!pageSections.some(function(s) { return s.type === type; })) pageSections.push({ type: type, enabled: true });
+  });
+  var sectionShown = function(type) {
+    var s = pageSections.find(function(x) { return x.type === type; });
+    return !!s && s.enabled !== false;
+  };
 
-    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
-    
-    <script type="application/ld+json">
+  var siteName = settings.site_name || 'Lullapos';
+  // ข้อความใน structured data ต้องเป็น plain text: ตัดแท็กออกแล้วคืนค่า entity กลับเป็นตัวอักษรจริง
+  var stripTags = function(v) {
+    return String(v || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&apos;/g, "'")
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ').trim();
+  };
+
+  var homeFaqs = [];
+  try { homeFaqs = JSON.parse(settings.faq_list || '[]'); } catch(e) {}
+
+  var graph = [
     {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "<%= settings.seo_title %>",
-      "operatingSystem": "Web Browser",
-      "applicationCategory": "BusinessApplication",
-      "description": "<%= settings.seo_description %>",
-      "url": "https://lullapos.com/",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "THB"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Lullapos",
-        "url": "https://lullapos.com/",
-        "logo": "<%= settings.logo_url %>"
+      '@type': 'Organization',
+      '@id': siteUrl + '/#organization',
+      name: siteName,
+      url: siteUrl + '/',
+      logo: settings.logo_url,
+      sameAs: [settings.facebook_url, settings.line_url].filter(Boolean)
+    },
+    {
+      '@type': 'WebSite',
+      '@id': siteUrl + '/#website',
+      url: siteUrl + '/',
+      name: siteName,
+      inLanguage: 'th-TH',
+      publisher: { '@id': siteUrl + '/#organization' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: siteUrl + '/articles?search={search_term_string}' },
+        'query-input': 'required name=search_term_string'
       }
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: settings.seo_title,
+      operatingSystem: 'Web Browser',
+      applicationCategory: 'BusinessApplication',
+      description: settings.seo_description,
+      url: siteUrl + '/',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'THB' },
+      publisher: { '@id': siteUrl + '/#organization' }
     }
-    </script>
+  ];
+
+  // ใส่ FAQPage เฉพาะตอนที่ส่วน FAQ แสดงจริงบนหน้า มิฉะนั้นถือว่าเป็น structured data ที่ไม่ตรงกับเนื้อหา
+  if (sectionShown('faq') && homeFaqs.length) {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: homeFaqs.map(function(f) {
+        return {
+          '@type': 'Question',
+          name: stripTags(f.question),
+          acceptedAnswer: { '@type': 'Answer', text: stripTags(f.answer) }
+        };
+      })
+    });
+  }
+%>
+<%- include('partials/seo/meta', {
+      pageTitle: settings.seo_title,
+      pageDescription: settings.seo_description,
+      pageUrl: siteUrl + '/',
+      pageImage: settings.seo_thumbnail_url,
+      ogType: 'website'
+    }) %>
+<meta name="keywords" content="<%= settings.seo_keywords %>">
+<%- include('partials/seo/jsonld', { graph: graph }) %>
     
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     
@@ -93,16 +136,6 @@
   </div>
 </div>
 
-<%
-  var knownSections = sectionCatalogue.map(function(s) { return s.type; });
-  var pageSections = [];
-  try { pageSections = JSON.parse(settings.section_order || '[]'); } catch(e) {}
-  pageSections = pageSections.filter(function(s) { return knownSections.indexOf(s.type) !== -1; });
-  // ส่วนที่ยังไม่เคยถูกบันทึกลำดับไว้ ให้ต่อท้ายไว้ก่อน จะได้ไม่หายไปจากหน้าเว็บ
-  knownSections.forEach(function(type) {
-    if (!pageSections.some(function(s) { return s.type === type; })) pageSections.push({ type: type, enabled: true });
-  });
-%>
 <% pageSections.forEach(function(sec) { %>
   <% if (sec.enabled !== false) { %>
     <% var meta = sectionCatalogue.find(function(s) { return s.type === sec.type; }); %>

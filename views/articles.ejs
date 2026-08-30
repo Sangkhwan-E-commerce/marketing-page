@@ -3,13 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บทความทั้งหมด - <%= settings.seo_title %></title>
-    <meta name="description" content="<%= settings.seo_description %>">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="บทความทั้งหมด - <%= settings.seo_title %>">
-    <meta property="og:description" content="แหล่งรวมความรู้และเทคนิคการจัดการร้านค้า">
-    <meta property="og:image" content="<%= settings.seo_thumbnail_url %>">
+<%
+  var siteName = settings.site_name || 'Lullapos';
+  var listTitle = 'บทความทั้งหมด - ' + settings.seo_title + (currentPage > 1 ? ' (หน้า ' + currentPage + ')' : '');
+  var listUrl = siteUrl + '/articles' + (currentPage > 1 ? '?page=' + currentPage : '');
+  var listGraph = [
+    {
+      '@type': 'CollectionPage',
+      '@id': listUrl + '#page',
+      url: listUrl,
+      name: listTitle,
+      inLanguage: 'th-TH',
+      isPartOf: { '@id': siteUrl + '/#website' }
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: siteUrl + '/' },
+        { '@type': 'ListItem', position: 2, name: 'บทความ', item: siteUrl + '/articles' }
+      ]
+    }
+  ];
+%>
+<%- include('partials/seo/meta', {
+      pageTitle: listTitle,
+      pageDescription: 'แหล่งรวมความรู้และเทคนิคการจัดการร้านค้า',
+      pageUrl: listUrl,
+      pageImage: settings.seo_thumbnail_url,
+      ogType: 'website',
+      noindex: (search && search.length > 0)
+    }) %>
+<%- include('partials/seo/jsonld', { graph: listGraph }) %>
     
     <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
     
