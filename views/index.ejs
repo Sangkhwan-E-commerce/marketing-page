@@ -130,9 +130,9 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 <main>
-<div class="bg-white pb-12">
+<div class="bg-white pb-12" style="padding-top: <%= settings.logo_padding_top || 0 %>px;">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
+    <img src="<%= settings.logo_url %>" alt="<%= settings.site_name || 'Lullapos' %>" class="w-auto max-w-full object-contain" style="height: <%= settings.logo_height || 80 %>px;">
   </div>
 </div>
 

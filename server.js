@@ -149,6 +149,8 @@ async function initDB() {
             site_name: 'Lullapos',
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
+            logo_height: '80',
+            logo_padding_top: '0',
             theme_color: 'rgb(244 97 100 / 98%)',
             section_order: JSON.stringify(SECTIONS.map(s => ({ type: s.type, enabled: true, bg: s.defaultBg }))),
             hero_list: JSON.stringify([
@@ -583,7 +585,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         } catch (e) { }
 
         const updates = { 
-            site_name: body.site_name, theme_color: body.theme_color, section_order: cleanSectionOrder, hero_list: cleanHeroList,
+            site_name: body.site_name, logo_height: clampNumber(body.logo_height, 20, 400, 80), logo_padding_top: clampNumber(body.logo_padding_top, 0, 300, 0), theme_color: body.theme_color, section_order: cleanSectionOrder, hero_list: cleanHeroList,
             feature_badge: body.feature_badge, feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
             col_list: cleanColList, col_template: pickTemplate('features', body.col_template, 'three-column-icons'), col_img_url: body.col_img_url || '',
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,
