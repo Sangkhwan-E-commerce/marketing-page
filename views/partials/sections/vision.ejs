@@ -1,0 +1,14 @@
+<%
+  var visionCols = [];
+  try { visionCols = JSON.parse(settings.col_list || '[]'); } catch(e) {}
+  var featureIds = templates.features.map(function(t) { return t.id; });
+  var visionTpl = featureIds.indexOf(settings.col_template) !== -1 ? settings.col_template : 'three-column-icons';
+%>
+<%- include('../features/' + visionTpl, { section: {
+      bg: sectionBg,
+      badge: settings.feature_badge,
+      title: settings.feature_title,
+      desc: settings.feature_subtitle,
+      image: settings.col_img_url,
+      items: visionCols
+} }) %>

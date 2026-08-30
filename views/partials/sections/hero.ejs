@@ -1,0 +1,8 @@
+<%
+  var heroBlocks = [];
+  try { heroBlocks = JSON.parse(settings.hero_list || '[]'); } catch(e) {}
+  var heroIds = templates.hero.map(function(t) { return t.id; });
+%>
+<% heroBlocks.forEach(function(block, i) { %>
+<%- include('../hero/' + (heroIds.indexOf(block.template) !== -1 ? block.template : 'split-with-image'), { block: block, index: i }) %>
+<% }); %>

@@ -1,0 +1,44 @@
+<% if (typeof latest_articles !== 'undefined' && latest_articles.length > 0) { %>
+<div class="<%= sectionBg %> py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">ความรู้และเทคนิคธุรกิจ</h2>
+      <p class="mt-2 text-lg leading-8 text-gray-600">เคล็ดลับการจัดการร้านค้า และเทคนิคเพิ่มยอดขายที่ผู้ประกอบการควรรู้</p>
+    </div>
+    
+    <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+      <% latest_articles.forEach(function(article) { %>
+      <article class="flex flex-col items-start justify-between bg-gray-50 p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+        <div class="relative w-full">
+          <% if(article.cover_image) { %>
+          <img src="<%= article.cover_image %>" alt="<%= article.title %>" class="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]">
+          <% } else { %>
+          <div class="aspect-[16/9] w-full rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400">ไม่มีรูปภาพ</div>
+          <% } %>
+          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10"></div>
+        </div>
+        <div class="max-w-xl w-full">
+          <div class="mt-8 flex items-center gap-x-4 text-xs">
+            <time datetime="<%= article.created_at %>" class="text-gray-500"><%= new Date(article.created_at).toLocaleDateString('th-TH') %></time>
+            <% if(article.category_name) { %><span class="relative z-10 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary"><%= article.category_name %></span><% } %>
+          </div>
+          <div class="group relative">
+            <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+              <a href="/article/<%= encodeURIComponent(article.slug) %>"><span class="absolute inset-0"></span><%= article.title %></a>
+            </h3>
+            <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600"><%= article.seo_description %></p>
+          </div>
+        </div>
+      </article>
+      <% }); %>
+    </div>
+    
+    <div class="mt-16 flex justify-center">
+        <a href="/articles" class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-sm ring-1 ring-inset ring-primary hover:bg-primary hover:text-white transition-all transform hover:-translate-y-1">
+            ดูบทความทั้งหมด <span aria-hidden="true">&rarr;</span>
+        </a>
+    </div>
+
+  </div>
+</div>
+<% } %>

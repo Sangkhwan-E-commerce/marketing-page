@@ -1,0 +1,14 @@
+<%
+  var gridFeatures = [];
+  try { gridFeatures = JSON.parse(settings.grid_list || '[]'); } catch(e) {}
+  var gridFeatureIds = templates.features.map(function(t) { return t.id; });
+  var gridTpl = gridFeatureIds.indexOf(settings.grid_template) !== -1 ? settings.grid_template : 'offset-grid-icons';
+%>
+<%- include('../features/' + gridTpl, { section: {
+      bg: sectionBg,
+      badge: settings.grid_badge,
+      title: settings.grid_title,
+      desc: settings.grid_desc,
+      image: settings.grid_img_url,
+      items: gridFeatures
+} }) %>

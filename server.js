@@ -56,6 +56,51 @@ const TEMPLATES = {
 };
 const pickTemplate = (group, value, fallback) => TEMPLATES[group].some(t => t.id === value) ? value : fallback;
 
+// ส่วนต่างๆ ของหน้าแรก เรียงลำดับ/ซ่อน/เลือกสีพื้นหลังได้จากหน้าแอดมิน
+// type ต้องตรงกับชื่อไฟล์ใน views/partials/sections/
+const SECTIONS = [
+    { type: 'hero', name: 'ส่วนบนสุด (Hero)', defaultBg: 'bg-white', bgEditable: false },
+    { type: 'vision', name: 'วิสัยทัศน์', defaultBg: 'bg-gray-50', bgEditable: true },
+    { type: 'features', name: 'ฟีเจอร์หลัก', defaultBg: 'bg-red-50', bgEditable: true },
+    { type: 'stats', name: 'ภารกิจและสถิติ', defaultBg: 'bg-white', bgEditable: true },
+    { type: 'articles', name: 'บทความล่าสุด', defaultBg: 'bg-white', bgEditable: true },
+    { type: 'faq', name: 'คำถามที่พบบ่อย (FAQ)', defaultBg: 'bg-gray-50', bgEditable: true },
+    { type: 'cta', name: 'ส่วนเชิญชวน (CTA)', defaultBg: 'bg-red-50', bgEditable: true }
+];
+const SECTION_BGS = [
+    { id: 'bg-white', name: 'ขาว' },
+    { id: 'bg-gray-50', name: 'เทาอ่อน' },
+    { id: 'bg-red-50', name: 'ชมพูอ่อน' },
+    { id: 'bg-amber-50', name: 'ครีม' },
+    { id: 'bg-sky-50', name: 'ฟ้าอ่อน' },
+    { id: 'bg-emerald-50', name: 'เขียวอ่อน' }
+];
+
+// เรียงตาม SECTIONS, เติมส่วนที่ยังไม่มีต่อท้าย และคัดค่าที่ไม่รู้จักทิ้ง
+function normalizeSectionOrder(raw) {
+    let parsed = [];
+    try { parsed = JSON.parse(raw || '[]'); } catch (e) { parsed = []; }
+    if (!Array.isArray(parsed)) parsed = [];
+    const bgIds = SECTION_BGS.map(b => b.id);
+    const seen = new Set();
+    const result = [];
+    parsed.forEach(entry => {
+        const meta = SECTIONS.find(s => s.type === (entry && entry.type));
+        if (!meta || seen.has(meta.type)) return;
+        seen.add(meta.type);
+        result.push({
+            type: meta.type,
+            enabled: entry.enabled !== false,
+            bg: bgIds.includes(entry.bg) ? entry.bg : meta.defaultBg
+        });
+    });
+    SECTIONS.forEach(meta => {
+        if (!seen.has(meta.type)) result.push({ type: meta.type, enabled: true, bg: meta.defaultBg });
+    });
+    return result;
+}
+
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -96,6 +141,7 @@ async function initDB() {
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
             theme_color: 'rgb(244 97 100 / 98%)',
+            section_order: JSON.stringify(SECTIONS.map(s => ({ type: s.type, enabled: true, bg: s.defaultBg }))),
             hero_list: JSON.stringify([
                 {
                     template: 'split-with-image',
@@ -333,7 +379,7 @@ app.get('/', async (req, res, next) => {
             WHERE a.is_published = true 
             ORDER BY a.created_at DESC LIMIT 9
         `);
-        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES });
+        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS });
     } catch (err) {
         next(err);
     }
@@ -448,7 +494,7 @@ app.post('/admin/login', loginLimiter, (req, res) => {
 app.get('/admin', requireAuth, async (req, res, next) => {
     try {
         const settings = await getSettings();
-        res.render('admin', { settings, templates: TEMPLATES });
+        res.render('admin', { settings, templates: TEMPLATES, sectionCatalogue: SECTIONS, sectionBgs: SECTION_BGS });
     } catch (err) {
         next(err);
     }
@@ -468,6 +514,8 @@ app.post('/admin/save', requireAuth, upload.fields([
             parsedFaq = parsedFaq.map(f => ({ question: f.question, answer: sanitizeHtml(f.answer) }));
             cleanFaqList = JSON.stringify(parsedFaq);
         } catch (e) { }
+
+        const cleanSectionOrder = JSON.stringify(normalizeSectionOrder(body.section_order));
 
         let cleanHeroList = body.hero_list;
         try {
@@ -513,7 +561,7 @@ app.post('/admin/save', requireAuth, upload.fields([
         } catch (e) { }
 
         const updates = { 
-            theme_color: body.theme_color, hero_list: cleanHeroList,
+            theme_color: body.theme_color, section_order: cleanSectionOrder, hero_list: cleanHeroList,
             feature_badge: body.feature_badge, feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
             col_list: cleanColList, col_template: pickTemplate('features', body.col_template, 'three-column-icons'), col_img_url: body.col_img_url || '',
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,

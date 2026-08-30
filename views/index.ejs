@@ -94,170 +94,21 @@
 </div>
 
 <%
-  var heroBlocks = [];
-  try { heroBlocks = JSON.parse(settings.hero_list || '[]'); } catch(e) {}
-  var heroIds = templates.hero.map(function(t) { return t.id; });
+  var knownSections = sectionCatalogue.map(function(s) { return s.type; });
+  var pageSections = [];
+  try { pageSections = JSON.parse(settings.section_order || '[]'); } catch(e) {}
+  pageSections = pageSections.filter(function(s) { return knownSections.indexOf(s.type) !== -1; });
+  // ส่วนที่ยังไม่เคยถูกบันทึกลำดับไว้ ให้ต่อท้ายไว้ก่อน จะได้ไม่หายไปจากหน้าเว็บ
+  knownSections.forEach(function(type) {
+    if (!pageSections.some(function(s) { return s.type === type; })) pageSections.push({ type: type, enabled: true });
+  });
 %>
-<% heroBlocks.forEach(function(block, i) { %>
-<%- include('partials/hero/' + (heroIds.indexOf(block.template) !== -1 ? block.template : 'split-with-image'), { block: block, index: i }) %>
+<% pageSections.forEach(function(sec) { %>
+  <% if (sec.enabled !== false) { %>
+    <% var meta = sectionCatalogue.find(function(s) { return s.type === sec.type; }); %>
+<%- include('partials/sections/' + sec.type, { sectionBg: sec.bg || meta.defaultBg }) %>
+  <% } %>
 <% }); %>
-
-<%
-  var visionCols = [];
-  try { visionCols = JSON.parse(settings.col_list || '[]'); } catch(e) {}
-  var featureIds = templates.features.map(function(t) { return t.id; });
-  var visionTpl = featureIds.indexOf(settings.col_template) !== -1 ? settings.col_template : 'three-column-icons';
-%>
-<%- include('partials/features/' + visionTpl, { section: {
-      bg: 'bg-primary-50',
-      badge: settings.feature_badge,
-      title: settings.feature_title,
-      desc: settings.feature_subtitle,
-      image: settings.col_img_url,
-      items: visionCols
-} }) %>
-
-<%
-  var gridFeatures = [];
-  try { gridFeatures = JSON.parse(settings.grid_list || '[]'); } catch(e) {}
-  var gridTpl = featureIds.indexOf(settings.grid_template) !== -1 ? settings.grid_template : 'offset-grid-icons';
-%>
-<%- include('partials/features/' + gridTpl, { section: {
-      bg: 'bg-red-50',
-      badge: settings.grid_badge,
-      title: settings.grid_title,
-      desc: settings.grid_desc,
-      image: settings.grid_img_url,
-      items: gridFeatures
-} }) %>
-
-<div class="relative bg-white">
-  <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:pt-32 lg:pb-32 lg:pl-16 xl:pl-32 lg:ml-auto">
-      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.stats_badge %></h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.stats_title %></p>
-      <div class="mt-6 text-base leading-7 text-gray-600 prose max-w-none"><%- settings.stats_desc %></div>
-      <dl class="mt-10 grid max-w-xl grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 xl:mt-16">
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat1_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat1_value %></dd></div>
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat2_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat2_value %></dd></div>
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat3_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat3_value %></dd></div>
-        <div class="flex flex-col gap-y-3 border-l border-gray-200 pl-6"><dt class="text-sm leading-6 text-gray-600"><%= settings.stat4_label %></dt><dd class="order-first text-3xl font-semibold tracking-tight text-gray-900"><%= settings.stat4_value %></dd></div>
-      </dl>
-    </div>
-  </div>
-</div>
-
-<% if (typeof latest_articles !== 'undefined' && latest_articles.length > 0) { %>
-<div class="bg-white py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">ความรู้และเทคนิคธุรกิจ</h2>
-      <p class="mt-2 text-lg leading-8 text-gray-600">เคล็ดลับการจัดการร้านค้า และเทคนิคเพิ่มยอดขายที่ผู้ประกอบการควรรู้</p>
-    </div>
-    
-    <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-      <% latest_articles.forEach(function(article) { %>
-      <article class="flex flex-col items-start justify-between bg-gray-50 p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-        <div class="relative w-full">
-          <% if(article.cover_image) { %>
-          <img src="<%= article.cover_image %>" alt="<%= article.title %>" class="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]">
-          <% } else { %>
-          <div class="aspect-[16/9] w-full rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400">ไม่มีรูปภาพ</div>
-          <% } %>
-          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10"></div>
-        </div>
-        <div class="max-w-xl w-full">
-          <div class="mt-8 flex items-center gap-x-4 text-xs">
-            <time datetime="<%= article.created_at %>" class="text-gray-500"><%= new Date(article.created_at).toLocaleDateString('th-TH') %></time>
-            <% if(article.category_name) { %><span class="relative z-10 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary"><%= article.category_name %></span><% } %>
-          </div>
-          <div class="group relative">
-            <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-              <a href="/article/<%= encodeURIComponent(article.slug) %>"><span class="absolute inset-0"></span><%= article.title %></a>
-            </h3>
-            <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600"><%= article.seo_description %></p>
-          </div>
-        </div>
-      </article>
-      <% }); %>
-    </div>
-    
-    <div class="mt-16 flex justify-center">
-        <a href="/articles" class="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-sm ring-1 ring-inset ring-primary hover:bg-primary hover:text-white transition-all transform hover:-translate-y-1">
-            ดูบทความทั้งหมด <span aria-hidden="true">&rarr;</span>
-        </a>
-    </div>
-
-  </div>
-</div>
-<% } %>
-
-<div class="bg-gray-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto text-center mb-12">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.faq_title %></h2>
-    </div>
-    
-    <dl class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
-      <% 
-          let faqs = [];
-          try { faqs = JSON.parse(settings.faq_list); } catch(e) {}
-          faqs.forEach(function(faq, index) { 
-      %>
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 faq-item self-start hover:shadow-md transition-shadow">
-        <dt>
-          <button type="button" class="faq-toggle-btn flex w-full items-start justify-between text-left text-gray-900 focus:outline-none transition-colors hover:text-primary">
-            <span class="text-base font-semibold leading-7 pr-4 flex items-center gap-3"><%- faq.question %></span>
-            <span class="flex h-7 items-center shrink-0">
-              <svg class="h-5 w-5 faq-icon-plus transition-transform duration-200 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
-              <svg class="h-5 w-5 hidden faq-icon-minus text-primary transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>
-            </span>
-          </button>
-        </dt>
-        <dd class="mt-4 hidden faq-answer transition-all duration-300 border-t border-gray-100 pt-4">
-          <div class="text-base leading-7 text-gray-600 prose max-w-none"><%- faq.answer %></div>
-        </dd>
-      </div>
-      <% }); %>
-    </dl>
-  </div>
-</div>
-
-<script>
-    const faqButtons = document.querySelectorAll('.faq-toggle-btn');
-    faqButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const answer = button.parentElement.nextElementSibling;
-            const iconPlus = button.querySelector('.faq-icon-plus');
-            const iconMinus = button.querySelector('.faq-icon-minus');
-            const isOpen = !answer.classList.contains('hidden');
-            
-            document.querySelectorAll('.faq-answer').forEach(ans => ans.classList.add('hidden'));
-            document.querySelectorAll('.faq-icon-plus').forEach(icon => icon.classList.remove('hidden'));
-            document.querySelectorAll('.faq-icon-minus').forEach(icon => icon.classList.add('hidden'));
-            
-            if (!isOpen) {
-                answer.classList.remove('hidden');
-                iconPlus.classList.add('hidden');
-                iconMinus.classList.remove('hidden');
-            }
-        });
-    });
-</script>
-
-<div class="bg-red-50 py-16 sm:py-24 lg:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.cta_title %></h2>
-      <div class="mx-auto mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.cta_desc %></div>
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <a href="<%= settings.cta_btn1_url %>" class="rounded-md bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.cta_btn1_text %></a>
-        <a href="<%= settings.cta_btn2_url %>" class="text-sm font-semibold leading-6 text-gray-900 group"><%= settings.cta_btn2_text %> <span aria-hidden="true" class="group-hover:translate-x-1 inline-block transition-transform">→</span></a>
-      </div>
-    </div>
-  </div>
-</div>
 </main>
 
 <footer class="bg-white border-t border-gray-200 py-12">

@@ -45,6 +45,7 @@
                 <li>
                     <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">จัดการหน้า Landing Page</div>
                     <ul role="list" class="-mx-2 space-y-1">
+                        <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-layout">⇅ โครงสร้างหน้าเว็บ</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-general">1. ทั่วไป & Footer</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-hero">2. ส่วนบนสุด (Hero)</button></li>
                         <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="tab-features3">3. วิสัยทัศน์</button></li>
@@ -104,6 +105,12 @@
 
                     <div class="p-6">
                         
+                        <div id="tab-layout" class="tab-content space-y-4 hidden">
+                            <p class="text-sm text-gray-600">จัดลำดับส่วนต่างๆ ของหน้าแรก เลือกซ่อน/แสดง และเลือกสีพื้นหลังของแต่ละส่วน (เนื้อหาของแต่ละส่วนแก้ได้ที่เมนูของส่วนนั้น)</p>
+                            <div id="layout-container" class="space-y-2"></div>
+                            <input type="hidden" name="section_order" id="section_order_input" value="<%= settings.section_order %>">
+                        </div>
+
                         <div id="tab-general" class="tab-content space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
                                 <div>
@@ -561,6 +568,73 @@
         document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
         
         renderFaqs();
+
+        // --- โครงสร้างหน้าเว็บ (ลำดับ / ซ่อน / สีพื้นหลังของแต่ละส่วน) ---
+        const SECTION_CATALOGUE = <%- JSON.stringify(sectionCatalogue) %>;
+        const SECTION_BGS = <%- JSON.stringify(sectionBgs) %>;
+
+        const layoutContainer = document.getElementById('layout-container');
+        const layoutInput = document.getElementById('section_order_input');
+        let pageSections = [];
+        try { pageSections = JSON.parse(layoutInput.value || '[]'); } catch(e) { pageSections = []; }
+
+        // ตัดส่วนที่ไม่รู้จักทิ้ง แล้วเติมส่วนที่ยังไม่มีต่อท้าย (ตรรกะเดียวกับฝั่งเซิร์ฟเวอร์)
+        (function normalize() {
+            const seen = new Set();
+            pageSections = pageSections.filter(s => {
+                const meta = SECTION_CATALOGUE.find(m => m.type === (s || {}).type);
+                if (!meta || seen.has(meta.type)) return false;
+                seen.add(meta.type);
+                if (!SECTION_BGS.some(b => b.id === s.bg)) s.bg = meta.defaultBg;
+                s.enabled = s.enabled !== false;
+                return true;
+            });
+            SECTION_CATALOGUE.forEach(meta => {
+                if (!seen.has(meta.type)) pageSections.push({ type: meta.type, enabled: true, bg: meta.defaultBg });
+            });
+        })();
+
+        const layoutSyncInput = () => { layoutInput.value = JSON.stringify(pageSections); };
+
+        function renderPageSections() {
+            layoutContainer.innerHTML = '';
+            pageSections.forEach((sec, index) => {
+                const meta = SECTION_CATALOGUE.find(m => m.type === sec.type);
+                const row = document.createElement('div');
+                row.className = 'flex flex-wrap items-center gap-3 bg-white border rounded p-3 ' + (sec.enabled ? '' : 'opacity-60');
+                row.innerHTML = `
+                    <span class="w-6 text-center text-xs font-bold text-gray-400">${index + 1}</span>
+                    <span class="flex-1 min-w-[10rem] font-semibold text-sm">${meta.name}</span>
+                    <label class="flex items-center gap-1 text-xs text-gray-600">
+                        <input type="checkbox" ${sec.enabled ? 'checked' : ''} onchange="toggleSection(${index}, this.checked)" class="h-4 w-4"> แสดง
+                    </label>
+                    ${meta.bgEditable ? `
+                    <select onchange="updateSectionBg(${index}, this.value)" class="border p-1 text-xs rounded">
+                        ${SECTION_BGS.map(b => `<option value="${b.id}" ${sec.bg === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
+                    </select>` : '<span class="text-xs text-gray-400">พื้นหลังตามเลย์เอาต์</span>'}
+                    <div class="flex space-x-1">
+                        ${index > 0 ? `<button type="button" onclick="movePageSection(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲</button>` : ''}
+                        ${index < pageSections.length - 1 ? `<button type="button" onclick="movePageSection(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼</button>` : ''}
+                    </div>
+                `;
+                layoutContainer.appendChild(row);
+            });
+            layoutSyncInput();
+        }
+
+        window.movePageSection = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < pageSections.length) {
+                const temp = pageSections[index];
+                pageSections[index] = pageSections[newIndex];
+                pageSections[newIndex] = temp;
+                renderPageSections();
+            }
+        };
+        window.toggleSection = (index, enabled) => { pageSections[index].enabled = enabled; renderPageSections(); };
+        window.updateSectionBg = (index, bg) => { pageSections[index].bg = bg; layoutSyncInput(); };
+
+        renderPageSections();
 
         // --- ระบบ Hero (หลายบล็อก + เลือกเลย์เอาต์) ---
         const HERO_TPL = <%- JSON.stringify(templates.hero) %>;
