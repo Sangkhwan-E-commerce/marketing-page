@@ -167,12 +167,22 @@
 </footer>
 
 <% if (settings.banner_active === 'true') { %>
-    <% 
+    <%
         let parsedBanners = [];
         try { parsedBanners = JSON.parse(settings.banner_list || '[]'); } catch(e) {}
+
+        // สไลด์ที่ยังไม่ได้กรอกอะไรเลยจะกลายเป็นช่องว่างใน carousel จึงตัดทิ้งก่อน
+        var slideHasImage = function(s) { return !!(s && s.img_url && String(s.img_url).trim()); };
+        var slideHasText = function(s) {
+            return String((s && s.content) || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length > 0;
+        };
+        parsedBanners = parsedBanners.filter(function(s) { return slideHasImage(s) || slideHasText(s); });
+
+        // ถ้าไม่มีสไลด์ไหนมีรูปภาพเลย ไม่ต้องแสดง carousel
+        var bannerHasImage = parsedBanners.some(slideHasImage);
     %>
-    
-    <% if (parsedBanners.length > 0) { %>
+
+    <% if (parsedBanners.length > 0 && bannerHasImage) { %>
         <div id="promo-config" 
               data-type="<%= settings.banner_display_type %>" 
               data-limit="<%= settings.banner_display_limit %>"
