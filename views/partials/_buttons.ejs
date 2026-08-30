@@ -1,0 +1,19 @@
+<%
+  var _btns = (typeof buttons !== 'undefined' && buttons) ? buttons : [];
+  var _align = (typeof align !== 'undefined') ? align : 'left';
+  var _tone = (typeof tone !== 'undefined') ? tone : 'light';
+%>
+<% if (_btns.length) { %>
+<div class="mt-10 flex flex-wrap items-center gap-4 <%= _align === 'center' ? 'justify-center' : '' %>">
+  <% _btns.forEach(function(btn) { %>
+    <% var _size = btn.size || 'text-sm'; %>
+    <% if (btn.style === 'link') { %>
+      <a href="<%= btn.url || '#' %>" class="<%= _size %> font-semibold leading-6 transition <%= _tone === 'dark' ? 'text-white hover:text-gray-200' : 'text-gray-900 hover:text-primary' %>"><%= btn.text %> <span aria-hidden="true">&rarr;</span></a>
+    <% } else if (btn.style === 'secondary') { %>
+      <a href="<%= btn.url || '#' %>" class="rounded-md px-6 py-3.5 <%= _size %> font-semibold shadow-sm transition <%= _tone === 'dark' ? 'bg-white/10 text-white ring-1 ring-inset ring-white/30 hover:bg-white/20' : 'bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50' %>"><%= btn.text %></a>
+    <% } else { %>
+      <a href="<%= btn.url || '#' %>" class="rounded-md bg-primary px-8 py-3.5 <%= _size %> font-semibold text-white shadow-sm transition hover:opacity-80"><%= btn.text %></a>
+    <% } %>
+  <% }); %>
+</div>
+<% } %>

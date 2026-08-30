@@ -145,44 +145,39 @@
                         </div>
 
                         <div id="tab-hero" class="tab-content space-y-6 hidden">
-                            <div class="space-y-4">
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label><input type="text" name="hero_badge" value="<%= settings.hero_badge %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
-                                <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก (Title)</label><input type="text" name="hero_title" value="<%= settings.hero_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด (Description)</label>
-                                    <input type="hidden" name="hero_desc" id="hero_desc">
-                                    <div class="quill-editor bg-white rounded-b-md" data-target="hero_desc" style="height: 150px;"><%- settings.hero_desc %></div>
-                                </div>
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-semibold">บล็อก Hero (<span id="hero-count">0</span> บล็อก)</h4>
+                                <button type="button" id="add-hero-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มบล็อก</button>
                             </div>
-                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพหน้าจอระบบ (Hero Image)</label>
-                                <input type="file" name="hero_img" accept="image/*" onchange="previewImage(this, 'preview-hero')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
-                                <div class="mt-4">
-                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
-                                    <img id="preview-hero" src="<%= settings.hero_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
-                                </div>
-                            </div>
-                            <div class="pt-6 border-t border-gray-200">
-                                <h4 class="text-base font-semibold text-gray-900 mb-4">ปุ่มสมัครใช้งาน</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ</label><input type="text" name="btn_text" value="<%= settings.btn_text %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">URL ลิงก์</label><input type="text" name="btn_url" value="<%= settings.btn_url %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">ขนาดอักษร</label>
-                                        <select name="btn_size" class="w-full border-gray-300 rounded-md border p-2 text-sm">
-                                            <option value="text-sm" <%= settings.btn_size === 'text-sm' ? 'selected' : '' %>>เล็ก (text-sm)</option>
-                                            <option value="text-base" <%= settings.btn_size === 'text-base' ? 'selected' : '' %>>ปกติ (text-base)</option>
-                                            <option value="text-lg" <%= settings.btn_size === 'text-lg' ? 'selected' : '' %>>ใหญ่ (text-lg)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="text-xs text-gray-500">แต่ละบล็อกเลือกเลย์เอาต์ได้เอง และเรียงต่อกันจากบนลงล่างบนหน้าเว็บ</p>
+                            <p id="hero-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีบล็อก กดปุ่ม "+ เพิ่มบล็อก" เพื่อเริ่มสร้าง</p>
+                            <div id="hero-container" class="space-y-6"></div>
+                            <input type="hidden" name="hero_list" id="hero_list_input" value="<%= settings.hero_list %>">
                         </div>
 
                         <div id="tab-features3" class="tab-content space-y-6 hidden">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="feature_title" value="<%= settings.feature_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
                                 <div><label class="block text-sm font-medium text-gray-700 mb-1">คำโปรยย่อย (Subtitle)</label><input type="text" name="feature_subtitle" value="<%= settings.feature_subtitle %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label><input type="text" name="feature_badge" value="<%= settings.feature_badge %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">เลย์เอาต์ (Template)</label>
+                                    <select name="col_template" id="col_template" onchange="toggleSectionImage('col')" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                        <% templates.features.forEach(function(t) { %>
+                                        <option value="<%= t.id %>" <%= settings.col_template === t.id ? 'selected' : '' %>><%= t.name %></option>
+                                        <% }); %>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของส่วนวิสัยทัศน์</p>
+                                </div>
+                                <div id="col_image_wrap" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ภาพประกอบของเลย์เอาต์นี้</label>
+                                    <input type="file" accept="image/*" onchange="uploadSectionImage(event, 'col')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <p id="col_img_status" class="text-xs text-gray-500 mt-1"></p>
+                                    <input type="hidden" name="col_img_url" id="col_img_url" value="<%= settings.col_img_url %>">
+                                    <img id="col_img_preview" src="<%= settings.col_img_url %>" class="mt-2 max-h-28 w-auto rounded border border-gray-200 <%= settings.col_img_url ? '' : 'hidden' %>">
+                                </div>
                             </div>
                             <div class="pt-6 border-t border-gray-200">
                                 <div class="flex justify-between items-center mb-4">
@@ -202,6 +197,24 @@
                                     <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="grid_title" value="<%= settings.grid_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
                                 </div>
                                 <div><label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label><input type="hidden" name="grid_desc" id="grid_desc"><div class="quill-editor bg-white rounded-b-md" data-target="grid_desc" style="height: 100px;"><%- settings.grid_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">เลย์เอาต์ (Template)</label>
+                                    <select name="grid_template" id="grid_template" onchange="toggleSectionImage('grid')" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                        <% templates.features.forEach(function(t) { %>
+                                        <option value="<%= t.id %>" <%= settings.grid_template === t.id ? 'selected' : '' %>><%= t.name %></option>
+                                        <% }); %>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของส่วนฟีเจอร์หลัก</p>
+                                </div>
+                                <div id="grid_image_wrap" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ภาพประกอบของเลย์เอาต์นี้</label>
+                                    <input type="file" accept="image/*" onchange="uploadSectionImage(event, 'grid')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <p id="grid_img_status" class="text-xs text-gray-500 mt-1"></p>
+                                    <input type="hidden" name="grid_img_url" id="grid_img_url" value="<%= settings.grid_img_url %>">
+                                    <img id="grid_img_preview" src="<%= settings.grid_img_url %>" class="mt-2 max-h-28 w-auto rounded border border-gray-200 <%= settings.grid_img_url ? '' : 'hidden' %>">
+                                </div>
                             </div>
                             <div class="pt-6 border-t border-gray-200">
                                 <div class="flex justify-between items-center mb-4">
@@ -548,6 +561,180 @@
         document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
         
         renderFaqs();
+
+        // --- ระบบ Hero (หลายบล็อก + เลือกเลย์เอาต์) ---
+        const HERO_TPL = <%- JSON.stringify(templates.hero) %>;
+        const FEATURE_TPL = <%- JSON.stringify(templates.features) %>;
+        const BTN_STYLES = [['primary', 'ปุ่มหลัก'], ['secondary', 'ปุ่มรอง'], ['link', 'ลิงก์ข้อความ']];
+        const BTN_SIZES = [['text-sm', 'เล็ก'], ['text-base', 'ปกติ'], ['text-lg', 'ใหญ่']];
+
+        const heroContainer = document.getElementById('hero-container');
+        const heroInput = document.getElementById('hero_list_input');
+        const heroEmpty = document.getElementById('hero-empty');
+        const heroCount = document.getElementById('hero-count');
+        let heroBlocks = [];
+        try { heroBlocks = JSON.parse(heroInput.value || '[]'); } catch(e) { heroBlocks = []; }
+
+        const heroEscAttr = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const heroTplNeedsImage = (id) => { const t = HERO_TPL.find(t => t.id === id); return t ? t.image : false; };
+        const heroSyncInput = () => { heroInput.value = JSON.stringify(heroBlocks); };
+
+        function heroButtonRow(blockIndex, btn, btnIndex) {
+            const opt = (list, current) => list.map(([v, label]) =>
+                `<option value="${v}" ${current === v ? 'selected' : ''}>${label}</option>`).join('');
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center bg-white border rounded p-2">
+                    <input type="text" class="md:col-span-3 border p-2 text-sm" placeholder="ข้อความบนปุ่ม" value="${heroEscAttr(btn.text)}" oninput="updateHeroButton(${blockIndex}, ${btnIndex}, 'text', this.value)">
+                    <input type="text" class="md:col-span-4 border p-2 text-sm" placeholder="URL" value="${heroEscAttr(btn.url)}" oninput="updateHeroButton(${blockIndex}, ${btnIndex}, 'url', this.value)">
+                    <select class="md:col-span-2 border p-2 text-sm" onchange="updateHeroButton(${blockIndex}, ${btnIndex}, 'style', this.value)">${opt(BTN_STYLES, btn.style)}</select>
+                    <select class="md:col-span-2 border p-2 text-sm" onchange="updateHeroButton(${blockIndex}, ${btnIndex}, 'size', this.value)">${opt(BTN_SIZES, btn.size)}</select>
+                    <button type="button" onclick="removeHeroButton(${blockIndex}, ${btnIndex})" class="md:col-span-1 text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖</button>
+                </div>`;
+        }
+
+        function renderHeroBlocks() {
+            heroContainer.innerHTML = '';
+            heroEmpty.classList.toggle('hidden', heroBlocks.length > 0);
+            heroCount.innerText = heroBlocks.length;
+
+            heroBlocks.forEach((block, index) => {
+                const buttons = Array.isArray(block.buttons) ? block.buttons : (block.buttons = []);
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50/50 p-5 rounded-lg border border-gray-200 space-y-3';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h4 class="font-semibold">บล็อก ${index + 1}${index === 0 ? ' <span class="text-xs font-normal text-gray-500">(หัวข้อจะเป็น H1)</span>' : ''}</h4>
+                        <div class="flex space-x-2">
+                            ${index > 0 ? `<button type="button" onclick="moveHeroBlock(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                            ${index < heroBlocks.length - 1 ? `<button type="button" onclick="moveHeroBlock(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                            <button type="button" onclick="removeHeroBlock(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                        </div>
+                    </div>
+
+                    <label class="block text-xs font-semibold text-gray-600">เลย์เอาต์ (Template)</label>
+                    <select class="w-full border p-2 text-sm" onchange="setHeroTemplate(${index}, this.value)">
+                        ${HERO_TPL.map(t => `<option value="${t.id}" ${block.template === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+                    </select>
+
+                    <label class="block text-xs font-semibold text-gray-600">ข้อความ Badge</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${heroEscAttr(block.badge)}" oninput="updateHeroBlock(${index}, 'badge', this.value)">
+
+                    <label class="block text-xs font-semibold text-gray-600">หัวข้อหลัก</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${heroEscAttr(block.title)}" oninput="updateHeroBlock(${index}, 'title', this.value)">
+
+                    <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
+                    <div id="hero_editor_${index}" class="bg-white" style="height: 120px;"></div>
+
+                    <div class="pt-8 ${heroTplNeedsImage(block.template) ? '' : 'hidden'}">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">รูปภาพประกอบ</label>
+                        <input type="file" accept="image/*" onchange="uploadHeroImage(event, ${index})" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                        <p id="hero_img_status_${index}" class="text-xs text-gray-500 mt-1"></p>
+                        <img id="hero_img_preview_${index}" src="${heroEscAttr(block.image)}" class="mt-2 max-h-28 w-auto rounded border border-gray-200 ${block.image ? '' : 'hidden'}">
+                    </div>
+
+                    <div class="pt-3 border-t">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-semibold text-gray-600">ปุ่ม (${buttons.length})</label>
+                            <button type="button" onclick="addHeroButton(${index})" class="bg-white px-2 py-1 text-xs border rounded hover:bg-gray-100">+ เพิ่มปุ่ม</button>
+                        </div>
+                        <div class="space-y-2">${buttons.map((btn, bi) => heroButtonRow(index, btn, bi)).join('')}</div>
+                    </div>
+                `;
+                heroContainer.appendChild(div);
+
+                const quillHero = new Quill(document.getElementById(`hero_editor_${index}`), {
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+                quillHero.root.innerHTML = block.desc || '';
+                quillHero.on('text-change', () => {
+                    heroBlocks[index].desc = quillHero.root.innerHTML;
+                    heroSyncInput();
+                });
+            });
+            heroSyncInput();
+        }
+
+        window.moveHeroBlock = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < heroBlocks.length) {
+                const temp = heroBlocks[index];
+                heroBlocks[index] = heroBlocks[newIndex];
+                heroBlocks[newIndex] = temp;
+                renderHeroBlocks();
+            }
+        };
+        window.removeHeroBlock = (index) => { if(confirm('ลบบล็อกนี้?')) { heroBlocks.splice(index, 1); renderHeroBlocks(); } };
+        window.updateHeroBlock = (index, key, value) => { heroBlocks[index][key] = value; heroSyncInput(); };
+        window.setHeroTemplate = (index, value) => { heroBlocks[index].template = value; renderHeroBlocks(); };
+
+        window.addHeroButton = (index) => {
+            heroBlocks[index].buttons = heroBlocks[index].buttons || [];
+            heroBlocks[index].buttons.push({ text: '', url: '#', style: 'primary', size: 'text-sm' });
+            renderHeroBlocks();
+        };
+        window.removeHeroButton = (index, btnIndex) => { heroBlocks[index].buttons.splice(btnIndex, 1); renderHeroBlocks(); };
+        window.updateHeroButton = (index, btnIndex, key, value) => { heroBlocks[index].buttons[btnIndex][key] = value; heroSyncInput(); };
+
+        window.uploadHeroImage = async (event, index) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const status = document.getElementById(`hero_img_status_${index}`);
+            status.innerText = 'กำลังอัปโหลด...';
+            const formData = new FormData();
+            formData.append('media', file);
+            try {
+                const res = await fetch('/admin/api/upload-media', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || 'อัปโหลดไม่สำเร็จ');
+                heroBlocks[index].image = data.url;
+                heroSyncInput();
+                const preview = document.getElementById(`hero_img_preview_${index}`);
+                preview.src = data.url;
+                preview.classList.remove('hidden');
+                status.innerText = 'อัปโหลดสำเร็จ';
+            } catch (err) {
+                status.innerText = err.message || 'อัปโหลดไม่สำเร็จ';
+            }
+        };
+
+        document.getElementById('add-hero-btn').addEventListener('click', () => {
+            heroBlocks.push({ template: 'split-with-image', badge: '', title: '', desc: '', image: '', buttons: [] });
+            renderHeroBlocks();
+        });
+
+        renderHeroBlocks();
+
+        // --- ภาพประกอบของเลย์เอาต์ที่ต้องใช้รูป (ส่วนวิสัยทัศน์ / ฟีเจอร์หลัก) ---
+        window.toggleSectionImage = (prefix) => {
+            const tplId = document.getElementById(`${prefix}_template`).value;
+            const tpl = FEATURE_TPL.find(t => t.id === tplId);
+            document.getElementById(`${prefix}_image_wrap`).classList.toggle('hidden', !(tpl && tpl.image));
+        };
+
+        window.uploadSectionImage = async (event, prefix) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const status = document.getElementById(`${prefix}_img_status`);
+            status.innerText = 'กำลังอัปโหลด...';
+            const formData = new FormData();
+            formData.append('media', file);
+            try {
+                const res = await fetch('/admin/api/upload-media', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || 'อัปโหลดไม่สำเร็จ');
+                document.getElementById(`${prefix}_img_url`).value = data.url;
+                const preview = document.getElementById(`${prefix}_img_preview`);
+                preview.src = data.url;
+                preview.classList.remove('hidden');
+                status.innerText = 'อัปโหลดสำเร็จ';
+            } catch (err) {
+                status.innerText = err.message || 'อัปโหลดไม่สำเร็จ';
+            }
+        };
+
+        toggleSectionImage('col');
+        toggleSectionImage('grid');
 
         // --- ระบบวิสัยทัศน์ (เพิ่ม/ลด/สลับลำดับได้) ---
         const colContainer = document.getElementById('col-container');

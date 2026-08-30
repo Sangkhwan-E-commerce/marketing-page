@@ -1,0 +1,20 @@
+<div class="<%= section.bg || 'bg-white' %> py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <% if (section.badge) { %><h2 class="text-base font-semibold leading-7 text-primary"><%= section.badge %></h2><% } %>
+      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= section.title %></p>
+      <p class="mt-6 text-lg leading-8 text-gray-600"><%- section.desc %></p>
+    </div>
+    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:max-w-none">
+      <dl class="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        <% section.items.forEach(function(item) { %>
+        <div class="flex flex-col items-center text-center">
+          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white [&>svg]:w-7 [&>svg]:h-7"><%- item.icon %></div>
+          <dt class="text-lg font-semibold leading-7 text-gray-900"><%- item.title %></dt>
+          <dd class="mt-2 text-base leading-7 text-gray-600"><%- item.desc %></dd>
+        </div>
+        <% }); %>
+      </dl>
+    </div>
+  </div>
+</div>

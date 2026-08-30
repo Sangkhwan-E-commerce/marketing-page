@@ -38,6 +38,24 @@ app.use(session({
     }
 }));
 
+// เลย์เอาต์ที่เลือกได้ในหน้าแอดมิน (id ต้องตรงกับชื่อไฟล์ใน views/partials/)
+const TEMPLATES = {
+    hero: [
+        { id: 'split-with-image', name: 'ข้อความซ้าย / รูปขวา', image: true },
+        { id: 'split-image-left', name: 'รูปซ้าย / ข้อความขวา', image: true },
+        { id: 'simple-centered', name: 'กึ่งกลาง ไม่มีรูป', image: false },
+        { id: 'centered-with-screenshot', name: 'กึ่งกลาง + ภาพหน้าจอด้านล่าง', image: true },
+        { id: 'background-image', name: 'รูปเต็มพื้นหลัง (โทนเข้ม)', image: true }
+    ],
+    features: [
+        { id: 'three-column-icons', name: 'การ์ด 3 คอลัมน์ (ไอคอนซ้าย)', image: false },
+        { id: 'offset-grid-icons', name: 'ตาราง 2 คอลัมน์ (ไอคอนเยื้องซ้าย)', image: false },
+        { id: 'centered-grid', name: 'ตารางกึ่งกลาง (ไอคอนด้านบน)', image: false },
+        { id: 'with-screenshot', name: 'รายการซ้าย + ภาพหน้าจอขวา', image: true }
+    ]
+};
+const pickTemplate = (group, value, fallback) => TEMPLATES[group].some(t => t.id === value) ? value : fallback;
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -78,10 +96,17 @@ async function initDB() {
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
             theme_color: 'rgb(244 97 100 / 98%)',
-            hero_badge: 'POS ระบบยุคใหม่เพื่อร้านค้าทุกขนาด',
-            hero_title: 'Lullapos โตไปด้วยกัน จ่ายตามจริง',
-            hero_desc: 'จุดเริ่มต้นจากหัวใจคนชนบท สู่ระบบจัดการร้านค้าที่ทรงพลัง เลิกแบกรับต้นทุนรายเดือนที่แสนแพง ให้คุณเริ่มใช้ฟรี และจ่ายเพียงเศษสตางค์เมื่อธุรกิจคุณเติบโต',
-            hero_img_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
+            hero_list: JSON.stringify([
+                {
+                    template: 'split-with-image',
+                    badge: 'POS ระบบยุคใหม่เพื่อร้านค้าทุกขนาด',
+                    title: 'Lullapos โตไปด้วยกัน จ่ายตามจริง',
+                    desc: 'จุดเริ่มต้นจากหัวใจคนชนบท สู่ระบบจัดการร้านค้าที่ทรงพลัง เลิกแบกรับต้นทุนรายเดือนที่แสนแพง ให้คุณเริ่มใช้ฟรี และจ่ายเพียงเศษสตางค์เมื่อธุรกิจคุณเติบโต',
+                    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80',
+                    buttons: [{ text: 'สมัครใช้งานฟรี', url: '#', style: 'primary', size: 'text-sm' }]
+                }
+            ]),
+            feature_badge: 'วิสัยทัศน์ของเรา',
             feature_title: 'ความฝันเล็กๆ สู่การเปลี่ยนแปลงที่ยิ่งใหญ่',
             feature_subtitle: 'หัวใจของการทำธุรกิจ ไม่ควรถูกจำกัดด้วยขนาดของร้านหรือทำเลที่ตั้ง Lullapos จึงเกิดมาเพื่อทลายกำแพงนั้น',
             col_list: JSON.stringify([
@@ -89,6 +114,8 @@ async function initDB() {
                 { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path></svg>`, title: 'ใช้ฟรี 1,000 ออเดอร์แรก', desc: 'ให้คุณเริ่มต้นปรับตัวเข้าสู่เทคโนโลยีได้ทันทีโดยไม่มีความเสี่ยง ไม่ถึงพันบิล ไม่ต้องเสียเงินแม้แต่บาทเดียว', highlight: false, badge: '' },
                 { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`, title: 'ยุติธรรม จ่ายเพียง 5 สตางค์', desc: 'เมื่อถึงเวลาเติบโต ออเดอร์ที่ 1,001 เป็นต้นไป จ่ายแค่ 5 สตางค์/ออเดอร์ เดือนไหนเงียบจ่ายน้อย แฟร์ที่สุด', highlight: true, badge: 'คุ้มค่าที่สุด' },
             ]),
+            col_template: 'three-column-icons',
+            col_img_url: '',
             footer_text: '© 2026 Lullapos.com. โตไปด้วยกัน จ่ายตามจริง.',
             facebook_url: 'https://facebook.com/',
             facebook_icon: `<svg fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>`,
@@ -105,7 +132,8 @@ async function initDB() {
                 { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path></svg>`, title: 'รายงานยอดขายอัจฉริยะ', desc: 'สรุปยอดขายรายวัน รายเดือน พร้อมกราฟ' },
                 { icon: `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"></path></svg>`, title: 'รองรับการชำระเงินหลายรูปแบบ', desc: 'เงินสด โอนเงิน พร้อมเพย์ หรือบัตรเครดิต' },
             ]),
-            btn_text: 'สมัครใช้งานฟรี', btn_url: '#', btn_size: 'text-sm',
+            grid_template: 'offset-grid-icons',
+            grid_img_url: '',
             
             stats_badge: 'ภารกิจของเรา', stats_title: 'สถิติที่เติบโตไปพร้อมกับคุณ', stats_desc: 'Lullapos มุ่งมั่นที่จะเป็นส่วนหนึ่งในความสำเร็จของร้านค้าขนาดเล็ก เราพร้อมสนับสนุนคุณด้วยระบบที่เสถียร ใช้งานง่าย และยุติธรรมที่สุด', stats_img_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2850&q=80',
             stat1_label: 'ร้านค้าที่ไว้วางใจ', stat1_value: '8,000+', stat2_label: 'ค่าธรรมเนียมแรกเข้า', stat2_value: '0 ฿', stat3_label: 'ระบบเสถียร (Uptime)', stat3_value: '99.9%', stat4_label: 'ประหยัดต้นทุนเฉลี่ย', stat4_value: '100%',
@@ -130,6 +158,32 @@ async function initDB() {
             article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
             article_cta_btn_url: '#'
         };
+
+        // แปลงส่วน Hero เดี่ยวของข้อมูลเดิม ให้เป็นลิสต์ที่วางได้หลายบล็อก (hero_list)
+        const heroListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'hero_list'");
+        if (heroListRow.rows.length === 0) {
+            const legacyHeroRes = await pool.query(
+                "SELECT key, value FROM LANDING_settings WHERE key IN ('hero_badge','hero_title','hero_desc','hero_img_url','btn_text','btn_url','btn_size')"
+            );
+            const legacyHero = {};
+            legacyHeroRes.rows.forEach(row => { legacyHero[row.key] = row.value; });
+            if (legacyHero.hero_title) {
+                const buttons = legacyHero.btn_text
+                    ? [{ text: legacyHero.btn_text, url: legacyHero.btn_url || '#', style: 'primary', size: legacyHero.btn_size || 'text-sm' }]
+                    : [];
+                await pool.query(
+                    "INSERT INTO LANDING_settings (key, value) VALUES ('hero_list', $1) ON CONFLICT (key) DO NOTHING",
+                    [JSON.stringify([{
+                        template: 'split-with-image',
+                        badge: legacyHero.hero_badge || '',
+                        title: legacyHero.hero_title,
+                        desc: legacyHero.hero_desc || '',
+                        image: legacyHero.hero_img_url || '',
+                        buttons
+                    }])]
+                );
+            }
+        }
 
         // แปลงวิสัยทัศน์แบบตายตัว (col1..col3) ของข้อมูลเดิม ให้เป็นลิสต์ที่เพิ่ม/ลดได้ (col_list)
         const colListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'col_list'");
@@ -279,7 +333,7 @@ app.get('/', async (req, res, next) => {
             WHERE a.is_published = true 
             ORDER BY a.created_at DESC LIMIT 9
         `);
-        res.render('index', { settings, latest_articles: articlesRes.rows });
+        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES });
     } catch (err) {
         next(err);
     }
@@ -394,7 +448,7 @@ app.post('/admin/login', loginLimiter, (req, res) => {
 app.get('/admin', requireAuth, async (req, res, next) => {
     try {
         const settings = await getSettings();
-        res.render('admin', { settings });
+        res.render('admin', { settings, templates: TEMPLATES });
     } catch (err) {
         next(err);
     }
@@ -402,7 +456,7 @@ app.get('/admin', requireAuth, async (req, res, next) => {
 
 app.post('/admin/save', requireAuth, upload.fields([
     { name: 'favicon', maxCount: 1 }, { name: 'logo', maxCount: 1 },
-    { name: 'hero_img', maxCount: 1 }, { name: 'stats_img', maxCount: 1 },
+    { name: 'stats_img', maxCount: 1 },
     { name: 'seo_thumbnail', maxCount: 1 }, { name: 'banner_img', maxCount: 1 }
 ]), async (req, res, next) => {
     try {
@@ -413,6 +467,25 @@ app.post('/admin/save', requireAuth, upload.fields([
             let parsedFaq = JSON.parse(body.faq_list || '[]');
             parsedFaq = parsedFaq.map(f => ({ question: f.question, answer: sanitizeHtml(f.answer) }));
             cleanFaqList = JSON.stringify(parsedFaq);
+        } catch (e) { }
+
+        let cleanHeroList = body.hero_list;
+        try {
+            let parsedHero = JSON.parse(body.hero_list || '[]');
+            parsedHero = parsedHero.map(h => ({
+                template: pickTemplate('hero', h.template, 'split-with-image'),
+                badge: (h.badge || '').toString(),
+                title: (h.title || '').toString(),
+                desc: sanitizeHtml(h.desc || ''),
+                image: (h.image || '').toString(),
+                buttons: (Array.isArray(h.buttons) ? h.buttons : []).map(b => ({
+                    text: (b.text || '').toString(),
+                    url: (b.url || '').toString(),
+                    style: ['primary', 'secondary', 'link'].includes(b.style) ? b.style : 'primary',
+                    size: ['text-sm', 'text-base', 'text-lg'].includes(b.size) ? b.size : 'text-sm'
+                }))
+            }));
+            cleanHeroList = JSON.stringify(parsedHero);
         } catch (e) { }
 
         let cleanColList = body.col_list;
@@ -440,13 +513,12 @@ app.post('/admin/save', requireAuth, upload.fields([
         } catch (e) { }
 
         const updates = { 
-            theme_color: body.theme_color, hero_badge: body.hero_badge, hero_title: body.hero_title, hero_desc: sanitizeHtml(body.hero_desc),
-            feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
-            col_list: cleanColList,
+            theme_color: body.theme_color, hero_list: cleanHeroList,
+            feature_badge: body.feature_badge, feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
+            col_list: cleanColList, col_template: pickTemplate('features', body.col_template, 'three-column-icons'), col_img_url: body.col_img_url || '',
             footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,
             grid_badge: body.grid_badge, grid_title: body.grid_title, grid_desc: sanitizeHtml(body.grid_desc),
-            grid_list: cleanGridList,
-            btn_text: body.btn_text, btn_url: body.btn_url, btn_size: body.btn_size,
+            grid_list: cleanGridList, grid_template: pickTemplate('features', body.grid_template, 'offset-grid-icons'), grid_img_url: body.grid_img_url || '',
             stats_badge: body.stats_badge, stats_title: body.stats_title, stats_desc: sanitizeHtml(body.stats_desc),
             stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
             stat3_label: body.stat3_label, stat3_value: body.stat3_value, stat4_label: body.stat4_label, stat4_value: body.stat4_value,
@@ -460,7 +532,6 @@ app.post('/admin/save', requireAuth, upload.fields([
 
         if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0], 'landingpage');
         if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0], 'landingpage');
-        if (req.files['hero_img']) updates.hero_img_url = await uploadToR2(req.files['hero_img'][0], 'landingpage');
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0], 'landingpage');
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0], 'landingpage');
         if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0], 'landingpage');
@@ -481,6 +552,14 @@ app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (
         const fileUrl = await uploadToR2(req.file, 'landingpage/thumbnail');
         res.json({ success: true, url: fileUrl });
     } catch (error) { res.status(500).json({ success: false }); }
+});
+
+app.post('/admin/api/upload-media', requireAuth, upload.single('media'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
+        const fileUrl = await uploadToR2(req.file, 'landingpage');
+        res.json({ success: true, url: fileUrl });
+    } catch (error) { res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' }); }
 });
 
 app.post('/admin/api/upload-slide', requireAuth, upload.single('slide_image'), async (req, res) => {

@@ -1,0 +1,17 @@
+<% var HTag = index === 0 ? 'h1' : 'h2'; %>
+<div class="relative isolate overflow-hidden bg-gray-900 py-28 sm:py-36">
+  <% if (block.image) { %>
+  <img src="<%= block.image %>" alt="<%= block.title %>" class="absolute inset-0 -z-10 h-full w-full object-cover">
+  <div class="absolute inset-0 -z-10 bg-gray-900/70"></div>
+  <% } %>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-3xl text-center">
+      <% if (block.badge) { %>
+      <p class="mb-4 inline-block rounded-full bg-white/10 px-4 py-1 text-sm font-semibold leading-6 text-white ring-1 ring-inset ring-white/20"><%= block.badge %></p>
+      <% } %>
+      <<%= HTag %> class="text-4xl font-bold tracking-tight text-white sm:text-6xl"><%= block.title %></<%= HTag %>>
+      <div class="mt-6 text-lg leading-8 text-gray-200 prose prose-invert max-w-none mx-auto"><%- block.desc %></div>
+      <%- include('../_buttons', { buttons: block.buttons, align: 'center', tone: 'dark' }) %>
+    </div>
+  </div>
+</div>

@@ -87,82 +87,51 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 <main>
-<div class="overflow-hidden bg-white py-15 sm:py-30">
+<div class="bg-white">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mb-12">
         <img src="<%= settings.logo_url %>" alt="Lullapos Logo" class="h-auto w-full max-w-[300px]">
     </div>
-    <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-16 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
-      <div class="lg:pr-[150px] lg:pt-4 relative z-10 bg-white/80 lg:bg-transparent rounded-2xl p-4 lg:p-0">
-        <div class="lg:max-w-lg">
-          <h1 class="text-base font-semibold leading-7 text-primary"><%= settings.hero_badge %></h1>
-          <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= settings.hero_title %></p>
-          <div class="mt-6 text-lg leading-8 text-gray-600 prose max-w-none"><%- settings.hero_desc %></div>
-          <div class="mt-10 flex items-center gap-x-6">
-            <a href="<%= settings.btn_url %>" class="rounded-md bg-primary px-8 py-3.5 <%= settings.btn_size %> font-semibold text-white shadow-sm hover:opacity-80 transition"><%= settings.btn_text %></a>
-          </div>
-        </div>
-      </div>
-      <div class="relative flex items-center justify-center mt-10 lg:mt-0">
-        <img src="<%= settings.hero_img_url %>" alt="Lullapos Dashboard Screenshot" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
-      </div>
-    </div>
   </div>
 </div>
 
-<div class="bg-primary-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-primary">วิสัยทัศน์ของเรา</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.feature_title %></p>
-      <p class="mt-6 text-lg leading-8 text-gray-600"><%= settings.feature_subtitle %></p>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        <% 
-            let visionCols = [];
-            try { visionCols = JSON.parse(settings.col_list || '[]'); } catch(e) {}
-            visionCols.forEach(function(col) { 
-        %>
-        <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm transition relative overflow-hidden hover:shadow-md <%= col.highlight ? 'border-2 border-primary' : 'border border-gray-100' %>">
-          <% if (col.highlight && col.badge) { %>
-          <div class="absolute top-0 right-0 bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg"><%= col.badge %></div>
-          <% } %>
-          <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- col.icon %></div>
-            <%= col.title %>
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- col.desc %></p></dd>
-        </div>
-        <% }); %>
-      </dl>
-    </div>
-  </div>
-</div>
+<%
+  var heroBlocks = [];
+  try { heroBlocks = JSON.parse(settings.hero_list || '[]'); } catch(e) {}
+  var heroIds = templates.hero.map(function(t) { return t.id; });
+%>
+<% heroBlocks.forEach(function(block, i) { %>
+<%- include('partials/hero/' + (heroIds.indexOf(block.template) !== -1 ? block.template : 'split-with-image'), { block: block, index: i }) %>
+<% }); %>
 
-<div class="bg-red-50 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-primary"><%= settings.grid_badge %></h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"><%= settings.grid_title %></p>
-      <p class="mt-6 text-lg leading-8 text-gray-600"><%- settings.grid_desc %></p>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-        <% 
-            let gridFeatures = [];
-            try { gridFeatures = JSON.parse(settings.grid_list || '[]'); } catch(e) {}
-            gridFeatures.forEach(function(feature) { 
-        %>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-gray-900"><div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- feature.icon %></div><%- feature.title %></dt>
-          <dd class="mt-2 text-base leading-7 text-gray-600"><%= feature.desc %></dd>
-        </div>
-        <% }); %>
-      </dl>
-    </div>
-  </div>
-</div>
+<%
+  var visionCols = [];
+  try { visionCols = JSON.parse(settings.col_list || '[]'); } catch(e) {}
+  var featureIds = templates.features.map(function(t) { return t.id; });
+  var visionTpl = featureIds.indexOf(settings.col_template) !== -1 ? settings.col_template : 'three-column-icons';
+%>
+<%- include('partials/features/' + visionTpl, { section: {
+      bg: 'bg-primary-50',
+      badge: settings.feature_badge,
+      title: settings.feature_title,
+      desc: settings.feature_subtitle,
+      image: settings.col_img_url,
+      items: visionCols
+} }) %>
+
+<%
+  var gridFeatures = [];
+  try { gridFeatures = JSON.parse(settings.grid_list || '[]'); } catch(e) {}
+  var gridTpl = featureIds.indexOf(settings.grid_template) !== -1 ? settings.grid_template : 'offset-grid-icons';
+%>
+<%- include('partials/features/' + gridTpl, { section: {
+      bg: 'bg-red-50',
+      badge: settings.grid_badge,
+      title: settings.grid_title,
+      desc: settings.grid_desc,
+      image: settings.grid_img_url,
+      items: gridFeatures
+} }) %>
 
 <div class="relative bg-white">
   <img class="h-56 w-full bg-gray-50 object-cover lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2" src="<%= settings.stats_img_url %>" alt="Lullapos Mission">
