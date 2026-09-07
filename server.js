@@ -105,7 +105,8 @@ function normalizeNavItem(raw, allowChildren) {
         type: (raw && raw.type) === 'url' ? 'url' : 'page',
         page_id: raw && raw.page_id ? String(raw.page_id).replace(/[^0-9]/g, '') : '',
         url: String((raw && raw.url) || '').slice(0, 500),
-        new_tab: !!(raw && raw.new_tab)
+        new_tab: !!(raw && raw.new_tab),
+        enabled: !(raw && raw.enabled === false)
     };
     if (allowChildren) {
         const kids = Array.isArray(raw && raw.children) ? raw.children : [];
@@ -130,8 +131,9 @@ function buildNav(rawItems, pages) {
         if (!pg || !pg.is_published) return null;
         return pg.is_home ? '/' : '/' + encodeURIComponent(pg.slug);
     };
-    return normalizeNavItems(rawItems).map(item => {
+    return normalizeNavItems(rawItems).filter(item => item.enabled).map(item => {
         const children = (item.children || [])
+            .filter(c => c.enabled)
             .map(c => ({ label: c.label, icon: c.icon, new_tab: c.new_tab, href: href(c) }))
             .filter(c => c.href);
         return { label: item.label, icon: item.icon, new_tab: item.new_tab, href: href(item), children };

@@ -57,7 +57,7 @@
 
         const navEsc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         const navSync = () => { navInput.value = JSON.stringify(navItems); };
-        const blankItem = () => ({ label: '', icon: '', type: 'page', page_id: '', url: '', new_tab: false, children: [] });
+        const blankItem = () => ({ label: '', icon: '', type: 'page', page_id: '', url: '', new_tab: false, enabled: true, children: [] });
 
         // path: [i] สำหรับเมนูหลัก, [i, j] สำหรับเมนูย่อย
         const itemAt = (path) => path.length === 1 ? navItems[path[0]] : navItems[path[0]].children[path[1]];
@@ -83,10 +83,14 @@
         function itemRow(item, path, isChild) {
             const list = listAt(path);
             const index = path[path.length - 1];
+            const enabled = item.enabled !== false;
             return `
-                <div class="${isChild ? 'bg-white border rounded p-3' : 'bg-gray-50/50 border border-gray-200 rounded-lg p-4'} space-y-2">
+                <div class="${isChild ? 'bg-white border rounded p-3' : 'bg-gray-50/50 border border-gray-200 rounded-lg p-4'} space-y-2 ${enabled ? '' : 'opacity-60'}">
                     <div class="flex justify-between items-center ${isChild ? '' : 'border-b pb-2'}">
-                        <span class="text-sm font-semibold">${isChild ? 'เมนูย่อย' : 'เมนู'} ${index + 1}</span>
+                        <span class="text-sm font-semibold">
+                            ${isChild ? 'เมนูย่อย' : 'เมนู'} ${index + 1}
+                            ${enabled ? '' : '<span class="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">ปิดใช้งาน</span>'}
+                        </span>
                         <div class="flex space-x-2">
                             ${index > 0 ? `<button type="button" onclick="moveNav('${pathAttr(path)}', -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲</button>` : ''}
                             ${index < list.length - 1 ? `<button type="button" onclick="moveNav('${pathAttr(path)}', 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼</button>` : ''}
@@ -98,9 +102,14 @@
                         <input type="text" list="bi-icon-list" class="border p-2 text-sm font-mono" placeholder="ไอคอน เช่น bi-shop" value="${navEsc(item.icon)}" oninput="updateNav('${pathAttr(path)}', 'icon', this.value)">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${targetFields(item, path)}</div>
-                    <label class="flex items-center gap-2 text-xs text-gray-600">
-                        <input type="checkbox" ${item.new_tab ? 'checked' : ''} onchange="updateNav('${pathAttr(path)}', 'new_tab', this.checked)" class="h-4 w-4"> เปิดในแท็บใหม่
-                    </label>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <label class="flex items-center gap-2 text-xs text-gray-600">
+                            <input type="checkbox" ${item.new_tab ? 'checked' : ''} onchange="updateNav('${pathAttr(path)}', 'new_tab', this.checked)" class="h-4 w-4"> เปิดในแท็บใหม่
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-semibold ${enabled ? 'text-gray-700' : 'text-amber-700'}">
+                            <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleNav('${pathAttr(path)}', this.checked)" class="h-4 w-4"> เปิดใช้งานเมนูนี้
+                        </label>
+                    </div>
                     ${isChild ? '' : `
                     <div class="pt-2 border-t">
                         <div class="flex justify-between items-center mb-2">
@@ -115,7 +124,8 @@
 
         function renderNav() {
             navEmpty.classList.toggle('hidden', navItems.length > 0);
-            navCount.innerText = navItems.length;
+            const active = navItems.filter(i => i.enabled !== false).length;
+            navCount.innerText = active === navItems.length ? navItems.length : active + ' จาก ' + navItems.length;
             navContainer.innerHTML = navItems.map((item, i) => itemRow(item, [i], false)).join('');
             navSync();
         }
@@ -126,6 +136,10 @@
             navSync();
             // สลับชนิดลิงก์ต้องวาดฟิลด์ใหม่
             if (key === 'type') renderNav();
+        };
+        window.toggleNav = (pathStr, enabled) => {
+            itemAt(parsePath(pathStr)).enabled = enabled;
+            renderNav();   // วาดใหม่เพื่อให้ป้ายและความจางอัปเดตตาม
         };
         window.moveNav = (pathStr, direction) => {
             const path = parsePath(pathStr);
