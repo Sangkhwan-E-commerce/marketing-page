@@ -34,16 +34,24 @@
         </main>
     </div>
 
-    <datalist id="bi-icon-list">
-        <% ['bi-house','bi-house-door','bi-shop','bi-cart','bi-bag','bi-basket','bi-credit-card','bi-cash-coin',
-            'bi-graph-up','bi-bar-chart','bi-pie-chart','bi-clipboard-data','bi-box-seam','bi-boxes','bi-truck',
-            'bi-people','bi-person-badge','bi-person-check','bi-headset','bi-chat-dots','bi-envelope','bi-telephone',
-            'bi-gear','bi-sliders','bi-tools','bi-shield-check','bi-lock','bi-cloud','bi-lightning-charge','bi-stars',
-            'bi-star','bi-heart','bi-book','bi-journal-text','bi-newspaper','bi-question-circle','bi-info-circle',
-            'bi-printer','bi-qr-code','bi-tags','bi-calendar-check','bi-clock-history','bi-globe','bi-phone'].forEach(function (icon) { %>
-        <option value="<%= icon %>"></option>
-        <% }); %>
-    </datalist>
+    <div id="icon-picker" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 p-4">
+        <div class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div class="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+                <i class="bi bi-search text-gray-400" aria-hidden="true"></i>
+                <input id="icon-search" type="text" placeholder="ค้นหาไอคอน เช่น cart, user, chart" class="flex-1 rounded border border-gray-300 p-2 text-sm" autocomplete="off">
+                <span id="icon-count" class="hidden shrink-0 text-xs text-gray-500 sm:block"></span>
+                <button type="button" id="icon-picker-close" class="shrink-0 rounded p-2 text-gray-500 hover:bg-gray-100" aria-label="ปิด">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div id="icon-grid" class="grid grid-cols-4 gap-2 overflow-y-auto p-4 sm:grid-cols-6 md:grid-cols-8"></div>
+            <div class="flex items-center justify-between border-t border-gray-200 px-4 py-2 text-xs text-gray-500">
+                <span>คลิกที่ไอคอนเพื่อเลือก</span>
+                <button type="button" id="icon-clear" class="rounded border border-gray-300 px-3 py-1 font-semibold text-gray-600 hover:bg-gray-50">ไม่ใช้ไอคอน</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
 <%- include('_shared-js') %>
@@ -122,7 +130,13 @@
                     <div class="${open ? '' : 'hidden'} space-y-2 border-t border-gray-200 px-3 py-3" data-row-body="${key}">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <input type="text" class="border p-2 text-sm" placeholder="ข้อความบนเมนู" value="${navEsc(item.label)}" oninput="updateNav('${key}', 'label', this.value)">
-                            <input type="text" list="bi-icon-list" class="border p-2 text-sm font-mono" placeholder="ไอคอน เช่น bi-shop" value="${navEsc(item.icon)}" oninput="updateNav('${key}', 'icon', this.value)">
+                            <div class="flex items-stretch gap-1">
+                                <button type="button" onclick="openIconPicker('${key}')" class="flex flex-1 items-center gap-2 overflow-hidden rounded border border-gray-300 p-2 text-left text-sm transition hover:border-primary">
+                                    <i class="bi ${item.icon ? navEsc(item.icon) + ' text-primary' : 'bi-plus-square text-gray-300'} shrink-0 text-lg" aria-hidden="true"></i>
+                                    <span class="flex-1 truncate ${item.icon ? 'font-mono text-gray-700' : 'text-gray-400'}">${navEsc(item.icon) || 'เลือกไอคอน'}</span>
+                                </button>
+                                ${item.icon ? `<button type="button" title="เอาไอคอนออก" onclick="updateNavIcon('${key}', '')" class="shrink-0 rounded border border-gray-300 px-2 text-gray-400 transition hover:border-red-400 hover:text-red-500">✖</button>` : ''}
+                            </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${targetFields(item, path)}</div>
                         <div class="flex flex-wrap items-center gap-4">
@@ -214,6 +228,90 @@
             navItems[index]._open = true;
             renderNav();
         };
+        // --- ตัวเลือกไอคอน Bootstrap Icons ---
+        // ดึงรายชื่อไอคอนทั้งหมดจาก CDN ตอนเปิดครั้งแรก ถ้าโหลดไม่ได้ใช้ชุดสำรองที่ฝังไว้
+        const ICON_FALLBACK = ['bi-house','bi-house-door','bi-shop','bi-cart','bi-bag','bi-basket','bi-credit-card',
+            'bi-cash-coin','bi-graph-up','bi-bar-chart','bi-pie-chart','bi-clipboard-data','bi-box-seam','bi-boxes',
+            'bi-truck','bi-people','bi-person-badge','bi-person-check','bi-headset','bi-chat-dots','bi-envelope',
+            'bi-telephone','bi-gear','bi-sliders','bi-tools','bi-shield-check','bi-lock','bi-cloud',
+            'bi-lightning-charge','bi-stars','bi-star','bi-heart','bi-book','bi-journal-text','bi-newspaper',
+            'bi-question-circle','bi-info-circle','bi-printer','bi-qr-code','bi-tags','bi-calendar-check',
+            'bi-clock-history','bi-globe','bi-phone'];
+        const ICON_PAGE_SIZE = 300;
+
+        const iconModal = document.getElementById('icon-picker');
+        const iconGrid = document.getElementById('icon-grid');
+        const iconSearch = document.getElementById('icon-search');
+        const iconCount = document.getElementById('icon-count');
+        let iconNames = null;
+        let iconTarget = null;
+
+        async function loadIconNames() {
+            if (iconNames) return iconNames;
+            try {
+                const res = await fetch('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.json');
+                if (!res.ok) throw new Error('http ' + res.status);
+                iconNames = Object.keys(await res.json()).map(n => 'bi-' + n).sort();
+            } catch (e) {
+                console.error('โหลดรายชื่อไอคอนไม่สำเร็จ ใช้ชุดสำรองแทน', e);
+                iconNames = ICON_FALLBACK.slice();
+            }
+            return iconNames;
+        }
+
+        function renderIconGrid(term) {
+            const q = String(term || '').trim().toLowerCase();
+            const all = iconNames || [];
+            const matched = q ? all.filter(n => n.indexOf(q) !== -1) : all;
+            const shown = matched.slice(0, ICON_PAGE_SIZE);
+            iconCount.classList.remove('hidden');
+            iconCount.innerText = matched.length
+                ? matched.length + ' ไอคอน' + (matched.length > shown.length ? ' · แสดง ' + shown.length + ' แรก' : '')
+                : 'ไม่พบไอคอนที่ค้นหา';
+            iconGrid.innerHTML = shown.map(name => `
+                <button type="button" onclick="chooseIcon('${name}')" title="${name}" class="flex flex-col items-center gap-1 rounded-lg border border-gray-200 p-2 transition hover:border-primary hover:bg-primary/5">
+                    <i class="bi ${name} text-2xl text-gray-700" aria-hidden="true"></i>
+                    <span class="w-full truncate text-[10px] leading-tight text-gray-500">${name.slice(3)}</span>
+                </button>`).join('');
+        }
+
+        const closeIconPicker = () => {
+            iconModal.classList.add('hidden');
+            iconModal.classList.remove('flex');
+            iconTarget = null;
+        };
+
+        window.openIconPicker = async (pathStr) => {
+            iconTarget = pathStr;
+            iconModal.classList.remove('hidden');
+            iconModal.classList.add('flex');
+            iconGrid.innerHTML = '<p class="col-span-full py-6 text-center text-sm text-gray-500">กำลังโหลดไอคอน...</p>';
+            iconSearch.value = '';
+            await loadIconNames();
+            renderIconGrid('');
+            iconSearch.focus();
+        };
+
+        window.chooseIcon = (name) => {
+            if (iconTarget) updateNavIcon(iconTarget, name);
+            closeIconPicker();
+        };
+
+        window.updateNavIcon = (pathStr, name) => {
+            itemAt(parsePath(pathStr)).icon = name;
+            navSync();
+            renderNav();
+        };
+
+        iconSearch.addEventListener('input', () => renderIconGrid(iconSearch.value));
+        document.getElementById('icon-picker-close').addEventListener('click', closeIconPicker);
+        document.getElementById('icon-clear').addEventListener('click', () => {
+            if (iconTarget) updateNavIcon(iconTarget, '');
+            closeIconPicker();
+        });
+        iconModal.addEventListener('click', (e) => { if (e.target === iconModal) closeIconPicker(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !iconModal.classList.contains('hidden')) closeIconPicker(); });
+
         document.getElementById('add-nav-btn').addEventListener('click', () => {
             navItems.push(Object.assign(blankItem(), { _open: true }));
             renderNav();
