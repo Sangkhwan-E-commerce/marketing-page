@@ -260,25 +260,6 @@ async function initDB() {
             article_cta_btn_url: '#'
         };
 
-        // สร้างหน้าเริ่มต้น (ห้ามลบ เป็นหน้าแรกเสมอ) แล้วย้ายเนื้อหาระดับหน้าจาก LANDING_settings มาไว้ที่หน้านี้
-        // ค่าปริยายยังคงถูก seed ลง LANDING_settings ตามเดิม จึงใช้เป็น fallback ให้หน้าที่สร้างใหม่ได้ด้วย
-        const homeRow = await pool.query('SELECT id FROM landing_pages WHERE is_home = true LIMIT 1');
-        if (homeRow.rows.length === 0) {
-            const created = await pool.query(
-                "INSERT INTO landing_pages (slug, title, is_home, sort_order) VALUES ('home', 'หน้าแรก', true, 0) RETURNING id"
-            );
-            const homeId = created.rows[0].id;
-            const existing = await pool.query('SELECT key, value FROM LANDING_settings');
-            for (const row of existing.rows) {
-                if (!isPageKey(row.key)) continue;
-                await pool.query(
-                    'INSERT INTO landing_page_settings (page_id, key, value) VALUES ($1, $2, $3) ON CONFLICT (page_id, key) DO NOTHING',
-                    [homeId, row.key, row.value]
-                );
-            }
-            console.log('Created default page with ' + existing.rows.filter(r => isPageKey(r.key)).length + ' migrated settings');
-        }
-
         // แปลงส่วน Hero เดี่ยวของข้อมูลเดิม ให้เป็นลิสต์ที่วางได้หลายบล็อก (hero_list)
         const heroListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'hero_list'");
         if (heroListRow.rows.length === 0) {
@@ -358,6 +339,25 @@ async function initDB() {
                 `INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`,
                 [key, value]
             );
+        }
+
+        // สร้างหน้าเริ่มต้น (ห้ามลบ เป็นหน้าแรกเสมอ) แล้วย้ายเนื้อหาระดับหน้าจาก LANDING_settings มาไว้ที่หน้านี้
+        // ค่าปริยายยังคงถูก seed ลง LANDING_settings ตามเดิม จึงใช้เป็น fallback ให้หน้าที่สร้างใหม่ได้ด้วย
+        const homeRow = await pool.query('SELECT id FROM landing_pages WHERE is_home = true LIMIT 1');
+        if (homeRow.rows.length === 0) {
+            const created = await pool.query(
+                "INSERT INTO landing_pages (slug, title, is_home, sort_order) VALUES ('home', 'หน้าแรก', true, 0) RETURNING id"
+            );
+            const homeId = created.rows[0].id;
+            const existing = await pool.query('SELECT key, value FROM LANDING_settings');
+            for (const row of existing.rows) {
+                if (!isPageKey(row.key)) continue;
+                await pool.query(
+                    'INSERT INTO landing_page_settings (page_id, key, value) VALUES ($1, $2, $3) ON CONFLICT (page_id, key) DO NOTHING',
+                    [homeId, row.key, row.value]
+                );
+            }
+            console.log('Created default page with ' + existing.rows.filter(r => isPageKey(r.key)).length + ' migrated settings');
         }
         console.log("Database initialized");
     } catch (err) {
