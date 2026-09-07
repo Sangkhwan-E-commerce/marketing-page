@@ -833,7 +833,7 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
         let cleanFaqList = body.faq_list;
         try {
             let parsedFaq = JSON.parse(body.faq_list || '[]');
-            parsedFaq = parsedFaq.map(f => ({ question: f.question, answer: sanitizeHtml(f.answer) }));
+            parsedFaq = parsedFaq.map(f => ({ icon: (f.icon || '').toString(), question: f.question, answer: sanitizeHtml(f.answer) }));
             cleanFaqList = JSON.stringify(parsedFaq);
         } catch (e) { }
 

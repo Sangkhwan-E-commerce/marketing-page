@@ -216,6 +216,19 @@
 
     <script>
 <%- include('_shared-js') %>
+        // --- ไอคอนของ Advocate / Feature Section ---
+        // ค่าเดิมเก็บเป็นโค้ด SVG ค่าใหม่เป็นชื่อคลาส Bootstrap Icons จึงต้องรองรับทั้งสองแบบ
+        const isSvgIcon = (v) => String(v || '').trim().charAt(0) === '<';
+        function iconPreview(value) {
+            const v = String(value || '').trim();
+            if (!v) return '<i class="bi bi-plus-square shrink-0 text-lg text-gray-300"></i><span class="flex-1 truncate text-gray-400">เลือกไอคอน</span>';
+            if (isSvgIcon(v)) return '<span class="shrink-0 text-primary [&>svg]:h-5 [&>svg]:w-5">' + v + '</span><span class="flex-1 truncate text-gray-500">SVG ที่วางไว้เอง</span>';
+            return '<i class="bi ' + v + ' shrink-0 text-lg text-primary"></i><span class="flex-1 truncate font-mono text-gray-700">' + v + '</span>';
+        }
+        window.setFaqIcon = (index, name) => { faqs[index].icon = name; faqInput.value = JSON.stringify(faqs); renderFaqs(); };
+        window.setVisionIcon = (index, name) => { visionCols[index].icon = name; colInput.value = JSON.stringify(visionCols); renderVisionCols(); };
+        window.setGridIcon = (index, name) => { gridFeatures[index].icon = name; gridInput.value = JSON.stringify(gridFeatures); renderGridFeatures(); };
+
         // --- ระบบ FAQ ---
         const faqContainer = document.getElementById('faq-container');
         const faqInput = document.getElementById('faq_list_input');
@@ -239,6 +252,13 @@
                 div.innerHTML = `
                     ${actionButtons}
                     <div class="pr-32">
+                        <label class="block text-sm font-semibold mb-1">ไอคอนหน้าคำถาม</label>
+                        <div class="mb-2 flex items-stretch gap-1">
+                            <button type="button" onclick="openIconPickerFor('setFaqIcon', '${index}')" class="flex flex-1 items-center gap-2 overflow-hidden rounded border border-gray-300 p-2 text-left text-sm transition hover:border-primary">
+                                ${iconPreview(faq.icon)}
+                            </button>
+                            ${faq.icon ? `<button type="button" title="เอาไอคอนออก" onclick="setFaqIcon('${index}', '')" class="shrink-0 rounded border border-gray-300 px-2 text-gray-400 transition hover:border-red-400 hover:text-red-500">✖</button>` : ''}
+                        </div>
                         <label class="block text-sm font-semibold mb-1">คำถาม</label>
                         <input type="text" class="w-full border p-2 text-sm mb-2" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)">
                     </div>
@@ -516,17 +536,6 @@
         toggleSectionImage('col');
         toggleSectionImage('grid');
 
-        // --- ไอคอนของ Advocate / Feature Section ---
-        // ค่าเดิมเก็บเป็นโค้ด SVG ค่าใหม่เป็นชื่อคลาส Bootstrap Icons จึงต้องรองรับทั้งสองแบบ
-        const isSvgIcon = (v) => String(v || '').trim().charAt(0) === '<';
-        function iconPreview(value) {
-            const v = String(value || '').trim();
-            if (!v) return '<i class="bi bi-plus-square shrink-0 text-lg text-gray-300"></i><span class="flex-1 truncate text-gray-400">เลือกไอคอน</span>';
-            if (isSvgIcon(v)) return '<span class="shrink-0 text-primary [&>svg]:h-5 [&>svg]:w-5">' + v + '</span><span class="flex-1 truncate text-gray-500">SVG ที่วางไว้เอง</span>';
-            return '<i class="bi ' + v + ' shrink-0 text-lg text-primary"></i><span class="flex-1 truncate font-mono text-gray-700">' + v + '</span>';
-        }
-        window.setVisionIcon = (index, name) => { visionCols[index].icon = name; colInput.value = JSON.stringify(visionCols); renderVisionCols(); };
-        window.setGridIcon = (index, name) => { gridFeatures[index].icon = name; gridInput.value = JSON.stringify(gridFeatures); renderGridFeatures(); };
 
         // --- Advocate Section (เพิ่ม/ลด/สลับลำดับได้) ---
         const colContainer = document.getElementById('col-container');
