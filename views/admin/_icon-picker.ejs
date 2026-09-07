@@ -21,6 +21,14 @@
     </div>
 </div>
 
+<style>
+    /* ไอคอนทั้งชุดมีราวสองพันตัว ให้เบราว์เซอร์ข้ามการวาดปุ่มที่ยังไม่เลื่อนมาถึง */
+    #icon-grid > button {
+        content-visibility: auto;
+        contain-intrinsic-size: 76px;
+    }
+</style>
+
 <script>
     (function () {
         // ชุดสำรองเผื่อโหลดรายชื่อจาก CDN ไม่สำเร็จ จะได้ไม่เปิดมาเจอหน้าว่าง
@@ -31,7 +39,6 @@
             'bi-lightning-charge','bi-stars','bi-star','bi-heart','bi-book','bi-journal-text','bi-newspaper',
             'bi-question-circle','bi-info-circle','bi-printer','bi-qr-code','bi-tags','bi-calendar-check',
             'bi-clock-history','bi-globe','bi-phone'];
-        const ICON_PAGE_SIZE = 300;
 
         const modal = document.getElementById('icon-picker');
         const grid = document.getElementById('icon-grid');
@@ -59,12 +66,9 @@
             const q = String(term || '').trim().toLowerCase();
             const all = iconNames || [];
             const matched = q ? all.filter(n => n.indexOf(q) !== -1) : all;
-            const shown = matched.slice(0, ICON_PAGE_SIZE);
             count.classList.remove('hidden');
-            count.innerText = matched.length
-                ? matched.length + ' ไอคอน' + (matched.length > shown.length ? ' · แสดง ' + shown.length + ' แรก' : '')
-                : 'ไม่พบไอคอนที่ค้นหา';
-            grid.innerHTML = shown.map(name => `
+            count.innerText = matched.length ? matched.length + ' ไอคอน' : 'ไม่พบไอคอนที่ค้นหา';
+            grid.innerHTML = matched.map(name => `
                 <button type="button" onclick="chooseIcon('${name}')" title="${name}" class="flex flex-col items-center gap-1 rounded-lg border border-gray-200 p-2 transition hover:border-primary hover:bg-primary/5">
                     <i class="bi ${name} text-2xl text-gray-700" aria-hidden="true"></i>
                     <span class="w-full truncate text-[10px] leading-tight text-gray-500">${name.slice(3)}</span>
@@ -93,7 +97,12 @@
             close();
         };
 
-        search.addEventListener('input', () => renderGrid(search.value));
+        // หน่วงเล็กน้อย เพราะการพิมพ์แต่ละตัวอักษรคือการสร้างปุ่มใหม่ทั้งชุด
+        let searchTimer = null;
+        search.addEventListener('input', () => {
+            if (searchTimer) clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => renderGrid(search.value), 120);
+        });
         document.getElementById('icon-picker-close').addEventListener('click', close);
         document.getElementById('icon-clear').addEventListener('click', () => {
             if (target && typeof window[target.handlerName] === 'function') window[target.handlerName](target.key, '');
