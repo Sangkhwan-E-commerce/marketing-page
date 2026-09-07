@@ -1,0 +1,6 @@
+<%
+  // locals: value (ชื่อคลาส Bootstrap Icons หรือโค้ด SVG แบบเดิม), cls (คลาสเสริมสำหรับ <i>)
+  // ค่าที่ขึ้นต้นด้วย < ถือเป็น SVG ที่บันทึกไว้ก่อนมีตัวเลือกไอคอน จึงแสดงตามเดิม
+  var _v = String(value || '').trim();
+  var _cls = (typeof cls !== 'undefined' && cls) ? cls : '';
+%><% if (!_v) { %><% } else if (_v.charAt(0) === '<') { %><%- _v %><% } else { %><i class="bi <%= _v %> <%= _cls %>" aria-hidden="true"></i><% } %>

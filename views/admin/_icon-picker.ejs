@@ -1,0 +1,105 @@
+<%
+  // ตัวเลือกไอคอน Bootstrap Icons ใช้ร่วมกันทุกหน้าแอดมิน
+  // เรียกด้วย openIconPickerFor('ชื่อฟังก์ชันที่จะรับค่า', 'คีย์ของรายการ')
+  // หน้าที่ใช้ต้องประกาศ window[ชื่อฟังก์ชัน] = (key, iconName) => { ... }
+%>
+<div id="icon-picker" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 p-4">
+    <div class="flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+        <div class="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
+            <i class="bi bi-search text-gray-400" aria-hidden="true"></i>
+            <input id="icon-search" type="text" placeholder="ค้นหาไอคอน เช่น cart, person, chart" class="flex-1 rounded border border-gray-300 p-2 text-sm" autocomplete="off">
+            <span id="icon-count" class="hidden shrink-0 text-xs text-gray-500 sm:block"></span>
+            <button type="button" id="icon-picker-close" class="shrink-0 rounded p-2 text-gray-500 hover:bg-gray-100" aria-label="ปิด">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div id="icon-grid" class="grid grid-cols-4 gap-2 overflow-y-auto p-4 sm:grid-cols-6 md:grid-cols-8"></div>
+        <div class="flex items-center justify-between border-t border-gray-200 px-4 py-2 text-xs text-gray-500">
+            <span>คลิกที่ไอคอนเพื่อเลือก</span>
+            <button type="button" id="icon-clear" class="rounded border border-gray-300 px-3 py-1 font-semibold text-gray-600 hover:bg-gray-50">ไม่ใช้ไอคอน</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // ชุดสำรองเผื่อโหลดรายชื่อจาก CDN ไม่สำเร็จ จะได้ไม่เปิดมาเจอหน้าว่าง
+        const ICON_FALLBACK = ['bi-house','bi-house-door','bi-shop','bi-cart','bi-bag','bi-basket','bi-credit-card',
+            'bi-cash-coin','bi-graph-up','bi-bar-chart','bi-pie-chart','bi-clipboard-data','bi-box-seam','bi-boxes',
+            'bi-truck','bi-people','bi-person-badge','bi-person-check','bi-headset','bi-chat-dots','bi-envelope',
+            'bi-telephone','bi-gear','bi-sliders','bi-tools','bi-shield-check','bi-lock','bi-cloud',
+            'bi-lightning-charge','bi-stars','bi-star','bi-heart','bi-book','bi-journal-text','bi-newspaper',
+            'bi-question-circle','bi-info-circle','bi-printer','bi-qr-code','bi-tags','bi-calendar-check',
+            'bi-clock-history','bi-globe','bi-phone'];
+        const ICON_PAGE_SIZE = 300;
+
+        const modal = document.getElementById('icon-picker');
+        const grid = document.getElementById('icon-grid');
+        const search = document.getElementById('icon-search');
+        const count = document.getElementById('icon-count');
+        if (!modal) return;
+
+        let iconNames = null;
+        let target = null;
+
+        async function loadIconNames() {
+            if (iconNames) return iconNames;
+            try {
+                const res = await fetch('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.json');
+                if (!res.ok) throw new Error('http ' + res.status);
+                iconNames = Object.keys(await res.json()).map(n => 'bi-' + n).sort();
+            } catch (e) {
+                console.error('โหลดรายชื่อไอคอนไม่สำเร็จ ใช้ชุดสำรองแทน', e);
+                iconNames = ICON_FALLBACK.slice();
+            }
+            return iconNames;
+        }
+
+        function renderGrid(term) {
+            const q = String(term || '').trim().toLowerCase();
+            const all = iconNames || [];
+            const matched = q ? all.filter(n => n.indexOf(q) !== -1) : all;
+            const shown = matched.slice(0, ICON_PAGE_SIZE);
+            count.classList.remove('hidden');
+            count.innerText = matched.length
+                ? matched.length + ' ไอคอน' + (matched.length > shown.length ? ' · แสดง ' + shown.length + ' แรก' : '')
+                : 'ไม่พบไอคอนที่ค้นหา';
+            grid.innerHTML = shown.map(name => `
+                <button type="button" onclick="chooseIcon('${name}')" title="${name}" class="flex flex-col items-center gap-1 rounded-lg border border-gray-200 p-2 transition hover:border-primary hover:bg-primary/5">
+                    <i class="bi ${name} text-2xl text-gray-700" aria-hidden="true"></i>
+                    <span class="w-full truncate text-[10px] leading-tight text-gray-500">${name.slice(3)}</span>
+                </button>`).join('');
+        }
+
+        const close = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            target = null;
+        };
+
+        window.openIconPickerFor = async (handlerName, key) => {
+            target = { handlerName: handlerName, key: key };
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            grid.innerHTML = '<p class="col-span-full py-6 text-center text-sm text-gray-500">กำลังโหลดไอคอน...</p>';
+            search.value = '';
+            await loadIconNames();
+            renderGrid('');
+            search.focus();
+        };
+
+        window.chooseIcon = (name) => {
+            if (target && typeof window[target.handlerName] === 'function') window[target.handlerName](target.key, name);
+            close();
+        };
+
+        search.addEventListener('input', () => renderGrid(search.value));
+        document.getElementById('icon-picker-close').addEventListener('click', close);
+        document.getElementById('icon-clear').addEventListener('click', () => {
+            if (target && typeof window[target.handlerName] === 'function') window[target.handlerName](target.key, '');
+            close();
+        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) close(); });
+    })();
+</script>

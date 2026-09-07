@@ -13,7 +13,7 @@
           <div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg"><%= item.badge %></div>
           <% } %>
           <dt class="flex items-center gap-x-3 text-xl font-semibold leading-7 text-gray-900">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- item.icon %></div>
+            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white [&>svg]:w-6 [&>svg]:h-6"><%- include('../_icon', { value: item.icon, cls: 'text-2xl' }) %></div>
             <%= item.title %>
           </dt>
           <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600"><p class="flex-auto"><%- item.desc %></p></dd>

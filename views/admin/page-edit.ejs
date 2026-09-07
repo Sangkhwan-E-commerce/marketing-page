@@ -212,6 +212,8 @@
         </main>
     </div>
 
+    <%- include('_icon-picker') %>
+
     <script>
 <%- include('_shared-js') %>
         // --- ระบบ FAQ ---
@@ -514,6 +516,18 @@
         toggleSectionImage('col');
         toggleSectionImage('grid');
 
+        // --- ไอคอนของ Advocate / Feature Section ---
+        // ค่าเดิมเก็บเป็นโค้ด SVG ค่าใหม่เป็นชื่อคลาส Bootstrap Icons จึงต้องรองรับทั้งสองแบบ
+        const isSvgIcon = (v) => String(v || '').trim().charAt(0) === '<';
+        function iconPreview(value) {
+            const v = String(value || '').trim();
+            if (!v) return '<i class="bi bi-plus-square shrink-0 text-lg text-gray-300"></i><span class="flex-1 truncate text-gray-400">เลือกไอคอน</span>';
+            if (isSvgIcon(v)) return '<span class="shrink-0 text-primary [&>svg]:h-5 [&>svg]:w-5">' + v + '</span><span class="flex-1 truncate text-gray-500">SVG ที่วางไว้เอง</span>';
+            return '<i class="bi ' + v + ' shrink-0 text-lg text-primary"></i><span class="flex-1 truncate font-mono text-gray-700">' + v + '</span>';
+        }
+        window.setVisionIcon = (index, name) => { visionCols[index].icon = name; colInput.value = JSON.stringify(visionCols); renderVisionCols(); };
+        window.setGridIcon = (index, name) => { gridFeatures[index].icon = name; gridInput.value = JSON.stringify(gridFeatures); renderGridFeatures(); };
+
         // --- Advocate Section (เพิ่ม/ลด/สลับลำดับได้) ---
         const colContainer = document.getElementById('col-container');
         const colInput = document.getElementById('col_list_input');
@@ -542,8 +556,17 @@
                             <button type="button" onclick="removeVisionCol(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
                         </div>
                     </div>
-                    <label class="block text-xs font-semibold text-gray-600">ไอคอน (โค้ด SVG)</label>
-                    <textarea rows="2" class="w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateVisionCol(${index}, 'icon', this.value)">${colEscText(col.icon)}</textarea>
+                    <label class="block text-xs font-semibold text-gray-600">ไอคอน</label>
+                    <div class="flex items-stretch gap-1">
+                        <button type="button" onclick="openIconPickerFor('setVisionIcon', '${index}')" class="flex flex-1 items-center gap-2 overflow-hidden rounded border border-gray-300 p-2 text-left text-sm transition hover:border-primary">
+                            ${iconPreview(col.icon)}
+                        </button>
+                        ${col.icon ? `<button type="button" title="เอาไอคอนออก" onclick="setVisionIcon('${index}', '')" class="shrink-0 rounded border border-gray-300 px-2 text-gray-400 transition hover:border-red-400 hover:text-red-500">✖</button>` : ''}
+                    </div>
+                    <details class="text-xs" ${isSvgIcon(col.icon) ? 'open' : ''}>
+                        <summary class="cursor-pointer text-gray-500 hover:text-primary">หรือวางโค้ด SVG เอง</summary>
+                        <textarea rows="2" class="mt-1 w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateVisionCol(${index}, 'icon', this.value)">${colEscText(col.icon)}</textarea>
+                    </details>
                     <label class="block text-xs font-semibold text-gray-600">หัวข้อ</label>
                     <input type="text" class="w-full border p-2 text-sm" value="${colEscAttr(col.title)}" oninput="updateVisionCol(${index}, 'title', this.value)">
                     <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
@@ -612,8 +635,17 @@
                             <button type="button" onclick="removeGridFeature(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
                         </div>
                     </div>
-                    <label class="block text-xs font-semibold text-gray-600">ไอคอน (โค้ด SVG)</label>
-                    <textarea rows="2" class="w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateGridFeature(${index}, 'icon', this.value)">${gridEscText(feature.icon)}</textarea>
+                    <label class="block text-xs font-semibold text-gray-600">ไอคอน</label>
+                    <div class="flex items-stretch gap-1">
+                        <button type="button" onclick="openIconPickerFor('setGridIcon', '${index}')" class="flex flex-1 items-center gap-2 overflow-hidden rounded border border-gray-300 p-2 text-left text-sm transition hover:border-primary">
+                            ${iconPreview(feature.icon)}
+                        </button>
+                        ${feature.icon ? `<button type="button" title="เอาไอคอนออก" onclick="setGridIcon('${index}', '')" class="shrink-0 rounded border border-gray-300 px-2 text-gray-400 transition hover:border-red-400 hover:text-red-500">✖</button>` : ''}
+                    </div>
+                    <details class="text-xs" ${isSvgIcon(feature.icon) ? 'open' : ''}>
+                        <summary class="cursor-pointer text-gray-500 hover:text-primary">หรือวางโค้ด SVG เอง</summary>
+                        <textarea rows="2" class="mt-1 w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateGridFeature(${index}, 'icon', this.value)">${gridEscText(feature.icon)}</textarea>
+                    </details>
                     <label class="block text-xs font-semibold text-gray-600">หัวข้อ</label>
                     <input type="text" class="w-full border p-2 text-sm" value="${gridEscAttr(feature.title)}" oninput="updateGridFeature(${index}, 'title', this.value)">
                     <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
