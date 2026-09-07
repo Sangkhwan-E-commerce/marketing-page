@@ -57,6 +57,23 @@ const TEMPLATES = {
 };
 const pickTemplate = (group, value, fallback) => TEMPLATES[group].some(t => t.id === value) ? value : fallback;
 
+// คีย์ที่เป็นเนื้อหา "ของหน้านั้นๆ" เก็บใน landing_page_settings
+// ที่เหลือ (โลโก้ ธีม footer โซเชียล โฆษณา Modal CTA ท้ายบทความ) เป็นของทั้งเว็บ อยู่ใน LANDING_settings
+const PAGE_SETTING_KEYS = [
+    'section_order',
+    'hero_list',
+    'feature_badge', 'feature_title', 'feature_subtitle', 'col_list', 'col_template', 'col_img_url',
+    'grid_badge', 'grid_title', 'grid_desc', 'grid_list', 'grid_template', 'grid_img_url',
+    'stats_badge', 'stats_title', 'stats_desc', 'stats_img_url',
+    'stat1_label', 'stat1_value', 'stat2_label', 'stat2_value',
+    'stat3_label', 'stat3_value', 'stat4_label', 'stat4_value',
+    'articles_title', 'articles_subtitle', 'articles_btn_text',
+    'faq_title', 'faq_list',
+    'cta_title', 'cta_desc', 'cta_btn1_text', 'cta_btn1_url', 'cta_btn2_text', 'cta_btn2_url',
+    'seo_title', 'seo_description', 'seo_keywords', 'seo_thumbnail_url'
+];
+const isPageKey = (key) => PAGE_SETTING_KEYS.includes(key);
+
 // ส่วนต่างๆ ของหน้าแรก เรียงลำดับ/ซ่อน/เลือกสีพื้นหลังได้จากหน้าแอดมิน
 // type ต้องตรงกับชื่อไฟล์ใน views/partials/sections/
 const SECTIONS = [
@@ -120,6 +137,27 @@ async function initDB() {
             CREATE TABLE IF NOT EXISTS LANDING_settings (
                 key VARCHAR(50) PRIMARY KEY,
                 value TEXT
+            );
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS landing_pages (
+                id SERIAL PRIMARY KEY,
+                slug VARCHAR(100) UNIQUE NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                is_home BOOLEAN DEFAULT false,
+                is_published BOOLEAN DEFAULT true,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS landing_page_settings (
+                page_id INTEGER NOT NULL REFERENCES landing_pages(id) ON DELETE CASCADE,
+                key VARCHAR(50) NOT NULL,
+                value TEXT,
+                PRIMARY KEY (page_id, key)
             );
         `);
 
@@ -222,6 +260,25 @@ async function initDB() {
             article_cta_btn_url: '#'
         };
 
+        // สร้างหน้าเริ่มต้น (ห้ามลบ เป็นหน้าแรกเสมอ) แล้วย้ายเนื้อหาระดับหน้าจาก LANDING_settings มาไว้ที่หน้านี้
+        // ค่าปริยายยังคงถูก seed ลง LANDING_settings ตามเดิม จึงใช้เป็น fallback ให้หน้าที่สร้างใหม่ได้ด้วย
+        const homeRow = await pool.query('SELECT id FROM landing_pages WHERE is_home = true LIMIT 1');
+        if (homeRow.rows.length === 0) {
+            const created = await pool.query(
+                "INSERT INTO landing_pages (slug, title, is_home, sort_order) VALUES ('home', 'หน้าแรก', true, 0) RETURNING id"
+            );
+            const homeId = created.rows[0].id;
+            const existing = await pool.query('SELECT key, value FROM LANDING_settings');
+            for (const row of existing.rows) {
+                if (!isPageKey(row.key)) continue;
+                await pool.query(
+                    'INSERT INTO landing_page_settings (page_id, key, value) VALUES ($1, $2, $3) ON CONFLICT (page_id, key) DO NOTHING',
+                    [homeId, row.key, row.value]
+                );
+            }
+            console.log('Created default page with ' + existing.rows.filter(r => isPageKey(r.key)).length + ' migrated settings');
+        }
+
         // แปลงส่วน Hero เดี่ยวของข้อมูลเดิม ให้เป็นลิสต์ที่วางได้หลายบล็อก (hero_list)
         const heroListRow = await pool.query("SELECT value FROM LANDING_settings WHERE key = 'hero_list'");
         if (heroListRow.rows.length === 0) {
@@ -309,11 +366,62 @@ async function initDB() {
 }
 initDB();
 
+// ค่าระดับเว็บ ใช้ร่วมกันทุกหน้า
 async function getSettings() {
     const res = await pool.query('SELECT key, value FROM LANDING_settings');
     const settings = {};
     res.rows.forEach(row => { settings[row.key] = row.value; });
     return settings;
+}
+
+async function getPageSettings(pageId) {
+    const res = await pool.query('SELECT key, value FROM landing_page_settings WHERE page_id = $1', [pageId]);
+    const settings = {};
+    res.rows.forEach(row => { settings[row.key] = row.value; });
+    return settings;
+}
+
+async function listPages() {
+    const res = await pool.query('SELECT * FROM landing_pages ORDER BY is_home DESC, sort_order ASC, id ASC');
+    return res.rows;
+}
+
+async function getHomePage() {
+    const res = await pool.query('SELECT * FROM landing_pages WHERE is_home = true LIMIT 1');
+    return res.rows[0] || null;
+}
+
+async function getPageById(id) {
+    const res = await pool.query('SELECT * FROM landing_pages WHERE id = $1', [id]);
+    return res.rows[0] || null;
+}
+
+// view ทุกตัวยังรับ object แบนๆ ชื่อ settings เหมือนเดิม
+// ค่าของหน้าทับค่าระดับเว็บ ส่วนคีย์ที่หน้านั้นยังไม่มี จะตกไปใช้ค่าปริยายที่ seed ไว้
+async function buildPageContext(page) {
+    const site = await getSettings();
+    if (!page) return site;
+    return Object.assign({}, site, await getPageSettings(page.id));
+}
+
+async function saveSettings(updates) {
+    for (const [key, value] of Object.entries(updates)) {
+        if (value === undefined) continue;
+        await pool.query(
+            'INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+            [key, value]
+        );
+    }
+}
+
+async function savePageSettings(pageId, updates) {
+    for (const [key, value] of Object.entries(updates)) {
+        if (value === undefined) continue;
+        await pool.query(
+            'INSERT INTO landing_page_settings (page_id, key, value) VALUES ($1, $2, $3) ON CONFLICT (page_id, key) DO UPDATE SET value = EXCLUDED.value',
+            [pageId, key, value]
+        );
+    }
 }
 
 const s3 = new S3Client({
@@ -405,7 +513,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
 app.get('/', async (req, res, next) => {
     try {
-        const settings = await getSettings();
+        const settings = await buildPageContext(await getHomePage());
         const articlesRes = await pool.query(`
             SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
             FROM landing_articles a 
@@ -421,7 +529,8 @@ app.get('/', async (req, res, next) => {
 
 app.get('/articles', async (req, res, next) => {
     try {
-        const settings = await getSettings();
+        // หน้ารายการ/หน้าบทความใช้ค่าเว็บ บวกค่าเริ่มต้นจากหน้าแรก (เช่น SEO fallback)
+        const settings = await buildPageContext(await getHomePage());
         
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
@@ -478,7 +587,7 @@ app.get('/articles', async (req, res, next) => {
 // --- อัปเดตส่วนดึงบทความสำหรับแสดงในหน้าบทความเดี่ยว ---
 app.get('/article/:slug', async (req, res, next) => {
     try {
-        const settings = await getSettings();
+        const settings = await buildPageContext(await getHomePage());
         
         // 1. ดึงข้อมูลบทความหลัก
         const articleRes = await pool.query(`
@@ -527,23 +636,76 @@ app.post('/admin/login', loginLimiter, (req, res) => {
     }
 });
 
-app.get('/admin', requireAuth, async (req, res, next) => {
+app.get('/admin', requireAuth, (req, res) => res.redirect('/admin/site'));
+
+app.get('/admin/site', requireAuth, async (req, res, next) => {
     try {
         const settings = await getSettings();
-        res.render('admin', { settings, templates: TEMPLATES, sectionCatalogue: SECTIONS, sectionBgs: SECTION_BGS });
-    } catch (err) {
-        next(err);
-    }
+        res.render('admin/site', { settings, templates: TEMPLATES, sectionCatalogue: SECTIONS, sectionBgs: SECTION_BGS });
+    } catch (err) { next(err); }
 });
 
-app.post('/admin/save', requireAuth, upload.fields([
-    { name: 'favicon', maxCount: 1 }, { name: 'logo', maxCount: 1 },
-    { name: 'stats_img', maxCount: 1 },
-    { name: 'seo_thumbnail', maxCount: 1 }, { name: 'banner_img', maxCount: 1 }
+app.post('/admin/site/save', requireAuth, upload.fields([
+    { name: 'favicon', maxCount: 1 }, { name: 'logo', maxCount: 1 }
 ]), async (req, res, next) => {
     try {
         const body = req.body;
-        
+        const updates = {
+            site_name: body.site_name,
+            logo_height: clampNumber(body.logo_height, 20, 400, 80),
+            logo_padding_top: clampNumber(body.logo_padding_top, 0, 300, 0),
+            theme_color: body.theme_color,
+            footer_text: body.footer_text,
+            facebook_url: body.facebook_url,
+            line_url: body.line_url,
+            facebook_icon: body.facebook_icon,
+            line_icon: body.line_icon,
+            banner_active: body.banner_active === 'on' ? 'true' : 'false',
+            banner_display_type: body.banner_display_type || 'always',
+            banner_width_percent: clampNumber(body.banner_width_percent, 10, 100, 80),
+            banner_max_width: clampNumber(body.banner_max_width, 200, 3000, 1200),
+            banner_display_limit: body.banner_display_limit || '1',
+            banner_version: Date.now().toString(),
+            banner_list: body.banner_list || '[]',
+            article_cta_title: body.article_cta_title,
+            article_cta_btn_text: body.article_cta_btn_text,
+            article_cta_btn_url: body.article_cta_btn_url,
+        };
+        if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0], 'landingpage');
+        if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0], 'landingpage');
+        await saveSettings(updates);
+        res.redirect('/admin/site');
+    } catch (error) { next(error); }
+});
+
+app.get('/admin/pages', requireAuth, async (req, res, next) => {
+    try {
+        res.render('admin/pages', { settings: await getSettings(), pages: await listPages() });
+    } catch (err) { next(err); }
+});
+
+app.get('/admin/pages/:id', requireAuth, async (req, res, next) => {
+    try {
+        const page = await getPageById(req.params.id);
+        if (!page) return res.status(404).send('ไม่พบหน้านี้');
+        res.render('admin/page-edit', {
+            settings: await buildPageContext(page),
+            page,
+            templates: TEMPLATES,
+            sectionCatalogue: SECTIONS,
+            sectionBgs: SECTION_BGS
+        });
+    } catch (err) { next(err); }
+});
+
+app.post('/admin/pages/:id/save', requireAuth, upload.fields([
+    { name: 'stats_img', maxCount: 1 }, { name: 'seo_thumbnail', maxCount: 1 }
+]), async (req, res, next) => {
+    try {
+        const page = await getPageById(req.params.id);
+        if (!page) return res.status(404).send('ไม่พบหน้านี้');
+        const body = req.body;
+
         let cleanFaqList = body.faq_list;
         try {
             let parsedFaq = JSON.parse(body.faq_list || '[]');
@@ -596,41 +758,58 @@ app.post('/admin/save', requireAuth, upload.fields([
             cleanGridList = JSON.stringify(parsedGrid);
         } catch (e) { }
 
-        const updates = { 
-            site_name: body.site_name, logo_height: clampNumber(body.logo_height, 20, 400, 80), logo_padding_top: clampNumber(body.logo_padding_top, 0, 300, 0), theme_color: body.theme_color, section_order: cleanSectionOrder, hero_list: cleanHeroList,
-            feature_badge: body.feature_badge, feature_title: body.feature_title, feature_subtitle: body.feature_subtitle,
-            col_list: cleanColList, col_template: pickTemplate('features', body.col_template, 'three-column-icons'), col_img_url: body.col_img_url || '',
-            footer_text: body.footer_text, facebook_url: body.facebook_url, line_url: body.line_url, facebook_icon: body.facebook_icon, line_icon: body.line_icon,
-            grid_badge: body.grid_badge, grid_title: body.grid_title, grid_desc: sanitizeHtml(body.grid_desc),
-            grid_list: cleanGridList, grid_template: pickTemplate('features', body.grid_template, 'offset-grid-icons'), grid_img_url: body.grid_img_url || '',
-            stats_badge: body.stats_badge, stats_title: body.stats_title, stats_desc: sanitizeHtml(body.stats_desc),
-            stat1_label: body.stat1_label, stat1_value: body.stat1_value, stat2_label: body.stat2_label, stat2_value: body.stat2_value,
-            stat3_label: body.stat3_label, stat3_value: body.stat3_value, stat4_label: body.stat4_label, stat4_value: body.stat4_value,
-            articles_title: body.articles_title, articles_subtitle: body.articles_subtitle, articles_btn_text: body.articles_btn_text,
-            faq_title: body.faq_title, faq_list: cleanFaqList,
-            cta_title: body.cta_title, cta_desc: sanitizeHtml(body.cta_desc), cta_btn1_text: body.cta_btn1_text, cta_btn1_url: body.cta_btn1_url, cta_btn2_text: body.cta_btn2_text, cta_btn2_url: body.cta_btn2_url,
-            seo_title: body.seo_title, seo_description: body.seo_description, seo_keywords: body.seo_keywords,
-            banner_active: body.banner_active === 'on' ? 'true' : 'false', banner_display_type: body.banner_display_type || 'always',
-            banner_width_percent: clampNumber(body.banner_width_percent, 10, 100, 80),
-            banner_max_width: clampNumber(body.banner_max_width, 200, 3000, 1200),
-            banner_display_limit: body.banner_display_limit || '1', banner_version: Date.now().toString(), banner_list: body.banner_list || '[]',
-            article_cta_title: body.article_cta_title, article_cta_btn_text: body.article_cta_btn_text, article_cta_btn_url: body.article_cta_btn_url
+        const updates = {
+            section_order: cleanSectionOrder,
+            hero_list: cleanHeroList,
+            feature_badge: body.feature_badge,
+            feature_title: body.feature_title,
+            feature_subtitle: body.feature_subtitle,
+            col_list: cleanColList,
+            col_template: pickTemplate('features', body.col_template, 'three-column-icons'),
+            col_img_url: body.col_img_url || '',
+            grid_badge: body.grid_badge,
+            grid_title: body.grid_title,
+            grid_desc: sanitizeHtml(body.grid_desc),
+            grid_list: cleanGridList,
+            grid_template: pickTemplate('features', body.grid_template, 'offset-grid-icons'),
+            grid_img_url: body.grid_img_url || '',
+            stats_badge: body.stats_badge,
+            stats_title: body.stats_title,
+            stats_desc: sanitizeHtml(body.stats_desc),
+            stat1_label: body.stat1_label,
+            stat1_value: body.stat1_value,
+            stat2_label: body.stat2_label,
+            stat2_value: body.stat2_value,
+            stat3_label: body.stat3_label,
+            stat3_value: body.stat3_value,
+            stat4_label: body.stat4_label,
+            stat4_value: body.stat4_value,
+            articles_title: body.articles_title,
+            articles_subtitle: body.articles_subtitle,
+            articles_btn_text: body.articles_btn_text,
+            faq_title: body.faq_title,
+            faq_list: cleanFaqList,
+            cta_title: body.cta_title,
+            cta_desc: sanitizeHtml(body.cta_desc),
+            cta_btn1_text: body.cta_btn1_text,
+            cta_btn1_url: body.cta_btn1_url,
+            cta_btn2_text: body.cta_btn2_text,
+            cta_btn2_url: body.cta_btn2_url,
+            seo_title: body.seo_title,
+            seo_description: body.seo_description,
+            seo_keywords: body.seo_keywords,
         };
-
-        if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0], 'landingpage');
-        if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0], 'landingpage');
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0], 'landingpage');
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0], 'landingpage');
-        if (req.files['banner_img']) updates.banner_img_url = await uploadToR2(req.files['banner_img'][0], 'landingpage');
-
-        for (const [key, value] of Object.entries(updates)) {
-            await pool.query(
-                `INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
-                [key, value]
-            );
-        }
-        res.redirect('/admin');
+        await savePageSettings(page.id, updates);
+        res.redirect('/admin/pages/' + page.id);
     } catch (error) { next(error); }
+});
+
+app.get('/admin/blog', requireAuth, async (req, res, next) => {
+    try {
+        res.render('admin/blog', { settings: await getSettings() });
+    } catch (err) { next(err); }
 });
 
 app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (req, res) => {

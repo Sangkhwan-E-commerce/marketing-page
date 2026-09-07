@@ -1,0 +1,127 @@
+<%- include('_head', { pageTitle: 'จัดการบทความ' }) %>
+<%- include('_sidebar', { adminPage: 'blog', tabs: [], tabsTitle: 'หัวข้อในหน้านี้' }) %>
+<%- include('_topbar', { heading: 'จัดการบทความ (Blog)' }) %>
+
+                <div id="tab-blog" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/90 rounded-t-xl">
+                            <h2 class="text-lg font-bold text-gray-800">จัดการบทความ (Blog)</h2>
+                            <div class="flex space-x-2 mt-2 sm:mt-0">
+                                <button onclick="blogUI.showCategoryModal()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm font-bold border border-gray-300 hover:bg-gray-200">จัดการหมวดหมู่</button>
+                                <button onclick="blogUI.showArticleEditor()" class="bg-primary text-white px-4 py-2 rounded text-sm font-bold hover:bg-opacity-80">+ เขียนบทความใหม่</button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-gray-500 border border-gray-200 rounded-lg">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                                        <tr><th class="px-6 py-3">หัวข้อบทความ</th><th class="px-6 py-3">หมวดหมู่</th><th class="px-6 py-3">สถานะ</th><th class="px-6 py-3">วันที่เขียน</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
+                                    </thead>
+                                    <tbody id="articles-tbody">
+                                        <tr><td colspan="5" class="text-center py-4">กำลังโหลด...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="text-sm text-gray-600" id="pagination-info">หน้า 1 จาก 1</span>
+                                <div class="flex space-x-2">
+                                    <button onclick="blogUI.prevPage()" class="px-3 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300">« ก่อนหน้า</button>
+                                    <button onclick="blogUI.nextPage()" class="px-3 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300">ถัดไป »</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+<%- include('_shared-js') %>
+        // --- ระบบ Blog Management (Tab 11) ---
+        const blogUI = {
+            currentPage: 1, totalPages: 1, quillBlog: null, categories: [],
+            initEditor: function() {
+                if(!this.quillBlog) {
+                    this.quillBlog = new Quill('#article-quill-editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: {
+                                container: [ [{ 'header': [2, 3, 4, false] }], ['bold', 'italic', 'underline', 'strike', 'blockquote'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image', 'video'], ['clean'] ],
+                                handlers: { image: this.imageHandler }
+                            }
+                        }
+                    });
+                }
+            },
+            imageHandler: function() {
+                const input = document.createElement('input'); input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*'); input.click();
+                input.onchange = async () => {
+                    const file = input.files[0]; if(!file) return;
+                    const formData = new FormData(); formData.append('image', file);
+                    try {
+                        const res = await fetch('/admin/api/upload-image', { method: 'POST', body: formData });
+                        const data = await res.json();
+                        if(data.success) { const range = blogUI.quillBlog.getSelection(); blogUI.quillBlog.insertEmbed(range.index, 'image', data.url); }
+                    } catch(e) { alert("อัปโหลดรูปไม่สำเร็จ"); }
+                };
+            },
+            loadCategories: async function() {
+                const res = await fetch('/admin/api/categories'); this.categories = await res.json();
+                const select = document.getElementById('article-category'); select.innerHTML = '<option value="">-- ไม่เลือกหมวดหมู่ --</option>';
+                const list = document.getElementById('category-list'); list.innerHTML = '';
+                this.categories.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                    list.innerHTML += `<li class="flex justify-between items-center border p-2 rounded text-sm bg-gray-50"><span>${c.name}</span> <button onclick="blogUI.deleteCategory(${c.id})" class="text-red-500 hover:font-bold">ลบ</button></li>`;
+                });
+            },
+            addCategory: async function() { const name = document.getElementById('new-category-name').value; if(!name) return; await fetch('/admin/api/categories', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name}) }); document.getElementById('new-category-name').value = ''; this.loadCategories(); },
+            deleteCategory: async function(id) { if(confirm('ยืนยันลบหมวดหมู่?')) { await fetch(`/admin/api/categories/${id}`, { method: 'DELETE' }); this.loadCategories(); } },
+            showCategoryModal: function() { document.getElementById('category-modal').classList.remove('hidden'); document.getElementById('category-modal').classList.add('flex'); },
+            loadArticles: async function() {
+                const tbody = document.getElementById('articles-tbody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">กำลังโหลด...</td></tr>';
+                const res = await fetch(`/admin/api/articles?page=${this.currentPage}`); const data = await res.json();
+                this.totalPages = data.totalPages || 1; document.getElementById('pagination-info').innerText = `หน้า ${this.currentPage} จาก ${this.totalPages}`;
+                tbody.innerHTML = ''; if(data.articles.length === 0) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">ยังไม่มีบทความ</td></tr>';
+                data.articles.forEach(a => {
+                    const status = a.is_published ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">เผยแพร่</span>' : '<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">ซ่อน</span>';
+                    tbody.innerHTML += `<tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium text-gray-900">${a.title}</td><td class="px-6 py-4">${a.category_name || '-'}</td><td class="px-6 py-4">${status}</td><td class="px-6 py-4 text-xs text-gray-500">${new Date(a.created_at).toLocaleDateString('th-TH')}</td><td class="px-6 py-4 text-right space-x-2"><button onclick="blogUI.editArticle(${a.id})" class="text-blue-600 hover:underline">แก้ไข</button><button onclick="blogUI.deleteArticle(${a.id})" class="text-red-600 hover:underline">ลบ</button></td></tr>`;
+                });
+            },
+            prevPage: function() { if(this.currentPage > 1) { this.currentPage--; this.loadArticles(); } },
+            nextPage: function() { if(this.currentPage < this.totalPages) { this.currentPage++; this.loadArticles(); } },
+            showArticleEditor: function() {
+                this.initEditor();
+                document.getElementById('edit-article-id').value = ''; document.getElementById('article-title').value = '';
+                document.getElementById('article-category').value = ''; document.getElementById('article-seo').value = '';
+                document.getElementById('article-cover').value = ''; document.getElementById('article-published').checked = true;
+                this.quillBlog.root.innerHTML = ''; document.getElementById('article-modal-title').innerText = 'เขียนบทความใหม่';
+                document.getElementById('article-modal').classList.remove('hidden'); document.getElementById('article-modal').classList.add('flex');
+            },
+            closeArticleEditor: function() { document.getElementById('article-modal').classList.add('hidden'); document.getElementById('article-modal').classList.remove('flex'); },
+            editArticle: async function(id) {
+                this.showArticleEditor(); document.getElementById('article-modal-title').innerText = 'กำลังโหลดข้อมูล...';
+                const res = await fetch(`/admin/api/articles/${id}`); const a = await res.json();
+                document.getElementById('edit-article-id').value = a.id; document.getElementById('article-title').value = a.title;
+                document.getElementById('article-category').value = a.category_id || ''; document.getElementById('article-seo').value = a.seo_description || '';
+                document.getElementById('article-published').checked = a.is_published; this.quillBlog.root.innerHTML = a.content || '';
+                document.getElementById('article-modal-title').innerText = 'แก้ไขบทความ';
+            },
+            saveArticle: async function() {
+                const id = document.getElementById('edit-article-id').value;
+                const formData = new FormData();
+                formData.append('title', document.getElementById('article-title').value); formData.append('category_id', document.getElementById('article-category').value);
+                formData.append('seo_description', document.getElementById('article-seo').value); formData.append('content', this.quillBlog.root.innerHTML);
+                formData.append('is_published', document.getElementById('article-published').checked);
+                const file = document.getElementById('article-cover').files[0]; if(file) formData.append('cover_image', file);
+                const url = id ? `/admin/api/articles/${id}` : '/admin/api/articles'; const method = id ? 'PUT' : 'POST';
+                document.getElementById('article-modal-title').innerText = 'กำลังบันทึก...';
+                await fetch(url, { method: method, body: formData });
+                this.closeArticleEditor(); this.loadArticles();
+            },
+            deleteArticle: async function(id) { if(confirm('ยืนยันลบบทความถาวร?')) { await fetch(`/admin/api/articles/${id}`, { method: 'DELETE' }); this.loadArticles(); } }
+        };
+    </script>
+</body>
+</html>

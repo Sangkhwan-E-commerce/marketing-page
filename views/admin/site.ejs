@@ -1,0 +1,354 @@
+<%- include('_head', { pageTitle: 'ตั้งค่าเว็บ' }) %>
+<%- include('_sidebar', { adminPage: 'site', tabs: [{ id: 'tab-general', label: 'ทั่วไป & Footer' }, { id: 'tab-banner', label: 'โฆษณา Modal' }, { id: 'tab-article-cta', label: 'CTA หน้าบทความ' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
+<%- include('_topbar', { heading: 'ตั้งค่าเว็บ' }) %>
+
+                <form action="/admin/site/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white z-20 rounded-t-xl">
+                        <div>
+                            <p class="text-sm text-gray-500">ค่าเหล่านี้ใช้ร่วมกันทุกหน้าของเว็บไซต์</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0">
+                            <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition">
+                                💾 บันทึกการเปลี่ยนแปลง
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+
+                        <div id="tab-general" class="tab-content space-y-6">
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อเว็บไซต์ (ใช้ใน og:site_name และท้ายชื่อหน้าบทความ)</label><input type="text" name="site_name" value="<%= settings.site_name %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon (PNG/ICO)</label>
+                                    <input type="file" name="favicon" accept="image/*" onchange="previewImage(this, 'preview-favicon')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <div class="mt-3">
+                                        <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                        <img id="preview-favicon" src="<%= settings.favicon_url %>" class="h-10 w-auto object-contain rounded border border-gray-200 shadow-sm bg-white p-1">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Logo โปร่งใส (PNG)</label>
+                                    <input type="file" name="logo" accept="image/png" onchange="previewImage(this, 'preview-logo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <div class="mt-3">
+                                        <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                        <img id="preview-logo" src="<%= settings.logo_url %>" class="h-12 w-auto object-contain rounded border border-gray-200 shadow-sm bg-gray-100 p-1">
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-gray-200">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ความสูงของโลโก้บนหน้าแรก (px)</label>
+                                        <input type="number" name="logo_height" value="<%= settings.logo_height || 80 %>" min="20" max="400" step="1" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                        <p class="text-xs text-gray-500 mt-1">ความกว้างจะปรับอัตโนมัติตามสัดส่วนของภาพ</p>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 mt-3">ระยะห่างด้านบนของกรอบโลโก้ (px)</label>
+                                        <input type="number" name="logo_padding_top" value="<%= settings.logo_padding_top || 0 %>" min="0" max="300" step="1" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                        <p class="text-xs text-gray-500 mt-1">เว้นว่างด้านบนเหนือโลโก้บนหน้าแรก (ด้านล่างคงที่ 48px)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">สีธีมหลัก (เช่น <code>rgb(244 97 100 / 98%)</code> หรือ <code>#F46164</code>)</label>
+                                <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2" required>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-gray-200">
+                                <h4 class="text-base font-semibold text-gray-900 mb-4">ตั้งค่า Footer & โซเชียล</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ลิงก์ Facebook</label><input type="url" name="facebook_url" value="<%= settings.facebook_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ไอคอน Facebook (SVG)</label><textarea name="facebook_icon" rows="2" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-xs font-mono"><%= settings.facebook_icon %></textarea></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ลิงก์ LINE</label><input type="url" name="line_url" value="<%= settings.line_url %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ไอคอน LINE (SVG)</label><textarea name="line_icon" rows="2" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-xs font-mono"><%= settings.line_icon %></textarea></div>
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Copyright</label>
+                                    <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="tab-banner" class="tab-content space-y-6 hidden">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าการแสดงผลโฆษณา (Modal Carousel)</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <div class="relative">
+                                                <input type="checkbox" name="banner_active" class="sr-only peer" <%= settings.banner_active === 'true' ? 'checked' : '' %>>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                            </div>
+                                            <span class="font-semibold text-gray-700">เปิดใช้งานแบนเนอร์โฆษณา</span>
+                                        </label>
+                                        <p class="text-xs text-gray-500 mt-2">หากปิดไว้ ระบบจะไม่แสดงหน้าต่างโฆษณาเลย</p>
+                                    </div>
+                                    <div class="space-y-4 border-l pl-6">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">รูปแบบการแสดงผล</label>
+                                            <select name="banner_display_type" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                                <option value="always" <%= settings.banner_display_type === 'always' ? 'selected' : '' %>>แสดงทุกครั้งที่โหลดหน้าเว็บ</option>
+                                                <option value="limited" <%= settings.banner_display_type === 'limited' ? 'selected' : '' %>>จำกัดจำนวนครั้งต่อผู้ใช้ 1 คน</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">แสดงผลสูงสุด (ครั้ง)</label>
+                                            <input type="number" name="banner_display_limit" value="<%= settings.banner_display_limit %>" min="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                                    <h3 class="text-lg font-bold">จัดการสไลด์โฆษณา (Carousel)</h3>
+                                    <button type="button" id="add-banner-btn" class="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 transition text-sm font-semibold">
+                                        + เพิ่มสไลด์ใหม่
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">ความกว้างของสไลด์ (% ของหน้าจอ)</label>
+                                        <input type="number" name="banner_width_percent" value="<%= settings.banner_width_percent || 80 %>" min="10" max="100" step="1" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">ความกว้างสูงสุด (px)</label>
+                                        <input type="number" name="banner_max_width" value="<%= settings.banner_max_width || 1200 %>" min="200" max="3000" step="10" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
+                                    </div>
+                                    <p class="md:col-span-2 text-xs text-gray-500">ตั้งครั้งเดียว มีผลกับทุกสไลด์ — สไลด์จะกว้างตาม % ของหน้าจอ แต่ไม่เกินค่า px ที่กำหนด</p>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-4">💡 แนะนำให้ใช้ภาพอัตราส่วน <strong>16:9</strong> (เช่น 1920×1080 px) ระบบจะครอบภาพให้เป็น 16:9 โดยอัตโนมัติก่อนอัปโหลด (ยกเว้นไฟล์ GIF และ SVG ที่อัปโหลดตามต้นฉบับ)<br>🎬 อัปวิดีโอสั้นแทนรูปได้ รองรับ <strong>MP4</strong> และ <strong>WebM</strong> ไม่เกิน 50MB — วิดีโอจะเล่นเองแบบ<strong>ไม่มีเสียง</strong> และรอจนเล่นจบจึงเลื่อนสไลด์ถัดไป ระบบครอบวิดีโอให้ไม่ได้ กรุณาตัดต่อมาเป็น 16:9</p>
+                                <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">
+                                <div id="banner-container" class="space-y-4"></div>
+                            </div>
+                        </div>
+
+                        <div id="tab-article-cta" class="tab-content space-y-6 hidden">
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                                <h3 class="text-lg font-bold mb-4 border-b pb-2">ตั้งค่าส่วนเชิญชวน (CTA) ส่วนท้ายหน้าอ่านบทความ</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-1">ข้อความหัวข้อหลัก (Title)</label>
+                                        <input type="text" name="article_cta_title" value="<%= settings.article_cta_title %>" class="w-full border-gray-300 border p-2 rounded text-sm" required>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">ข้อความบนปุ่ม</label>
+                                            <input type="text" name="article_cta_btn_text" value="<%= settings.article_cta_btn_text %>" class="w-full border-gray-300 border p-2 rounded text-sm" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-1">URL ลิงก์ปลายทาง</label>
+                                            <input type="text" name="article_cta_btn_url" value="<%= settings.article_cta_btn_url %>" class="w-full border-gray-300 border p-2 rounded text-sm" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+<%- include('_shared-js') %>
+        // --- ระบบ Banner Carousel ---
+        const bannerContainer = document.getElementById('banner-container');
+        const bannerInput = document.getElementById('banner_list_input');
+        let banners = [];
+        try { banners = JSON.parse(bannerInput.value || '[]'); } catch(e) { banners = []; }
+        let quillBanners = [];
+
+        function renderBanners() {
+            bannerContainer.innerHTML = '';
+            quillBanners = [];
+
+            if (banners.length === 0) {
+                bannerContainer.innerHTML = '<p class="text-center text-gray-500 py-4">ยังไม่มีสไลด์โฆษณา กดปุ่ม "+ เพิ่มสไลด์ใหม่" ด้านบน</p>';
+                bannerInput.value = '[]';
+                return;
+            }
+
+            banners.forEach((banner, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 p-5 rounded-lg border border-gray-200 relative mb-4';
+                
+                let actionButtons = `
+                    <div class="absolute top-3 right-3 flex space-x-2 z-10">
+                        ${index > 0 ? `<button type="button" onclick="moveBanner(${index}, -1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▲ ขึ้น</button>` : ''}
+                        ${index < banners.length - 1 ? `<button type="button" onclick="moveBanner(${index}, 1)" class="bg-white text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition shadow-sm">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeBanner(${index})" class="bg-white text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition shadow-sm">✖ ลบ</button>
+                    </div>
+                `;
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-40 mb-4 flex items-center space-x-2">
+                        <span class="bg-primary text-white font-bold w-6 h-6 flex items-center justify-center rounded-full text-xs"> ${index + 1} </span>
+                        <h4 class="font-bold text-gray-700">สไลด์ที่ ${index + 1}</h4>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">รูปภาพแบนเนอร์</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="img_input_${index}" class="flex-1 border border-gray-300 p-2 text-sm rounded bg-gray-50 focus:bg-white transition" value="${banner.img_url || ''}" onchange="updateBanner(${index}, 'img_url', this.value)" placeholder="อัปโหลดรูป หรือ วางลิงก์...">
+                                <label class="bg-blue-600 text-white px-3 py-2 rounded shadow-sm hover:bg-blue-700 cursor-pointer text-sm font-semibold flex items-center justify-center whitespace-nowrap transition">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                    อัปโหลด
+                                    <input type="file" class="hidden" accept="image/*,video/mp4,video/webm" onchange="uploadSlideImage(event, ${index})">
+                                </label>
+                            </div>
+                            ${banner.img_url ? (banner.media_type === 'video'
+                                ? `<video src="${banner.img_url}" class="mt-3 h-24 w-auto rounded border border-gray-200 object-cover shadow-sm bg-black" muted playsinline controls preload="metadata"></video>`
+                                : `<img src="${banner.img_url}" class="mt-3 h-24 w-auto rounded border border-gray-200 object-cover shadow-sm">`) : ''}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">ลิงก์ปลายทางเมื่อคลิกรูป (ถ้ามี)</label>
+                            <input type="url" class="w-full border border-gray-300 p-2 text-sm rounded focus:border-primary transition" value="${banner.link_url || ''}" onchange="updateBanner(${index}, 'link_url', this.value)" placeholder="https://...">
+                        </div>
+                    </div>
+                    <label class="block text-sm font-semibold mb-1">ข้อความรายละเอียดด้านล่างรูป</label>
+                    <div id="banner_editor_${index}" class="bg-white h-24 rounded-b border-gray-300"></div>
+                `;
+                bannerContainer.appendChild(div);
+                
+                const quillBanner = new Quill(document.getElementById(`banner_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'color': []}], [{ 'align': [] }], ['clean'] ] }
+                });
+                quillBanner.root.innerHTML = banner.content || '';
+                quillBanner.on('text-change', () => { 
+                    banners[index].content = quillBanner.root.innerHTML; 
+                    bannerInput.value = JSON.stringify(banners); 
+                });
+                quillBanners.push(quillBanner);
+            });
+            bannerInput.value = JSON.stringify(banners);
+        }
+
+        window.moveBanner = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < banners.length) {
+                const temp = banners[index];
+                banners[index] = banners[newIndex];
+                banners[newIndex] = temp;
+                renderBanners();
+            }
+        };
+        window.updateBanner = (index, key, value) => { 
+            banners[index][key] = value;
+            bannerInput.value = JSON.stringify(banners);
+            if (key === 'img_url') renderBanners(); 
+        };
+        window.removeBanner = (index) => { 
+            if(confirm('ลบสไลด์นี้?')) { 
+                banners.splice(index, 1);
+                renderBanners(); 
+            } 
+        };
+        document.getElementById('add-banner-btn').addEventListener('click', () => { 
+            banners.push({ img_url: '', link_url: '', content: '' }); 
+            renderBanners(); 
+        });
+
+        // ครอบภาพให้เป็น 16:9 (ตัดกึ่งกลาง) ในเบราว์เซอร์ก่อนส่งขึ้น R2
+        async function cropImageTo16x9(file) {
+            // วิดีโอครอบด้วย canvas ไม่ได้ GIF จะเสียภาพเคลื่อนไหว และ SVG ไม่มีขนาดพิกเซลที่แน่นอน จึงปล่อยผ่านทั้งหมด
+            if (!file.type.startsWith('image/') || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+                return { blob: file, filename: file.name };
+            }
+
+            const objectUrl = URL.createObjectURL(file);
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const im = new Image();
+                    im.onload = () => resolve(im);
+                    im.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'));
+                    im.src = objectUrl;
+                });
+
+                const RATIO = 16 / 9;
+                const MAX_WIDTH = 1920;
+                let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+                if (!sw || !sh) return { blob: file, filename: file.name };
+                if (sw / sh > RATIO) {
+                    const w = Math.round(sh * RATIO);
+                    sx = Math.round((sw - w) / 2);
+                    sw = w;
+                } else {
+                    const h = Math.round(sw / RATIO);
+                    sy = Math.round((sh - h) / 2);
+                    sh = h;
+                }
+
+                const outW = Math.min(sw, MAX_WIDTH);
+                const outH = Math.round(outW / RATIO);
+                const canvas = document.createElement('canvas');
+                canvas.width = outW;
+                canvas.height = outH;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingQuality = 'high';
+
+                const keepAlpha = file.type === 'image/png' || file.type === 'image/webp';
+                if (!keepAlpha) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, outW, outH);
+                }
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+
+                const toBlob = (type, quality) => new Promise(r => canvas.toBlob(r, type, quality));
+                let type = keepAlpha ? file.type : 'image/jpeg';
+                let blob = await toBlob(type, 0.9);
+                // PNG ที่ยังใหญ่เกินลิมิต 5MB ของเซิร์ฟเวอร์ ให้ถอยไปเป็น JPEG
+                if (blob && blob.size > 4 * 1024 * 1024 && type !== 'image/jpeg') {
+                    type = 'image/jpeg';
+                    blob = await toBlob(type, 0.9);
+                }
+                if (!blob) return { blob: file, filename: file.name };
+
+                const ext = type === 'image/png' ? '.png' : (type === 'image/webp' ? '.webp' : '.jpg');
+                return { blob, filename: 'slide' + ext };
+            } finally {
+                URL.revokeObjectURL(objectUrl);
+            }
+        }
+
+        window.uploadSlideImage = async (event, index) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const inputEl = document.getElementById(`img_input_${index}`);
+            const originalVal = inputEl.value;
+            inputEl.value = 'กำลังอัปโหลด... ⏳';
+
+            let upload = { blob: file, filename: file.name };
+            try {
+                upload = await cropImageTo16x9(file);
+            } catch (err) {
+                console.error('ครอบภาพไม่สำเร็จ ใช้ไฟล์ต้นฉบับแทน', err);
+            }
+
+            const formData = new FormData();
+            formData.append('slide_image', upload.blob, upload.filename);
+            try {
+                const response = await fetch('/admin/api/upload-slide', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    banners[index].media_type = data.media_type || 'image';
+                    updateBanner(index, 'img_url', data.url);
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + data.message);
+                    inputEl.value = originalVal;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่ออัปโหลดได้');
+                inputEl.value = originalVal;
+            }
+            event.target.value = '';
+        };
+        
+        renderBanners();
+    </script>
+</body>
+</html>

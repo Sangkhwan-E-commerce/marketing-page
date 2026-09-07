@@ -1,0 +1,616 @@
+<%- include('_head', { pageTitle: 'จัดการ Page' }) %>
+<%- include('_sidebar', { adminPage: 'pages', tabs: [{ id: 'tab-layout', label: '⇅ โครงสร้างหน้าเว็บ' }, { id: 'tab-hero', label: 'Hero Section' }, { id: 'tab-features3', label: 'Advocate Section' }, { id: 'tab-features4', label: 'Feature Section' }, { id: 'tab-stats', label: 'State Section' }, { id: 'tab-articles', label: 'บทความล่าสุด' }, { id: 'tab-faq', label: 'Function Section' }, { id: 'tab-cta', label: 'CTA Section' }, { id: 'tab-seo', label: 'ตั้งค่า SEO' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
+<%- include('_topbar', { heading: 'จัดการ Page' }) %>
+
+                <div class="mb-4 flex items-center gap-3 text-sm">
+                    <a href="/admin/pages" class="text-primary hover:underline">← กลับไปรายการ Page</a>
+                    <span class="text-gray-400">|</span>
+                    <span class="font-semibold text-gray-700"><%= page.title %></span>
+                    <% if (page.is_home) { %><span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">หน้าแรก</span><% } %>
+                </div>
+
+                <form action="/admin/pages/<%= page.id %>/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white z-20 rounded-t-xl">
+                        <div>
+                            <p class="text-sm text-gray-500">เนื้อหาเหล่านี้เป็นของหน้านี้เท่านั้น</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0">
+                            <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition">
+                                💾 บันทึกการเปลี่ยนแปลง
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+
+                        <div id="tab-layout" class="tab-content space-y-4 hidden">
+                            <p class="text-sm text-gray-600">จัดลำดับส่วนต่างๆ ของหน้าแรก เลือกซ่อน/แสดง และเลือกสีพื้นหลังของแต่ละส่วน (เนื้อหาของแต่ละส่วนแก้ได้ที่เมนูของส่วนนั้น)</p>
+                            <div id="layout-container" class="space-y-2"></div>
+                            <input type="hidden" name="section_order" id="section_order_input" value="<%= settings.section_order %>">
+                        </div>
+
+                        <div id="tab-hero" class="tab-content space-y-6 hidden">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-semibold">บล็อก Hero (<span id="hero-count">0</span> บล็อก)</h4>
+                                <button type="button" id="add-hero-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มบล็อก</button>
+                            </div>
+                            <p class="text-xs text-gray-500">แต่ละบล็อกเลือกเลย์เอาต์ได้เอง และเรียงต่อกันจากบนลงล่างบนหน้าเว็บ</p>
+                            <p id="hero-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีบล็อก กดปุ่ม "+ เพิ่มบล็อก" เพื่อเริ่มสร้าง</p>
+                            <div id="hero-container" class="space-y-6"></div>
+                            <input type="hidden" name="hero_list" id="hero_list_input" value="<%= settings.hero_list %>">
+                        </div>
+
+                        <div id="tab-features3" class="tab-content space-y-6 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="feature_title" value="<%= settings.feature_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">คำโปรยย่อย (Subtitle)</label><input type="text" name="feature_subtitle" value="<%= settings.feature_subtitle %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label><input type="text" name="feature_badge" value="<%= settings.feature_badge %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">เลย์เอาต์ (Template)</label>
+                                    <select name="col_template" id="col_template" onchange="toggleSectionImage('col')" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                        <% templates.features.forEach(function(t) { %>
+                                        <option value="<%= t.id %>" <%= settings.col_template === t.id ? 'selected' : '' %>><%= t.name %></option>
+                                        <% }); %>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของ Advocate Section</p>
+                                </div>
+                                <div id="col_image_wrap" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ภาพประกอบของเลย์เอาต์นี้</label>
+                                    <input type="file" accept="image/*" onchange="uploadSectionImage(event, 'col')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <p id="col_img_status" class="text-xs text-gray-500 mt-1"></p>
+                                    <input type="hidden" name="col_img_url" id="col_img_url" value="<%= settings.col_img_url %>">
+                                    <img id="col_img_preview" src="<%= settings.col_img_url %>" class="mt-2 max-h-28 w-auto rounded border border-gray-200 <%= settings.col_img_url ? '' : 'hidden' %>">
+                                </div>
+                            </div>
+                            <div class="pt-6 border-t border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">รายการคอลัมน์ (<span id="col-count">0</span> รายการ)</h4>
+                                    <button type="button" id="add-col-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มคอลัมน์</button>
+                                </div>
+                                <p id="col-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีคอลัมน์ กดปุ่ม "+ เพิ่มคอลัมน์" เพื่อเริ่มเพิ่มรายการ</p>
+                                <div id="col-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                                <input type="hidden" name="col_list" id="col_list_input" value="<%= settings.col_list %>">
+                            </div>
+                        </div>
+
+                        <div id="tab-features4" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Badge</label><input type="text" name="grid_badge" value="<%= settings.grid_badge %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="grid_title" value="<%= settings.grid_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm" required></div>
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label><input type="hidden" name="grid_desc" id="grid_desc"><div class="quill-editor bg-white rounded-b-md" data-target="grid_desc" style="height: 100px;"><%- settings.grid_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-gray-200">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">เลย์เอาต์ (Template)</label>
+                                    <select name="grid_template" id="grid_template" onchange="toggleSectionImage('grid')" class="w-full border-gray-300 rounded-md border p-2 text-sm">
+                                        <% templates.features.forEach(function(t) { %>
+                                        <option value="<%= t.id %>" <%= settings.grid_template === t.id ? 'selected' : '' %>><%= t.name %></option>
+                                        <% }); %>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">เลือกรูปแบบการจัดวางของ Feature Section</p>
+                                </div>
+                                <div id="grid_image_wrap" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ภาพประกอบของเลย์เอาต์นี้</label>
+                                    <input type="file" accept="image/*" onchange="uploadSectionImage(event, 'grid')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                    <p id="grid_img_status" class="text-xs text-gray-500 mt-1"></p>
+                                    <input type="hidden" name="grid_img_url" id="grid_img_url" value="<%= settings.grid_img_url %>">
+                                    <img id="grid_img_preview" src="<%= settings.grid_img_url %>" class="mt-2 max-h-28 w-auto rounded border border-gray-200 <%= settings.grid_img_url ? '' : 'hidden' %>">
+                                </div>
+                            </div>
+                            <div class="pt-6 border-t border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">รายการฟีเจอร์ (<span id="grid-count">0</span> รายการ)</h4>
+                                    <button type="button" id="add-grid-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มฟีเจอร์</button>
+                                </div>
+                                <p id="grid-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีฟีเจอร์ กดปุ่ม "+ เพิ่มฟีเจอร์" เพื่อเริ่มเพิ่มรายการ</p>
+                                <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                                <input type="hidden" name="grid_list" id="grid_list_input" value="<%= settings.grid_list %>">
+                            </div>
+                        </div>
+
+                        <div id="tab-stats" class="tab-content space-y-6 hidden">
+                            <div class="bg-gray-50/50 p-6 rounded-lg border border-gray-100 mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">รูปภาพประกอบ (ฝั่งซ้าย)</label>
+                                <input type="file" name="stats_img" accept="image/*" onchange="previewImage(this, 'preview-stats')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-stats" src="<%= settings.stats_img_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm">ข้อความ Badge</label><input type="text" name="stats_badge" value="<%= settings.stats_badge %>" class="w-full border p-2 rounded" required></div>
+                                    <div><label class="block text-sm">หัวข้อหลัก</label><input type="text" name="stats_title" value="<%= settings.stats_title %>" class="w-full border p-2 rounded" required></div>
+                                </div>
+                                <div><label class="block text-sm">รายละเอียด</label><input type="hidden" name="stats_desc" id="stats_desc"><div class="quill-editor bg-white rounded-b-md" data-target="stats_desc" style="height: 120px;"><%- settings.stats_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 1</label><input type="text" name="stat1_value" value="<%= settings.stat1_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat1_label" value="<%= settings.stat1_label %>" class="w-full border p-2 text-sm" required></div>
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 2</label><input type="text" name="stat2_value" value="<%= settings.stat2_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat2_label" value="<%= settings.stat2_label %>" class="w-full border p-2 text-sm" required></div>
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 3</label><input type="text" name="stat3_value" value="<%= settings.stat3_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat3_label" value="<%= settings.stat3_label %>" class="w-full border p-2 text-sm" required></div>
+                                <div><label class="block text-xs font-bold mb-1">สถิติ 4</label><input type="text" name="stat4_value" value="<%= settings.stat4_value %>" class="w-full border p-2 mb-1 text-sm font-bold" required><input type="text" name="stat4_label" value="<%= settings.stat4_label %>" class="w-full border p-2 text-sm" required></div>
+                            </div>
+                        </div>
+
+                        <div id="tab-articles" class="tab-content space-y-6 hidden">
+                            <p class="text-sm text-gray-600">หัวข้อของส่วนบทความล่าสุดบนหน้าแรก (ตัวบทความมาจากเมนูจัดการบทความ)</p>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">หัวข้อหลัก</label><input type="text" name="articles_title" value="<%= settings.articles_title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">คำโปรยย่อย</label><input type="text" name="articles_subtitle" value="<%= settings.articles_subtitle %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">ข้อความบนปุ่มดูบทความทั้งหมด</label><input type="text" name="articles_btn_text" value="<%= settings.articles_btn_text %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
+                        </div>
+
+                        <div id="tab-faq" class="tab-content space-y-6 hidden">
+                            <div><label class="block text-sm">หัวข้อหลัก (Title)</label><input type="text" name="faq_title" value="<%= settings.faq_title %>" class="w-full border p-2 rounded" required></div>
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-4"><h4 class="font-semibold">รายการคำถาม</h4><button type="button" id="add-faq-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มคำถาม</button></div>
+                                <div id="faq-container" class="space-y-4"></div><input type="hidden" name="faq_list" id="faq_list_input" value="<%= settings.faq_list %>">
+                            </div>
+                        </div>
+
+                        <div id="tab-cta" class="tab-content space-y-6 hidden">
+                            <div class="space-y-4">
+                                <div><label class="block text-sm">หัวข้อหลัก</label><input type="text" name="cta_title" value="<%= settings.cta_title %>" class="w-full border p-2 rounded" required></div>
+                                <div><label class="block text-sm">รายละเอียด</label><input type="hidden" name="cta_desc" id="cta_desc"><div class="quill-editor bg-white rounded-b-md" data-target="cta_desc" style="height: 120px;"><%- settings.cta_desc %></div></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded"><h4 class="font-semibold mb-2">ปุ่มหลัก</h4><input type="text" name="cta_btn1_text" value="<%= settings.cta_btn1_text %>" class="w-full border p-2 mb-2 text-sm" placeholder="ข้อความบนปุ่ม" required><input type="text" name="cta_btn1_url" value="<%= settings.cta_btn1_url %>" class="w-full border p-2 text-sm" placeholder="URL" required></div>
+                                <div class="bg-gray-50 p-4 rounded"><h4 class="font-semibold mb-2">ปุ่มรอง</h4><input type="text" name="cta_btn2_text" value="<%= settings.cta_btn2_text %>" class="w-full border p-2 mb-2 text-sm" placeholder="ข้อความบนปุ่ม" required><input type="text" name="cta_btn2_url" value="<%= settings.cta_btn2_url %>" class="w-full border p-2 text-sm" placeholder="URL" required></div>
+                            </div>
+                        </div>
+
+                        <div id="tab-seo" class="tab-content space-y-6 hidden">
+                            <div class="bg-blue-50/50 p-6 rounded-lg mb-6 border border-blue-100">
+                                <label class="block text-sm font-semibold mb-2">รูปภาพ Thumbnail (แชร์ลง Facebook/LINE)</label>
+                                <input type="file" name="seo_thumbnail" accept="image/*" onchange="previewImage(this, 'preview-seo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:bg-primary file:text-white">
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
+                                    <img id="preview-seo" src="<%= settings.seo_thumbnail_url %>" class="max-h-32 w-auto object-cover rounded border border-gray-200 shadow-sm">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div><label class="block text-sm">SEO Title</label><input type="text" name="seo_title" value="<%= settings.seo_title %>" class="w-full border p-2 rounded text-sm" required></div>
+                                <div><label class="block text-sm">SEO Description</label><textarea name="seo_description" rows="3" class="w-full border p-2 rounded text-sm" required><%= settings.seo_description %></textarea></div>
+                                <div><label class="block text-sm">SEO Keywords</label><input type="text" name="seo_keywords" value="<%= settings.seo_keywords %>" class="w-full border p-2 rounded text-sm" required></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+<%- include('_shared-js') %>
+        // --- ระบบ FAQ ---
+        const faqContainer = document.getElementById('faq-container');
+        const faqInput = document.getElementById('faq_list_input');
+        let faqs = [];
+        try { faqs = JSON.parse(faqInput.value || '[]'); } catch(e) { faqs = []; }
+
+        function renderFaqs() {
+            faqContainer.innerHTML = '';
+            faqs.forEach((faq, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-5 rounded border relative mt-2';
+                const safeQuestion = faq.question ? faq.question.replace(/"/g, '&quot;') : '';
+                
+                let actionButtons = `
+                    <div class="absolute top-2 right-2 flex space-x-2">
+                        ${index > 0 ? `<button type="button" onclick="moveFaq(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                        ${index < faqs.length - 1 ? `<button type="button" onclick="moveFaq(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                        <button type="button" onclick="removeFaq(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                    </div>
+                `;
+                div.innerHTML = `
+                    ${actionButtons}
+                    <div class="pr-32">
+                        <label class="block text-sm font-semibold mb-1">คำถาม</label>
+                        <input type="text" class="w-full border p-2 text-sm mb-2" value="${safeQuestion}" onchange="updateFaq(${index}, 'question', this.value)">
+                    </div>
+                    <label class="block text-sm font-semibold mb-1">คำตอบ</label>
+                    <div id="faq_editor_${index}" class="bg-white h-24"></div>
+                `;
+                faqContainer.appendChild(div);
+                
+                const quillFaq = new Quill(document.getElementById(`faq_editor_${index}`), { 
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+                quillFaq.root.innerHTML = faq.answer || '';
+                quillFaq.on('text-change', () => { 
+                    faqs[index].answer = quillFaq.root.innerHTML; 
+                    faqInput.value = JSON.stringify(faqs); 
+                });
+            });
+            faqInput.value = JSON.stringify(faqs);
+        }
+
+        window.moveFaq = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < faqs.length) {
+                const temp = faqs[index];
+                faqs[index] = faqs[newIndex];
+                faqs[newIndex] = temp;
+                renderFaqs();
+            }
+        };
+        window.updateFaq = (index, key, value) => { faqs[index][key] = value; faqInput.value = JSON.stringify(faqs); };
+        window.removeFaq = (index) => { if(confirm('ลบคำถามนี้?')) { faqs.splice(index, 1); renderFaqs(); } };
+        document.getElementById('add-faq-btn').addEventListener('click', () => { faqs.push({ question: '', answer: '' }); renderFaqs(); });
+        
+        renderFaqs();
+
+        // --- โครงสร้างหน้าเว็บ (ลำดับ / ซ่อน / สีพื้นหลังของแต่ละส่วน) ---
+        const SECTION_CATALOGUE = <%- JSON.stringify(sectionCatalogue) %>;
+        const SECTION_BGS = <%- JSON.stringify(sectionBgs) %>;
+
+        const layoutContainer = document.getElementById('layout-container');
+        const layoutInput = document.getElementById('section_order_input');
+        let pageSections = [];
+        try { pageSections = JSON.parse(layoutInput.value || '[]'); } catch(e) { pageSections = []; }
+
+        // ตัดส่วนที่ไม่รู้จักทิ้ง แล้วเติมส่วนที่ยังไม่มีต่อท้าย (ตรรกะเดียวกับฝั่งเซิร์ฟเวอร์)
+        (function normalize() {
+            const seen = new Set();
+            pageSections = pageSections.filter(s => {
+                const meta = SECTION_CATALOGUE.find(m => m.type === (s || {}).type);
+                if (!meta || seen.has(meta.type)) return false;
+                seen.add(meta.type);
+                if (!SECTION_BGS.some(b => b.id === s.bg)) s.bg = meta.defaultBg;
+                s.enabled = s.enabled !== false;
+                return true;
+            });
+            SECTION_CATALOGUE.forEach(meta => {
+                if (!seen.has(meta.type)) pageSections.push({ type: meta.type, enabled: true, bg: meta.defaultBg });
+            });
+        })();
+
+        const layoutSyncInput = () => { layoutInput.value = JSON.stringify(pageSections); };
+
+        function renderPageSections() {
+            layoutContainer.innerHTML = '';
+            pageSections.forEach((sec, index) => {
+                const meta = SECTION_CATALOGUE.find(m => m.type === sec.type);
+                const row = document.createElement('div');
+                row.className = 'flex flex-wrap items-center gap-3 bg-white border rounded p-3 ' + (sec.enabled ? '' : 'opacity-60');
+                row.innerHTML = `
+                    <span class="w-6 text-center text-xs font-bold text-gray-400">${index + 1}</span>
+                    <span class="flex-1 min-w-[10rem] font-semibold text-sm">${meta.name}</span>
+                    <label class="flex items-center gap-1 text-xs text-gray-600">
+                        <input type="checkbox" ${sec.enabled ? 'checked' : ''} onchange="toggleSection(${index}, this.checked)" class="h-4 w-4"> แสดง
+                    </label>
+                    ${meta.bgEditable ? `
+                    <select onchange="updateSectionBg(${index}, this.value)" class="border p-1 text-xs rounded">
+                        ${SECTION_BGS.map(b => `<option value="${b.id}" ${sec.bg === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
+                    </select>` : '<span class="text-xs text-gray-400">พื้นหลังตามเลย์เอาต์</span>'}
+                    <div class="flex space-x-1">
+                        ${index > 0 ? `<button type="button" onclick="movePageSection(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲</button>` : ''}
+                        ${index < pageSections.length - 1 ? `<button type="button" onclick="movePageSection(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼</button>` : ''}
+                    </div>
+                `;
+                layoutContainer.appendChild(row);
+            });
+            layoutSyncInput();
+        }
+
+        window.movePageSection = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < pageSections.length) {
+                const temp = pageSections[index];
+                pageSections[index] = pageSections[newIndex];
+                pageSections[newIndex] = temp;
+                renderPageSections();
+            }
+        };
+        window.toggleSection = (index, enabled) => { pageSections[index].enabled = enabled; renderPageSections(); };
+        window.updateSectionBg = (index, bg) => { pageSections[index].bg = bg; layoutSyncInput(); };
+
+        renderPageSections();
+
+        // --- ระบบ Hero (หลายบล็อก + เลือกเลย์เอาต์) ---
+        const HERO_TPL = <%- JSON.stringify(templates.hero) %>;
+        const FEATURE_TPL = <%- JSON.stringify(templates.features) %>;
+        const BTN_STYLES = [['primary', 'ปุ่มหลัก'], ['secondary', 'ปุ่มรอง'], ['link', 'ลิงก์ข้อความ']];
+        const BTN_SIZES = [['text-sm', 'เล็ก'], ['text-base', 'ปกติ'], ['text-lg', 'ใหญ่']];
+
+        const heroContainer = document.getElementById('hero-container');
+        const heroInput = document.getElementById('hero_list_input');
+        const heroEmpty = document.getElementById('hero-empty');
+        const heroCount = document.getElementById('hero-count');
+        let heroBlocks = [];
+        try { heroBlocks = JSON.parse(heroInput.value || '[]'); } catch(e) { heroBlocks = []; }
+
+        const heroEscAttr = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const heroTplNeedsImage = (id) => { const t = HERO_TPL.find(t => t.id === id); return t ? t.image : false; };
+        const heroSyncInput = () => { heroInput.value = JSON.stringify(heroBlocks); };
+
+        function heroButtonRow(blockIndex, btn, btnIndex) {
+            const opt = (list, current) => list.map(([v, label]) =>
+                `<option value="${v}" ${current === v ? 'selected' : ''}>${label}</option>`).join('');
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center bg-white border rounded p-2">
+                    <input type="text" class="md:col-span-3 border p-2 text-sm" placeholder="ข้อความบนปุ่ม" value="${heroEscAttr(btn.text)}" oninput="updateHeroButton(${blockIndex}, ${btnIndex}, 'text', this.value)">
+                    <input type="text" class="md:col-span-4 border p-2 text-sm" placeholder="URL" value="${heroEscAttr(btn.url)}" oninput="updateHeroButton(${blockIndex}, ${btnIndex}, 'url', this.value)">
+                    <select class="md:col-span-2 border p-2 text-sm" onchange="updateHeroButton(${blockIndex}, ${btnIndex}, 'style', this.value)">${opt(BTN_STYLES, btn.style)}</select>
+                    <select class="md:col-span-2 border p-2 text-sm" onchange="updateHeroButton(${blockIndex}, ${btnIndex}, 'size', this.value)">${opt(BTN_SIZES, btn.size)}</select>
+                    <button type="button" onclick="removeHeroButton(${blockIndex}, ${btnIndex})" class="md:col-span-1 text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖</button>
+                </div>`;
+        }
+
+        function renderHeroBlocks() {
+            heroContainer.innerHTML = '';
+            heroEmpty.classList.toggle('hidden', heroBlocks.length > 0);
+            heroCount.innerText = heroBlocks.length;
+
+            heroBlocks.forEach((block, index) => {
+                const buttons = Array.isArray(block.buttons) ? block.buttons : (block.buttons = []);
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50/50 p-5 rounded-lg border border-gray-200 space-y-3';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h4 class="font-semibold">บล็อก ${index + 1}${index === 0 ? ' <span class="text-xs font-normal text-gray-500">(หัวข้อจะเป็น H1)</span>' : ''}</h4>
+                        <div class="flex space-x-2">
+                            ${index > 0 ? `<button type="button" onclick="moveHeroBlock(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                            ${index < heroBlocks.length - 1 ? `<button type="button" onclick="moveHeroBlock(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                            <button type="button" onclick="removeHeroBlock(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                        </div>
+                    </div>
+
+                    <label class="block text-xs font-semibold text-gray-600">เลย์เอาต์ (Template)</label>
+                    <select class="w-full border p-2 text-sm" onchange="setHeroTemplate(${index}, this.value)">
+                        ${HERO_TPL.map(t => `<option value="${t.id}" ${block.template === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+                    </select>
+
+                    <label class="block text-xs font-semibold text-gray-600">ข้อความ Badge</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${heroEscAttr(block.badge)}" oninput="updateHeroBlock(${index}, 'badge', this.value)">
+
+                    <label class="block text-xs font-semibold text-gray-600">หัวข้อหลัก</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${heroEscAttr(block.title)}" oninput="updateHeroBlock(${index}, 'title', this.value)">
+
+                    <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
+                    <div id="hero_editor_${index}" class="bg-white" style="height: 120px;"></div>
+
+                    <div class="pt-8 ${heroTplNeedsImage(block.template) ? '' : 'hidden'}">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">รูปภาพประกอบ</label>
+                        <input type="file" accept="image/*" onchange="uploadHeroImage(event, ${index})" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                        <p id="hero_img_status_${index}" class="text-xs text-gray-500 mt-1"></p>
+                        <img id="hero_img_preview_${index}" src="${heroEscAttr(block.image)}" class="mt-2 max-h-28 w-auto rounded border border-gray-200 ${block.image ? '' : 'hidden'}">
+                    </div>
+
+                    <div class="pt-3 border-t">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-semibold text-gray-600">ปุ่ม (${buttons.length})</label>
+                            <button type="button" onclick="addHeroButton(${index})" class="bg-white px-2 py-1 text-xs border rounded hover:bg-gray-100">+ เพิ่มปุ่ม</button>
+                        </div>
+                        <div class="space-y-2">${buttons.map((btn, bi) => heroButtonRow(index, btn, bi)).join('')}</div>
+                    </div>
+                `;
+                heroContainer.appendChild(div);
+
+                const quillHero = new Quill(document.getElementById(`hero_editor_${index}`), {
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+                quillHero.root.innerHTML = block.desc || '';
+                quillHero.on('text-change', () => {
+                    heroBlocks[index].desc = quillHero.root.innerHTML;
+                    heroSyncInput();
+                });
+            });
+            heroSyncInput();
+        }
+
+        window.moveHeroBlock = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < heroBlocks.length) {
+                const temp = heroBlocks[index];
+                heroBlocks[index] = heroBlocks[newIndex];
+                heroBlocks[newIndex] = temp;
+                renderHeroBlocks();
+            }
+        };
+        window.removeHeroBlock = (index) => { if(confirm('ลบบล็อกนี้?')) { heroBlocks.splice(index, 1); renderHeroBlocks(); } };
+        window.updateHeroBlock = (index, key, value) => { heroBlocks[index][key] = value; heroSyncInput(); };
+        window.setHeroTemplate = (index, value) => { heroBlocks[index].template = value; renderHeroBlocks(); };
+
+        window.addHeroButton = (index) => {
+            heroBlocks[index].buttons = heroBlocks[index].buttons || [];
+            heroBlocks[index].buttons.push({ text: '', url: '#', style: 'primary', size: 'text-sm' });
+            renderHeroBlocks();
+        };
+        window.removeHeroButton = (index, btnIndex) => { heroBlocks[index].buttons.splice(btnIndex, 1); renderHeroBlocks(); };
+        window.updateHeroButton = (index, btnIndex, key, value) => { heroBlocks[index].buttons[btnIndex][key] = value; heroSyncInput(); };
+
+        window.uploadHeroImage = async (event, index) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const status = document.getElementById(`hero_img_status_${index}`);
+            status.innerText = 'กำลังอัปโหลด...';
+            const formData = new FormData();
+            formData.append('media', file);
+            try {
+                const res = await fetch('/admin/api/upload-media', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || 'อัปโหลดไม่สำเร็จ');
+                heroBlocks[index].image = data.url;
+                heroSyncInput();
+                const preview = document.getElementById(`hero_img_preview_${index}`);
+                preview.src = data.url;
+                preview.classList.remove('hidden');
+                status.innerText = 'อัปโหลดสำเร็จ';
+            } catch (err) {
+                status.innerText = err.message || 'อัปโหลดไม่สำเร็จ';
+            }
+        };
+
+        document.getElementById('add-hero-btn').addEventListener('click', () => {
+            heroBlocks.push({ template: 'split-with-image', badge: '', title: '', desc: '', image: '', buttons: [] });
+            renderHeroBlocks();
+        });
+
+        renderHeroBlocks();
+
+        // --- ภาพประกอบของเลย์เอาต์ที่ต้องใช้รูป (Advocate Section / Feature Section) ---
+        window.toggleSectionImage = (prefix) => {
+            const tplId = document.getElementById(`${prefix}_template`).value;
+            const tpl = FEATURE_TPL.find(t => t.id === tplId);
+            document.getElementById(`${prefix}_image_wrap`).classList.toggle('hidden', !(tpl && tpl.image));
+        };
+
+        window.uploadSectionImage = async (event, prefix) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const status = document.getElementById(`${prefix}_img_status`);
+            status.innerText = 'กำลังอัปโหลด...';
+            const formData = new FormData();
+            formData.append('media', file);
+            try {
+                const res = await fetch('/admin/api/upload-media', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || 'อัปโหลดไม่สำเร็จ');
+                document.getElementById(`${prefix}_img_url`).value = data.url;
+                const preview = document.getElementById(`${prefix}_img_preview`);
+                preview.src = data.url;
+                preview.classList.remove('hidden');
+                status.innerText = 'อัปโหลดสำเร็จ';
+            } catch (err) {
+                status.innerText = err.message || 'อัปโหลดไม่สำเร็จ';
+            }
+        };
+
+        toggleSectionImage('col');
+        toggleSectionImage('grid');
+
+        // --- Advocate Section (เพิ่ม/ลด/สลับลำดับได้) ---
+        const colContainer = document.getElementById('col-container');
+        const colInput = document.getElementById('col_list_input');
+        const colEmpty = document.getElementById('col-empty');
+        const colCount = document.getElementById('col-count');
+        let visionCols = [];
+        try { visionCols = JSON.parse(colInput.value || '[]'); } catch(e) { visionCols = []; }
+
+        const colEscAttr = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const colEscText = (str) => (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        function renderVisionCols() {
+            colContainer.innerHTML = '';
+            colEmpty.classList.toggle('hidden', visionCols.length > 0);
+            colCount.innerText = visionCols.length;
+
+            visionCols.forEach((col, index) => {
+                const div = document.createElement('div');
+                div.className = 'space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h4 class="font-semibold">คอลัมน์ ${index + 1}</h4>
+                        <div class="flex space-x-2">
+                            ${index > 0 ? `<button type="button" onclick="moveVisionCol(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                            ${index < visionCols.length - 1 ? `<button type="button" onclick="moveVisionCol(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                            <button type="button" onclick="removeVisionCol(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                        </div>
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600">ไอคอน (โค้ด SVG)</label>
+                    <textarea rows="2" class="w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateVisionCol(${index}, 'icon', this.value)">${colEscText(col.icon)}</textarea>
+                    <label class="block text-xs font-semibold text-gray-600">หัวข้อ</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${colEscAttr(col.title)}" oninput="updateVisionCol(${index}, 'title', this.value)">
+                    <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
+                    <div id="col_editor_${index}" class="bg-white" style="height: 100px;"></div>
+                    <div class="flex items-center gap-2 pt-8">
+                        <input type="checkbox" id="col_highlight_${index}" ${col.highlight ? 'checked' : ''} onchange="updateVisionCol(${index}, 'highlight', this.checked)" class="h-4 w-4">
+                        <label for="col_highlight_${index}" class="text-xs font-semibold text-gray-600">เน้นเป็นการ์ดแนะนำ</label>
+                        <input type="text" class="flex-1 border p-2 text-sm" placeholder="ข้อความป้าย เช่น คุ้มค่าที่สุด" value="${colEscAttr(col.badge)}" oninput="updateVisionCol(${index}, 'badge', this.value)">
+                    </div>
+                `;
+                colContainer.appendChild(div);
+
+                const quillCol = new Quill(document.getElementById(`col_editor_${index}`), {
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] }
+                });
+                quillCol.root.innerHTML = col.desc || '';
+                quillCol.on('text-change', () => {
+                    visionCols[index].desc = quillCol.root.innerHTML;
+                    colInput.value = JSON.stringify(visionCols);
+                });
+            });
+            colInput.value = JSON.stringify(visionCols);
+        }
+
+        window.moveVisionCol = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < visionCols.length) {
+                const temp = visionCols[index];
+                visionCols[index] = visionCols[newIndex];
+                visionCols[newIndex] = temp;
+                renderVisionCols();
+            }
+        };
+        window.updateVisionCol = (index, key, value) => { visionCols[index][key] = value; colInput.value = JSON.stringify(visionCols); };
+        window.removeVisionCol = (index) => { if(confirm('ลบคอลัมน์นี้?')) { visionCols.splice(index, 1); renderVisionCols(); } };
+        document.getElementById('add-col-btn').addEventListener('click', () => { visionCols.push({ icon: '', title: '', desc: '', highlight: false, badge: '' }); renderVisionCols(); });
+
+        renderVisionCols();
+
+        // --- Feature Section (เพิ่ม/ลด/สลับลำดับได้) ---
+        const gridContainer = document.getElementById('grid-container');
+        const gridInput = document.getElementById('grid_list_input');
+        const gridEmpty = document.getElementById('grid-empty');
+        const gridCount = document.getElementById('grid-count');
+        let gridFeatures = [];
+        try { gridFeatures = JSON.parse(gridInput.value || '[]'); } catch(e) { gridFeatures = []; }
+
+        const gridEscAttr = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const gridEscText = (str) => (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        function renderGridFeatures() {
+            gridContainer.innerHTML = '';
+            gridEmpty.classList.toggle('hidden', gridFeatures.length > 0);
+            gridCount.innerText = gridFeatures.length;
+
+            gridFeatures.forEach((feature, index) => {
+                const div = document.createElement('div');
+                div.className = 'space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-100';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h4 class="font-semibold">ฟีเจอร์ ${index + 1}</h4>
+                        <div class="flex space-x-2">
+                            ${index > 0 ? `<button type="button" onclick="moveGridFeature(${index}, -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲ ขึ้น</button>` : ''}
+                            ${index < gridFeatures.length - 1 ? `<button type="button" onclick="moveGridFeature(${index}, 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼ ลง</button>` : ''}
+                            <button type="button" onclick="removeGridFeature(${index})" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                        </div>
+                    </div>
+                    <label class="block text-xs font-semibold text-gray-600">ไอคอน (โค้ด SVG)</label>
+                    <textarea rows="2" class="w-full border p-2 text-xs font-mono" placeholder="วางโค้ด SVG ที่นี่" oninput="updateGridFeature(${index}, 'icon', this.value)">${gridEscText(feature.icon)}</textarea>
+                    <label class="block text-xs font-semibold text-gray-600">หัวข้อ</label>
+                    <input type="text" class="w-full border p-2 text-sm" value="${gridEscAttr(feature.title)}" oninput="updateGridFeature(${index}, 'title', this.value)">
+                    <label class="block text-xs font-semibold text-gray-600">รายละเอียด</label>
+                    <textarea rows="2" class="w-full border p-2 text-sm" oninput="updateGridFeature(${index}, 'desc', this.value)">${gridEscText(feature.desc)}</textarea>
+                `;
+                gridContainer.appendChild(div);
+            });
+            gridInput.value = JSON.stringify(gridFeatures);
+        }
+
+        window.moveGridFeature = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < gridFeatures.length) {
+                const temp = gridFeatures[index];
+                gridFeatures[index] = gridFeatures[newIndex];
+                gridFeatures[newIndex] = temp;
+                renderGridFeatures();
+            }
+        };
+        window.updateGridFeature = (index, key, value) => { gridFeatures[index][key] = value; gridInput.value = JSON.stringify(gridFeatures); };
+        window.removeGridFeature = (index) => { if(confirm('ลบฟีเจอร์นี้?')) { gridFeatures.splice(index, 1); renderGridFeatures(); } };
+        document.getElementById('add-grid-btn').addEventListener('click', () => { gridFeatures.push({ icon: '', title: '', desc: '' }); renderGridFeatures(); });
+
+        renderGridFeatures();
+    </script>
+</body>
+</html>

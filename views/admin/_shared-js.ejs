@@ -1,0 +1,53 @@
+        const pageTitleDisplay = document.getElementById('page-title-display');
+        
+        function showTab(tabId, menuTitle) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-menu-btn').forEach(el => {
+                el.classList.remove('bg-gray-800', 'text-white');
+                el.classList.add('text-gray-400');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            let activeBtn = document.querySelector(`[data-target="${tabId}"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-gray-800', 'text-white');
+                activeBtn.classList.remove('text-gray-400');
+                if(menuTitle) pageTitleDisplay.innerText = menuTitle;
+            }
+
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
+            }
+        }
+
+        document.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.dataset.target;
+                const menuTitle = e.currentTarget.innerText;
+                showTab(targetId, menuTitle);
+            });
+        });
+        const firstTab = document.querySelector('.sidebar-menu-btn');
+        if (firstTab) showTab(firstTab.dataset.target, firstTab.innerText);
+
+        document.getElementById('open-sidebar-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('mobile-sidebar-backdrop').classList.remove('hidden');
+        });
+        document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('mobile-sidebar-backdrop').classList.add('hidden');
+        });
+        document.getElementById('user-menu-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('user-dropdown-panel').classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => document.getElementById('user-dropdown-panel').classList.add('hidden'));
+
+        document.querySelectorAll('.quill-editor').forEach(function(editorDiv) {
+            var targetId = editorDiv.getAttribute('data-target');
+            var input = document.getElementById(targetId);
+            var quill = new Quill(editorDiv, { theme: 'snow', modules: { toolbar: [ ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean'] ] } });
+            quill.on('text-change', function() { input.value = quill.root.innerHTML; });
+            input.value = quill.root.innerHTML;
+        });

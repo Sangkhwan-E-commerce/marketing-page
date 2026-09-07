@@ -1,0 +1,40 @@
+<%
+  // adminPage: 'site' | 'pages' | 'blog'  |  tabs: [{ id, label }] ของหน้านั้น
+  var _tabs = (typeof tabs !== 'undefined' && tabs) ? tabs : [];
+  var navItem = function (key) {
+    return adminPage === key
+      ? 'bg-gray-800 text-white'
+      : 'text-gray-400 hover:bg-gray-800 hover:text-white';
+  };
+%>
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-gray-900 transition-transform duration-300 ease-in-out md:static md:translate-x-0">
+    <div class="flex h-16 shrink-0 items-center bg-gray-900 px-6 border-b border-gray-800">
+        <span class="text-2xl font-bold text-white tracking-wide">Lulla<span class="text-primary">pos</span> <span class="text-xs text-gray-400 font-normal ml-1">Admin</span></span>
+        <button id="close-sidebar-btn" type="button" class="ml-auto flex items-center justify-center text-gray-400 hover:text-white md:hidden">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+    </div>
+
+    <nav class="flex flex-1 flex-col overflow-y-auto no-scrollbar px-4 py-6">
+        <ul role="list" class="flex flex-1 flex-col gap-y-7">
+            <li>
+                <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">เมนูหลัก</div>
+                <ul role="list" class="-mx-2 space-y-1">
+                    <li><a href="/admin/site" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('site') %>">⚙️ ตั้งค่าเว็บ</a></li>
+                    <li><a href="/admin/pages" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('pages') %>">📄 จัดการ Page</a></li>
+                    <li><a href="/admin/blog" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('blog') %>">📝 จัดการบทความ (Blog)</a></li>
+                </ul>
+            </li>
+            <% if (_tabs.length) { %>
+            <li>
+                <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2"><%= typeof tabsTitle !== 'undefined' ? tabsTitle : 'หัวข้อในหน้านี้' %></div>
+                <ul role="list" class="-mx-2 space-y-1">
+                    <% _tabs.forEach(function (t) { %>
+                    <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="<%= t.id %>"><%= t.label %></button></li>
+                    <% }); %>
+                </ul>
+            </li>
+            <% } %>
+        </ul>
+    </nav>
+</aside>
