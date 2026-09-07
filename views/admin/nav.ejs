@@ -17,7 +17,11 @@
                     <div class="p-6 space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="font-semibold">รายการเมนู (<span id="nav-count">0</span> รายการ)</h4>
-                            <button type="button" id="add-nav-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มเมนู</button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="expand-nav-btn" class="text-xs text-gray-600 underline hover:text-primary">กางทั้งหมด</button>
+                                <button type="button" id="collapse-nav-btn" class="text-xs text-gray-600 underline hover:text-primary">ยุบทั้งหมด</button>
+                                <button type="button" id="add-nav-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มเมนู</button>
+                            </div>
                         </div>
                         <p class="text-xs text-gray-500">แต่ละเมนูเพิ่มเมนูย่อยได้ กลายเป็น dropdown อัตโนมัติ — เมนูที่ชี้ไปหน้าที่ถูกลบหรือยังไม่เผยแพร่จะไม่แสดงบนเว็บ</p>
                         <p id="nav-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีเมนู กดปุ่ม "+ เพิ่มเมนู" เพื่อเริ่ม</p>
@@ -44,7 +48,7 @@
     <script>
 <%- include('_shared-js') %>
 
-        // --- Navbar & เมนู (สองระดับ) ---
+        // --- Navbar & เมนู (สองระดับ, แถวยุบ/กางได้) ---
         const NAV_PAGES = <%- JSON.stringify(pages.map(function (p) { return { id: p.id, title: p.title, slug: p.slug, is_home: p.is_home, is_published: p.is_published }; })) %>;
 
         const navContainer = document.getElementById('nav-container');
@@ -55,8 +59,9 @@
         try { navItems = JSON.parse(navInput.value || '[]'); } catch (e) { navItems = []; }
         if (!Array.isArray(navItems)) navItems = [];
 
-        const navEsc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-        const navSync = () => { navInput.value = JSON.stringify(navItems); };
+        const navEsc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        // _open คือสถานะกาง/ยุบของแถว เก็บติดกับตัวรายการเพื่อให้ย้ายลำดับแล้วตามไปด้วย และตัดทิ้งก่อนบันทึก
+        const navSync = () => { navInput.value = JSON.stringify(navItems, (k, v) => k === '_open' ? undefined : v); };
         const blankItem = () => ({ label: '', icon: '', type: 'page', page_id: '', url: '', new_tab: false, enabled: true, children: [] });
 
         // path: [i] สำหรับเมนูหลัก, [i, j] สำหรับเมนูย่อย
@@ -64,6 +69,15 @@
         const listAt = (path) => path.length === 1 ? navItems : navItems[path[0]].children;
         const pathAttr = (path) => path.join('-');
         const parsePath = (value) => value.split('-').map(Number);
+
+        const NO_NAME = '<span class="font-normal text-gray-400">(ยังไม่ตั้งชื่อ)</span>';
+
+        function targetSummary(item) {
+            if (item.type === 'url') return item.url ? item.url : '— ยังไม่ใส่ลิงก์ —';
+            const pg = NAV_PAGES.find(p => String(p.id) === String(item.page_id));
+            if (!pg) return '— ยังไม่เลือกหน้า —';
+            return (pg.is_home ? '/' : '/' + pg.slug) + (pg.is_published ? '' : ' (ยังไม่เผยแพร่)');
+        }
 
         function targetFields(item, path) {
             const options = NAV_PAGES.map(p =>
@@ -83,41 +97,51 @@
         function itemRow(item, path, isChild) {
             const list = listAt(path);
             const index = path[path.length - 1];
+            const key = pathAttr(path);
             const enabled = item.enabled !== false;
+            const open = item._open === true;
+            const childCount = (item.children || []).length;
+
             return `
-                <div class="${isChild ? 'bg-white border rounded p-3' : 'bg-gray-50/50 border border-gray-200 rounded-lg p-4'} space-y-2 ${enabled ? '' : 'opacity-60'}">
-                    <div class="flex justify-between items-center ${isChild ? '' : 'border-b pb-2'}">
-                        <span class="text-sm font-semibold">
-                            ${isChild ? 'เมนูย่อย' : 'เมนู'} ${index + 1}
-                            ${enabled ? '' : '<span class="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">ปิดใช้งาน</span>'}
-                        </span>
-                        <div class="flex space-x-2">
-                            ${index > 0 ? `<button type="button" onclick="moveNav('${pathAttr(path)}', -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲</button>` : ''}
-                            ${index < list.length - 1 ? `<button type="button" onclick="moveNav('${pathAttr(path)}', 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼</button>` : ''}
-                            <button type="button" onclick="removeNav('${pathAttr(path)}')" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                <div class="${isChild ? 'bg-white border rounded' : 'bg-white border border-gray-200 rounded-lg shadow-sm'} ${enabled ? '' : 'opacity-60'}">
+                    <div class="flex items-center gap-2 px-3 py-2.5 cursor-pointer select-none hover:bg-gray-50 rounded-lg" onclick="toggleRow('${key}')">
+                        <svg data-row-caret="${key}" class="h-4 w-4 shrink-0 text-gray-400 transition-transform ${open ? 'rotate-90' : ''}" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        <span class="shrink-0 text-xs font-bold text-gray-400">${index + 1}</span>
+                        ${item.icon ? `<i class="bi ${navEsc(item.icon)} shrink-0 text-primary" aria-hidden="true"></i>` : ''}
+                        <span class="flex-1 truncate text-sm font-semibold text-gray-800" data-row-label="${key}">${navEsc(item.label) || NO_NAME}</span>
+                        <span class="hidden max-w-[13rem] truncate text-xs text-gray-500 sm:block" data-row-target="${key}">${navEsc(targetSummary(item))}</span>
+                        ${childCount ? `<span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">${childCount} ย่อย</span>` : ''}
+                        ${enabled ? '' : '<span class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">ปิด</span>'}
+                        <div class="flex shrink-0 space-x-1" onclick="event.stopPropagation()">
+                            ${index > 0 ? `<button type="button" title="เลื่อนขึ้น" onclick="moveNav('${key}', -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲</button>` : ''}
+                            ${index < list.length - 1 ? `<button type="button" title="เลื่อนลง" onclick="moveNav('${key}', 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼</button>` : ''}
+                            <button type="button" title="ลบ" onclick="removeNav('${key}')" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖</button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <input type="text" class="border p-2 text-sm" placeholder="ข้อความบนเมนู" value="${navEsc(item.label)}" oninput="updateNav('${pathAttr(path)}', 'label', this.value)">
-                        <input type="text" list="bi-icon-list" class="border p-2 text-sm font-mono" placeholder="ไอคอน เช่น bi-shop" value="${navEsc(item.icon)}" oninput="updateNav('${pathAttr(path)}', 'icon', this.value)">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${targetFields(item, path)}</div>
-                    <div class="flex flex-wrap items-center gap-4">
-                        <label class="flex items-center gap-2 text-xs text-gray-600">
-                            <input type="checkbox" ${item.new_tab ? 'checked' : ''} onchange="updateNav('${pathAttr(path)}', 'new_tab', this.checked)" class="h-4 w-4"> เปิดในแท็บใหม่
-                        </label>
-                        <label class="flex items-center gap-2 text-xs font-semibold ${enabled ? 'text-gray-700' : 'text-amber-700'}">
-                            <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleNav('${pathAttr(path)}', this.checked)" class="h-4 w-4"> เปิดใช้งานเมนูนี้
-                        </label>
-                    </div>
-                    ${isChild ? '' : `
-                    <div class="pt-2 border-t">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold text-gray-600">เมนูย่อย (${(item.children || []).length})</span>
-                            <button type="button" onclick="addNavChild(${index})" class="bg-white px-2 py-1 text-xs border rounded hover:bg-gray-100">+ เพิ่มเมนูย่อย</button>
+
+                    <div class="${open ? '' : 'hidden'} space-y-2 border-t border-gray-200 px-3 py-3" data-row-body="${key}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <input type="text" class="border p-2 text-sm" placeholder="ข้อความบนเมนู" value="${navEsc(item.label)}" oninput="updateNav('${key}', 'label', this.value)">
+                            <input type="text" list="bi-icon-list" class="border p-2 text-sm font-mono" placeholder="ไอคอน เช่น bi-shop" value="${navEsc(item.icon)}" oninput="updateNav('${key}', 'icon', this.value)">
                         </div>
-                        <div class="space-y-2">${(item.children || []).map((c, j) => itemRow(c, [index, j], true)).join('')}</div>
-                    </div>`}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${targetFields(item, path)}</div>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <label class="flex items-center gap-2 text-xs text-gray-600">
+                                <input type="checkbox" ${item.new_tab ? 'checked' : ''} onchange="updateNav('${key}', 'new_tab', this.checked)" class="h-4 w-4"> เปิดในแท็บใหม่
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-semibold ${enabled ? 'text-gray-700' : 'text-amber-700'}">
+                                <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleNav('${key}', this.checked)" class="h-4 w-4"> เปิดใช้งานเมนูนี้
+                            </label>
+                        </div>
+                        ${isChild ? '' : `
+                        <div class="pt-2 border-t border-gray-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-semibold text-gray-600">เมนูย่อย (${childCount})</span>
+                                <button type="button" onclick="addNavChild(${index})" class="bg-white px-2 py-1 text-xs border rounded hover:bg-gray-100">+ เพิ่มเมนูย่อย</button>
+                            </div>
+                            <div class="space-y-2">${(item.children || []).map((c, j) => itemRow(c, [index, j], true)).join('')}</div>
+                        </div>`}
+                    </div>
                 </div>
             `;
         }
@@ -130,16 +154,44 @@
             navSync();
         }
 
+        window.toggleRow = (key) => {
+            const body = document.querySelector('[data-row-body="' + key + '"]');
+            const caret = document.querySelector('[data-row-caret="' + key + '"]');
+            if (!body) return;
+            const nowOpen = body.classList.contains('hidden');
+            body.classList.toggle('hidden', !nowOpen);
+            if (caret) caret.classList.toggle('rotate-90', nowOpen);
+            itemAt(parsePath(key))._open = nowOpen;
+        };
+
+        const setAllOpen = (state) => {
+            navItems.forEach(item => {
+                item._open = state;
+                (item.children || []).forEach(child => { child._open = state; });
+            });
+            renderNav();
+        };
+        document.getElementById('expand-nav-btn').addEventListener('click', () => setAllOpen(true));
+        document.getElementById('collapse-nav-btn').addEventListener('click', () => setAllOpen(false));
+
         window.updateNav = (pathStr, key, value) => {
-            const path = parsePath(pathStr);
-            itemAt(path)[key] = value;
+            const item = itemAt(parsePath(pathStr));
+            item[key] = value;
             navSync();
-            // สลับชนิดลิงก์ต้องวาดฟิลด์ใหม่
-            if (key === 'type') renderNav();
+            // สลับชนิดลิงก์ต้องวาดฟิลด์ใหม่ ส่วนที่เหลืออัปเดตเฉพาะหัวแถว จะได้ไม่หลุดโฟกัสระหว่างพิมพ์
+            if (key === 'type') { renderNav(); return; }
+            if (key === 'label') {
+                const el = document.querySelector('[data-row-label="' + pathStr + '"]');
+                if (el) el.innerHTML = navEsc(value) || NO_NAME;
+            }
+            if (key === 'url' || key === 'page_id') {
+                const el = document.querySelector('[data-row-target="' + pathStr + '"]');
+                if (el) el.textContent = targetSummary(item);
+            }
         };
         window.toggleNav = (pathStr, enabled) => {
             itemAt(parsePath(pathStr)).enabled = enabled;
-            renderNav();   // วาดใหม่เพื่อให้ป้ายและความจางอัปเดตตาม
+            renderNav();
         };
         window.moveNav = (pathStr, direction) => {
             const path = parsePath(pathStr);
@@ -158,10 +210,14 @@
         };
         window.addNavChild = (index) => {
             navItems[index].children = navItems[index].children || [];
-            navItems[index].children.push(blankItem());
+            navItems[index].children.push(Object.assign(blankItem(), { _open: true }));
+            navItems[index]._open = true;
             renderNav();
         };
-        document.getElementById('add-nav-btn').addEventListener('click', () => { navItems.push(blankItem()); renderNav(); });
+        document.getElementById('add-nav-btn').addEventListener('click', () => {
+            navItems.push(Object.assign(blankItem(), { _open: true }));
+            renderNav();
+        });
 
         renderNav();
     </script>
