@@ -1,0 +1,134 @@
+<%
+  // locals: nav (จาก buildNav), settings
+  var _nav = (typeof nav !== 'undefined' && nav) ? nav : [];
+  var _logoHeight = settings.logo_height || 40;
+%>
+<header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-8" aria-label="เมนูหลัก">
+    <a href="/" class="shrink-0 transition hover:opacity-80">
+      <img src="<%= settings.logo_url %>" alt="<%= settings.site_name || 'Lullapos' %>" class="w-auto max-w-[220px] object-contain" style="height: <%= _logoHeight %>px;">
+    </a>
+
+    <% if (_nav.length) { %>
+    <ul class="hidden items-center gap-1 md:flex">
+      <% _nav.forEach(function (item, i) { %>
+        <% if (item.children.length) { %>
+        <li class="relative" data-nav-dropdown>
+          <button type="button" class="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-primary" aria-expanded="false" data-nav-toggle="<%= i %>">
+            <% if (item.icon) { %><i class="bi <%= item.icon %>" aria-hidden="true"></i><% } %>
+            <%= item.label %>
+            <svg class="h-4 w-4 transition-transform" data-nav-caret fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          <div class="absolute left-0 top-full hidden min-w-[15rem] pt-2" data-nav-panel="<%= i %>">
+            <ul class="overflow-hidden rounded-xl border border-gray-200 bg-white py-2 shadow-lg">
+              <% item.children.forEach(function (child) { %>
+              <li>
+                <a href="<%= child.href %>" <%= child.new_tab ? 'target="_blank" rel="noopener"' : '' %> class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 hover:text-primary">
+                  <% if (child.icon) { %><i class="bi <%= child.icon %> text-base text-primary" aria-hidden="true"></i><% } %>
+                  <%= child.label %>
+                </a>
+              </li>
+              <% }); %>
+            </ul>
+          </div>
+        </li>
+        <% } else { %>
+        <li>
+          <a href="<%= item.href %>" <%= item.new_tab ? 'target="_blank" rel="noopener"' : '' %> class="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 hover:text-primary">
+            <% if (item.icon) { %><i class="bi <%= item.icon %>" aria-hidden="true"></i><% } %>
+            <%= item.label %>
+          </a>
+        </li>
+        <% } %>
+      <% }); %>
+    </ul>
+
+    <button type="button" id="nav-mobile-toggle" class="rounded-md p-2 text-gray-600 transition hover:bg-gray-100 md:hidden" aria-expanded="false" aria-label="เปิดเมนู">
+      <i class="bi bi-list text-2xl" aria-hidden="true"></i>
+    </button>
+    <% } %>
+  </nav>
+
+  <% if (_nav.length) { %>
+  <div id="nav-mobile-panel" class="hidden border-t border-gray-200 bg-white md:hidden">
+    <ul class="mx-auto max-w-7xl px-6 py-3 lg:px-8">
+      <% _nav.forEach(function (item, i) { %>
+      <li class="border-b border-gray-100 last:border-0">
+        <% if (item.children.length) { %>
+        <button type="button" class="flex w-full items-center justify-between gap-2 py-3 text-left text-sm font-semibold text-gray-800" data-nav-mobile-toggle="<%= i %>">
+          <span class="flex items-center gap-2">
+            <% if (item.icon) { %><i class="bi <%= item.icon %> text-primary" aria-hidden="true"></i><% } %>
+            <%= item.label %>
+          </span>
+          <svg class="h-4 w-4 transition-transform" data-nav-caret fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        <ul class="hidden pb-2 pl-4" data-nav-mobile-panel="<%= i %>">
+          <% if (item.href) { %>
+          <li><a href="<%= item.href %>" <%= item.new_tab ? 'target="_blank" rel="noopener"' : '' %> class="block py-2 text-sm text-gray-600 hover:text-primary"><%= item.label %></a></li>
+          <% } %>
+          <% item.children.forEach(function (child) { %>
+          <li>
+            <a href="<%= child.href %>" <%= child.new_tab ? 'target="_blank" rel="noopener"' : '' %> class="flex items-center gap-2 py-2 text-sm text-gray-600 hover:text-primary">
+              <% if (child.icon) { %><i class="bi <%= child.icon %> text-primary" aria-hidden="true"></i><% } %>
+              <%= child.label %>
+            </a>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <a href="<%= item.href %>" <%= item.new_tab ? 'target="_blank" rel="noopener"' : '' %> class="flex items-center gap-2 py-3 text-sm font-semibold text-gray-800 hover:text-primary">
+          <% if (item.icon) { %><i class="bi <%= item.icon %> text-primary" aria-hidden="true"></i><% } %>
+          <%= item.label %>
+        </a>
+        <% } %>
+      </li>
+      <% }); %>
+    </ul>
+  </div>
+
+  <script>
+    (function () {
+      // dropdown บนจอใหญ่: เปิดเมื่อ hover และเมื่อคลิก/โฟกัสด้วยคีย์บอร์ด
+      document.querySelectorAll('[data-nav-dropdown]').forEach(function (wrap) {
+        var toggle = wrap.querySelector('[data-nav-toggle]');
+        var panel = wrap.querySelector('[data-nav-panel]');
+        var caret = wrap.querySelector('[data-nav-caret]');
+        if (!toggle || !panel) return;
+        var open = function (state) {
+          panel.classList.toggle('hidden', !state);
+          toggle.setAttribute('aria-expanded', state ? 'true' : 'false');
+          if (caret) caret.classList.toggle('rotate-180', state);
+        };
+        wrap.addEventListener('mouseenter', function () { open(true); });
+        wrap.addEventListener('mouseleave', function () { open(false); });
+        toggle.addEventListener('click', function (e) {
+          e.stopPropagation();
+          open(panel.classList.contains('hidden'));
+        });
+        wrap.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
+      });
+      document.addEventListener('click', function () {
+        document.querySelectorAll('[data-nav-panel]').forEach(function (p) { p.classList.add('hidden'); });
+      });
+
+      var mobileToggle = document.getElementById('nav-mobile-toggle');
+      var mobilePanel = document.getElementById('nav-mobile-panel');
+      if (mobileToggle && mobilePanel) {
+        mobileToggle.addEventListener('click', function () {
+          var hidden = mobilePanel.classList.toggle('hidden');
+          mobileToggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        });
+      }
+      document.querySelectorAll('[data-nav-mobile-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var panel = document.querySelector('[data-nav-mobile-panel="' + btn.dataset.navMobileToggle + '"]');
+          if (!panel) return;
+          var hidden = panel.classList.toggle('hidden');
+          var caret = btn.querySelector('[data-nav-caret]');
+          if (caret) caret.classList.toggle('rotate-180', !hidden);
+        });
+      });
+    })();
+  </script>
+  <% } %>
+</header>

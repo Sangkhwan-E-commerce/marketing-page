@@ -97,6 +97,47 @@ function slugError(slug) {
     return null;
 }
 
+// เมนูบน Navbar: เก็บเป็น JSON ก้อนเดียวใน LANDING_settings รองรับสองระดับ (เมนูหลัก + dropdown)
+function normalizeNavItem(raw, allowChildren) {
+    const item = {
+        label: String((raw && raw.label) || '').slice(0, 120),
+        icon: String((raw && raw.icon) || '').replace(/[^a-z0-9- ]/gi, '').slice(0, 60),
+        type: (raw && raw.type) === 'url' ? 'url' : 'page',
+        page_id: raw && raw.page_id ? String(raw.page_id).replace(/[^0-9]/g, '') : '',
+        url: String((raw && raw.url) || '').slice(0, 500),
+        new_tab: !!(raw && raw.new_tab)
+    };
+    if (allowChildren) {
+        const kids = Array.isArray(raw && raw.children) ? raw.children : [];
+        item.children = kids.slice(0, 20).map(k => normalizeNavItem(k, false)).filter(k => k.label.trim());
+    }
+    return item;
+}
+
+function normalizeNavItems(raw) {
+    let parsed = [];
+    try { parsed = JSON.parse(raw || '[]'); } catch (e) { parsed = []; }
+    if (!Array.isArray(parsed)) parsed = [];
+    return parsed.slice(0, 20).map(i => normalizeNavItem(i, true)).filter(i => i.label.trim());
+}
+
+// แปลงเมนูที่บันทึกไว้ให้พร้อมแสดงผล: หาลิงก์จริง และตัดรายการที่ชี้ไปหน้าที่ถูกลบหรือยังไม่เผยแพร่
+function buildNav(rawItems, pages) {
+    const byId = new Map(pages.map(pg => [pg.id, pg]));
+    const href = (item) => {
+        if (item.type === 'url') return item.url.trim() || null;
+        const pg = byId.get(parseInt(item.page_id, 10));
+        if (!pg || !pg.is_published) return null;
+        return pg.is_home ? '/' : '/' + encodeURIComponent(pg.slug);
+    };
+    return normalizeNavItems(rawItems).map(item => {
+        const children = (item.children || [])
+            .map(c => ({ label: c.label, icon: c.icon, new_tab: c.new_tab, href: href(c) }))
+            .filter(c => c.href);
+        return { label: item.label, icon: item.icon, new_tab: item.new_tab, href: href(item), children };
+    }).filter(item => item.href || item.children.length);
+}
+
 // ส่วนต่างๆ ของหน้าแรก เรียงลำดับ/ซ่อน/เลือกสีพื้นหลังได้จากหน้าแอดมิน
 // type ต้องตรงกับชื่อไฟล์ใน views/partials/sections/
 const SECTIONS = [
@@ -208,10 +249,10 @@ async function initDB() {
         
         const defaultSettings = {
             site_name: 'Lullapos',
+            nav_items: '[]',
             favicon_url: 'https://via.placeholder.com/32',
             logo_url: 'https://via.placeholder.com/150x50?text=Logo',
             logo_height: '80',
-            logo_padding_top: '0',
             theme_color: 'rgb(244 97 100 / 98%)',
             section_order: JSON.stringify(SECTIONS.map(s => ({ type: s.type, enabled: true, bg: s.defaultBg }))),
             hero_list: JSON.stringify([
@@ -561,6 +602,7 @@ app.get('/', async (req, res, next) => {
     try {
         const home = await getHomePage();
         const settings = await buildPageContext(home);
+        const nav = buildNav(settings.nav_items, await listPages());
         const articlesRes = await pool.query(`
             SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
             FROM landing_articles a 
@@ -568,7 +610,7 @@ app.get('/', async (req, res, next) => {
             WHERE a.is_published = true 
             ORDER BY a.created_at DESC LIMIT 9
         `);
-        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS, siteUrl: SITE_URL, page: home, pageUrl: SITE_URL + '/' });
+        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS, siteUrl: SITE_URL, page: home, pageUrl: SITE_URL + '/', nav });
     } catch (err) {
         next(err);
     }
@@ -578,6 +620,7 @@ app.get('/articles', async (req, res, next) => {
     try {
         // หน้ารายการ/หน้าบทความใช้ค่าเว็บ บวกค่าเริ่มต้นจากหน้าแรก (เช่น SEO fallback)
         const settings = await buildPageContext(await getHomePage());
+        const nav = buildNav(settings.nav_items, await listPages());
         
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
@@ -618,6 +661,7 @@ app.get('/articles', async (req, res, next) => {
         
         res.render('articles', { 
             siteUrl: SITE_URL,
+            nav,
             settings, 
             articles: articlesRes.rows,
             categories: catRes.rows,
@@ -635,6 +679,7 @@ app.get('/articles', async (req, res, next) => {
 app.get('/article/:slug', async (req, res, next) => {
     try {
         const settings = await buildPageContext(await getHomePage());
+        const nav = buildNav(settings.nav_items, await listPages());
         
         // 1. ดึงข้อมูลบทความหลัก
         const articleRes = await pool.query(`
@@ -659,6 +704,7 @@ app.get('/article/:slug', async (req, res, next) => {
 
         res.render('article', { 
             siteUrl: SITE_URL,
+            nav,
             settings, 
             article: article,
             related_articles: relatedRes.rows 
@@ -700,7 +746,7 @@ app.post('/admin/site/save', requireAuth, upload.fields([
         const updates = {
             site_name: body.site_name,
             logo_height: clampNumber(body.logo_height, 20, 400, 80),
-            logo_padding_top: clampNumber(body.logo_padding_top, 0, 300, 0),
+           
             theme_color: body.theme_color,
             footer_text: body.footer_text,
             facebook_url: body.facebook_url,
@@ -898,6 +944,19 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
     } catch (error) { next(error); }
 });
 
+app.get('/admin/nav', requireAuth, async (req, res, next) => {
+    try {
+        res.render('admin/nav', { settings: await getSettings(), pages: await listPages() });
+    } catch (err) { next(err); }
+});
+
+app.post('/admin/nav/save', requireAuth, async (req, res, next) => {
+    try {
+        await saveSettings({ nav_items: JSON.stringify(normalizeNavItems(req.body.nav_items)) });
+        res.redirect('/admin/nav');
+    } catch (err) { next(err); }
+});
+
 app.get('/admin/blog', requireAuth, async (req, res, next) => {
     try {
         res.render('admin/blog', { settings: await getSettings() });
@@ -1009,6 +1068,7 @@ app.get('/:slug', async (req, res, next) => {
         if (!page.is_published) return next();
 
         const settings = await buildPageContext(page);
+        const nav = buildNav(settings.nav_items, await listPages());
         const articlesRes = await pool.query(`
             SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
             FROM landing_articles a
@@ -1023,7 +1083,8 @@ app.get('/:slug', async (req, res, next) => {
             sectionCatalogue: SECTIONS,
             siteUrl: SITE_URL,
             page,
-            pageUrl: SITE_URL + '/' + encodeURIComponent(page.slug)
+            pageUrl: SITE_URL + '/' + encodeURIComponent(page.slug),
+            nav
         });
     } catch (err) { next(err); }
 });

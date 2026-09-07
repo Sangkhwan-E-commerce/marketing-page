@@ -1,0 +1,155 @@
+<%- include('_head', { pageTitle: 'Navbar & เมนู' }) %>
+<%- include('_sidebar', { adminPage: 'nav', tabs: [] }) %>
+<%- include('_topbar', { heading: 'Navbar & เมนู' }) %>
+
+                <form action="/admin/nav/save" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white z-20 rounded-t-xl">
+                        <div>
+                            <p class="text-sm text-gray-500">เมนูนี้แสดงบนทุกหน้าของเว็บไซต์</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0">
+                            <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition">
+                                💾 บันทึกการเปลี่ยนแปลง
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-semibold">รายการเมนู (<span id="nav-count">0</span> รายการ)</h4>
+                            <button type="button" id="add-nav-btn" class="bg-white px-3 py-2 text-sm border rounded hover:bg-gray-50">+ เพิ่มเมนู</button>
+                        </div>
+                        <p class="text-xs text-gray-500">แต่ละเมนูเพิ่มเมนูย่อยได้ กลายเป็น dropdown อัตโนมัติ — เมนูที่ชี้ไปหน้าที่ถูกลบหรือยังไม่เผยแพร่จะไม่แสดงบนเว็บ</p>
+                        <p id="nav-empty" class="text-sm text-gray-500 bg-gray-50 border border-dashed rounded p-4 text-center hidden">ยังไม่มีเมนู กดปุ่ม "+ เพิ่มเมนู" เพื่อเริ่ม</p>
+                        <div id="nav-container" class="space-y-4"></div>
+                        <input type="hidden" name="nav_items" id="nav_items_input" value="<%= settings.nav_items || '[]' %>">
+                    </div>
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+    <datalist id="bi-icon-list">
+        <% ['bi-house','bi-house-door','bi-shop','bi-cart','bi-bag','bi-basket','bi-credit-card','bi-cash-coin',
+            'bi-graph-up','bi-bar-chart','bi-pie-chart','bi-clipboard-data','bi-box-seam','bi-boxes','bi-truck',
+            'bi-people','bi-person-badge','bi-person-check','bi-headset','bi-chat-dots','bi-envelope','bi-telephone',
+            'bi-gear','bi-sliders','bi-tools','bi-shield-check','bi-lock','bi-cloud','bi-lightning-charge','bi-stars',
+            'bi-star','bi-heart','bi-book','bi-journal-text','bi-newspaper','bi-question-circle','bi-info-circle',
+            'bi-printer','bi-qr-code','bi-tags','bi-calendar-check','bi-clock-history','bi-globe','bi-phone'].forEach(function (icon) { %>
+        <option value="<%= icon %>"></option>
+        <% }); %>
+    </datalist>
+
+    <script>
+<%- include('_shared-js') %>
+
+        // --- Navbar & เมนู (สองระดับ) ---
+        const NAV_PAGES = <%- JSON.stringify(pages.map(function (p) { return { id: p.id, title: p.title, slug: p.slug, is_home: p.is_home, is_published: p.is_published }; })) %>;
+
+        const navContainer = document.getElementById('nav-container');
+        const navInput = document.getElementById('nav_items_input');
+        const navEmpty = document.getElementById('nav-empty');
+        const navCount = document.getElementById('nav-count');
+        let navItems = [];
+        try { navItems = JSON.parse(navInput.value || '[]'); } catch (e) { navItems = []; }
+        if (!Array.isArray(navItems)) navItems = [];
+
+        const navEsc = (str) => (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const navSync = () => { navInput.value = JSON.stringify(navItems); };
+        const blankItem = () => ({ label: '', icon: '', type: 'page', page_id: '', url: '', new_tab: false, children: [] });
+
+        // path: [i] สำหรับเมนูหลัก, [i, j] สำหรับเมนูย่อย
+        const itemAt = (path) => path.length === 1 ? navItems[path[0]] : navItems[path[0]].children[path[1]];
+        const listAt = (path) => path.length === 1 ? navItems : navItems[path[0]].children;
+        const pathAttr = (path) => path.join('-');
+        const parsePath = (value) => value.split('-').map(Number);
+
+        function targetFields(item, path) {
+            const options = NAV_PAGES.map(p =>
+                `<option value="${p.id}" ${String(item.page_id) === String(p.id) ? 'selected' : ''}>${navEsc(p.title)}${p.is_published ? '' : ' (ยังไม่เผยแพร่)'}</option>`
+            ).join('');
+            return `
+                <select class="w-full border p-2 text-sm" onchange="updateNav('${pathAttr(path)}', 'type', this.value)">
+                    <option value="page" ${item.type !== 'url' ? 'selected' : ''}>ลิงก์ไปหน้าในเว็บ</option>
+                    <option value="url" ${item.type === 'url' ? 'selected' : ''}>ลิงก์ภายนอก / URL เอง</option>
+                </select>
+                ${item.type === 'url'
+                    ? `<input type="text" class="w-full border p-2 text-sm" placeholder="https://..." value="${navEsc(item.url)}" oninput="updateNav('${pathAttr(path)}', 'url', this.value)">`
+                    : `<select class="w-full border p-2 text-sm" onchange="updateNav('${pathAttr(path)}', 'page_id', this.value)"><option value="">— เลือกหน้า —</option>${options}</select>`}
+            `;
+        }
+
+        function itemRow(item, path, isChild) {
+            const list = listAt(path);
+            const index = path[path.length - 1];
+            return `
+                <div class="${isChild ? 'bg-white border rounded p-3' : 'bg-gray-50/50 border border-gray-200 rounded-lg p-4'} space-y-2">
+                    <div class="flex justify-between items-center ${isChild ? '' : 'border-b pb-2'}">
+                        <span class="text-sm font-semibold">${isChild ? 'เมนูย่อย' : 'เมนู'} ${index + 1}</span>
+                        <div class="flex space-x-2">
+                            ${index > 0 ? `<button type="button" onclick="moveNav('${pathAttr(path)}', -1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▲</button>` : ''}
+                            ${index < list.length - 1 ? `<button type="button" onclick="moveNav('${pathAttr(path)}', 1)" class="text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 font-bold px-2 py-1 rounded text-xs transition">▼</button>` : ''}
+                            <button type="button" onclick="removeNav('${pathAttr(path)}')" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 font-bold px-2 py-1 rounded text-xs transition">✖ ลบ</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input type="text" class="border p-2 text-sm" placeholder="ข้อความบนเมนู" value="${navEsc(item.label)}" oninput="updateNav('${pathAttr(path)}', 'label', this.value)">
+                        <input type="text" list="bi-icon-list" class="border p-2 text-sm font-mono" placeholder="ไอคอน เช่น bi-shop" value="${navEsc(item.icon)}" oninput="updateNav('${pathAttr(path)}', 'icon', this.value)">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${targetFields(item, path)}</div>
+                    <label class="flex items-center gap-2 text-xs text-gray-600">
+                        <input type="checkbox" ${item.new_tab ? 'checked' : ''} onchange="updateNav('${pathAttr(path)}', 'new_tab', this.checked)" class="h-4 w-4"> เปิดในแท็บใหม่
+                    </label>
+                    ${isChild ? '' : `
+                    <div class="pt-2 border-t">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-semibold text-gray-600">เมนูย่อย (${(item.children || []).length})</span>
+                            <button type="button" onclick="addNavChild(${index})" class="bg-white px-2 py-1 text-xs border rounded hover:bg-gray-100">+ เพิ่มเมนูย่อย</button>
+                        </div>
+                        <div class="space-y-2">${(item.children || []).map((c, j) => itemRow(c, [index, j], true)).join('')}</div>
+                    </div>`}
+                </div>
+            `;
+        }
+
+        function renderNav() {
+            navEmpty.classList.toggle('hidden', navItems.length > 0);
+            navCount.innerText = navItems.length;
+            navContainer.innerHTML = navItems.map((item, i) => itemRow(item, [i], false)).join('');
+            navSync();
+        }
+
+        window.updateNav = (pathStr, key, value) => {
+            const path = parsePath(pathStr);
+            itemAt(path)[key] = value;
+            navSync();
+            // สลับชนิดลิงก์ต้องวาดฟิลด์ใหม่
+            if (key === 'type') renderNav();
+        };
+        window.moveNav = (pathStr, direction) => {
+            const path = parsePath(pathStr);
+            const list = listAt(path);
+            const i = path[path.length - 1];
+            const target = i + direction;
+            if (target < 0 || target >= list.length) return;
+            const tmp = list[i]; list[i] = list[target]; list[target] = tmp;
+            renderNav();
+        };
+        window.removeNav = (pathStr) => {
+            if (!confirm('ลบรายการนี้?')) return;
+            const path = parsePath(pathStr);
+            listAt(path).splice(path[path.length - 1], 1);
+            renderNav();
+        };
+        window.addNavChild = (index) => {
+            navItems[index].children = navItems[index].children || [];
+            navItems[index].children.push(blankItem());
+            renderNav();
+        };
+        document.getElementById('add-nav-btn').addEventListener('click', () => { navItems.push(blankItem()); renderNav(); });
+
+        renderNav();
+    </script>
+</body>
+</html>
