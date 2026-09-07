@@ -19,6 +19,8 @@
   };
 
   var siteName = settings.site_name || 'Lullapos';
+  var thisPage = (typeof page !== 'undefined' && page) ? page : { is_home: true, title: siteName };
+  var thisUrl = (typeof pageUrl !== 'undefined' && pageUrl) ? pageUrl : siteUrl + '/';
   // ข้อความใน structured data ต้องเป็น plain text: ตัดแท็กออกแล้วคืนค่า entity กลับเป็นตัวอักษรจริง
   var stripTags = function(v) {
     return String(v || '')
@@ -33,7 +35,7 @@
   var homeFaqs = [];
   try { homeFaqs = JSON.parse(settings.faq_list || '[]'); } catch(e) {}
 
-  var graph = [
+  var graph = thisPage.is_home ? [
     {
       '@type': 'Organization',
       '@id': siteUrl + '/#organization',
@@ -65,6 +67,23 @@
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'THB' },
       publisher: { '@id': siteUrl + '/#organization' }
     }
+  ] : [
+    {
+      '@type': 'WebPage',
+      '@id': thisUrl + '#page',
+      url: thisUrl,
+      name: settings.seo_title,
+      description: settings.seo_description,
+      inLanguage: 'th-TH',
+      isPartOf: { '@id': siteUrl + '/#website' }
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: siteUrl + '/' },
+        { '@type': 'ListItem', position: 2, name: thisPage.title, item: thisUrl }
+      ]
+    }
   ];
 
   // ใส่ FAQPage เฉพาะตอนที่ส่วน FAQ แสดงจริงบนหน้า มิฉะนั้นถือว่าเป็น structured data ที่ไม่ตรงกับเนื้อหา
@@ -84,7 +103,7 @@
 <%- include('partials/seo/meta', {
       pageTitle: settings.seo_title,
       pageDescription: settings.seo_description,
-      pageUrl: siteUrl + '/',
+      pageUrl: thisUrl,
       pageImage: settings.seo_thumbnail_url,
       ogType: 'website'
     }) %>

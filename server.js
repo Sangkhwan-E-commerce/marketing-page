@@ -74,6 +74,29 @@ const PAGE_SETTING_KEYS = [
 ];
 const isPageKey = (key) => PAGE_SETTING_KEYS.includes(key);
 
+// slug ที่ชนกับ route อื่นของระบบ ห้ามใช้เป็นชื่อหน้า
+const RESERVED_SLUGS = [
+    'admin', 'api', 'article', 'articles', 'assets', 'static', 'public',
+    'robots.txt', 'sitemap.xml', 'wakeup', 'favicon.ico', 'home'
+];
+
+// อนุญาต a-z 0-9 ยัติภังค์ และอักษรไทย
+function slugify(value) {
+    return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 100);
+}
+
+function slugError(slug) {
+    if (!slug) return 'กรุณากรอก URL ของหน้า';
+    if (RESERVED_SLUGS.includes(slug)) return 'URL นี้ระบบสงวนไว้ กรุณาใช้ชื่ออื่น';
+    return null;
+}
+
 // ส่วนต่างๆ ของหน้าแรก เรียงลำดับ/ซ่อน/เลือกสีพื้นหลังได้จากหน้าแอดมิน
 // type ต้องตรงกับชื่อไฟล์ใน views/partials/sections/
 const SECTIONS = [
@@ -391,6 +414,19 @@ async function getHomePage() {
     return res.rows[0] || null;
 }
 
+async function getPageBySlug(slug) {
+    const res = await pool.query('SELECT * FROM landing_pages WHERE slug = $1 LIMIT 1', [slug]);
+    return res.rows[0] || null;
+}
+
+async function slugTaken(slug, exceptId) {
+    const res = await pool.query(
+        'SELECT 1 FROM landing_pages WHERE slug = $1 AND id <> $2 LIMIT 1',
+        [slug, exceptId || 0]
+    );
+    return res.rows.length > 0;
+}
+
 async function getPageById(id) {
     const res = await pool.query('SELECT * FROM landing_pages WHERE id = $1', [id]);
     return res.rows[0] || null;
@@ -480,6 +516,7 @@ app.get('/robots.txt', (req, res) => {
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const articles = await pool.query('SELECT slug, created_at FROM landing_articles WHERE is_published = true ORDER BY created_at DESC');
+        const extraPages = await pool.query('SELECT slug, created_at FROM landing_pages WHERE is_published = true AND is_home = false ORDER BY sort_order ASC');
         const lastmod = (d) => new Date(d).toISOString().slice(0, 10);
         const newest = articles.rows.length ? lastmod(articles.rows[0].created_at) : lastmod(Date.now());
         let urls = `
@@ -495,6 +532,15 @@ app.get('/sitemap.xml', async (req, res) => {
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>`;
+        extraPages.rows.forEach(pg => {
+            urls += `
+  <url>
+    <loc>${SITE_URL}/${encodeURIComponent(pg.slug)}</loc>
+    <lastmod>${lastmod(pg.created_at)}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+        });
         articles.rows.forEach(a => {
             urls += `
   <url>
@@ -513,7 +559,8 @@ app.get('/sitemap.xml', async (req, res) => {
 
 app.get('/', async (req, res, next) => {
     try {
-        const settings = await buildPageContext(await getHomePage());
+        const home = await getHomePage();
+        const settings = await buildPageContext(home);
         const articlesRes = await pool.query(`
             SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
             FROM landing_articles a 
@@ -521,7 +568,7 @@ app.get('/', async (req, res, next) => {
             WHERE a.is_published = true 
             ORDER BY a.created_at DESC LIMIT 9
         `);
-        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS, siteUrl: SITE_URL });
+        res.render('index', { settings, latest_articles: articlesRes.rows, templates: TEMPLATES, sectionCatalogue: SECTIONS, siteUrl: SITE_URL, page: home, pageUrl: SITE_URL + '/' });
     } catch (err) {
         next(err);
     }
@@ -680,7 +727,35 @@ app.post('/admin/site/save', requireAuth, upload.fields([
 
 app.get('/admin/pages', requireAuth, async (req, res, next) => {
     try {
-        res.render('admin/pages', { settings: await getSettings(), pages: await listPages() });
+        res.render('admin/pages', { settings: await getSettings(), pages: await listPages(), error: req.query.error || null });
+    } catch (err) { next(err); }
+});
+
+app.post('/admin/pages', requireAuth, async (req, res, next) => {
+    try {
+        const title = (req.body.title || '').toString().trim();
+        if (!title) return res.redirect('/admin/pages?error=' + encodeURIComponent('กรุณากรอกชื่อหน้า'));
+        const slug = slugify(req.body.slug || title);
+        const problem = slugError(slug) || (await slugTaken(slug) ? 'URL นี้ถูกใช้แล้ว' : null);
+        if (problem) return res.redirect('/admin/pages?error=' + encodeURIComponent(problem));
+
+        const maxSort = await pool.query('SELECT COALESCE(MAX(sort_order), 0) AS m FROM landing_pages');
+        const created = await pool.query(
+            'INSERT INTO landing_pages (slug, title, is_home, sort_order) VALUES ($1, $2, false, $3) RETURNING id',
+            [slug, title, Number(maxSort.rows[0].m) + 1]
+        );
+        res.redirect('/admin/pages/' + created.rows[0].id);
+    } catch (err) { next(err); }
+});
+
+app.post('/admin/pages/:id/delete', requireAuth, async (req, res, next) => {
+    try {
+        const page = await getPageById(req.params.id);
+        if (!page) return res.status(404).send('ไม่พบหน้านี้');
+        // หน้าเริ่มต้นเป็นหน้าแรกของเว็บเสมอ ลบไม่ได้
+        if (page.is_home) return res.redirect('/admin/pages?error=' + encodeURIComponent('ลบหน้าแรกไม่ได้'));
+        await pool.query('DELETE FROM landing_pages WHERE id = $1', [page.id]);
+        res.redirect('/admin/pages');
     } catch (err) { next(err); }
 });
 
@@ -691,6 +766,7 @@ app.get('/admin/pages/:id', requireAuth, async (req, res, next) => {
         res.render('admin/page-edit', {
             settings: await buildPageContext(page),
             page,
+            error: req.query.error || null,
             templates: TEMPLATES,
             sectionCatalogue: SECTIONS,
             sectionBgs: SECTION_BGS
@@ -802,6 +878,22 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
         if (req.files['stats_img']) updates.stats_img_url = await uploadToR2(req.files['stats_img'][0], 'landingpage');
         if (req.files['seo_thumbnail']) updates.seo_thumbnail_url = await uploadToR2(req.files['seo_thumbnail'][0], 'landingpage');
         await savePageSettings(page.id, updates);
+
+        const title = (body.page_title || '').toString().trim() || page.title;
+        const sortOrder = clampNumber(body.sort_order, 0, 999, page.sort_order || 0);
+        // หน้าแรกเผยแพร่เสมอ และเปลี่ยน slug ไม่ได้ เพราะเสิร์ฟที่ /
+        const published = page.is_home ? true : body.is_published === 'on';
+        let slug = page.slug;
+        if (!page.is_home) {
+            const requested = slugify(body.page_slug || '');
+            const problem = slugError(requested) || (await slugTaken(requested, page.id) ? 'URL นี้ถูกใช้แล้ว' : null);
+            if (problem) return res.redirect('/admin/pages/' + page.id + '?error=' + encodeURIComponent(problem));
+            slug = requested;
+        }
+        await pool.query(
+            'UPDATE landing_pages SET title = $1, slug = $2, is_published = $3, sort_order = $4 WHERE id = $5',
+            [title, slug, published, parseInt(sortOrder, 10), page.id]
+        );
         res.redirect('/admin/pages/' + page.id);
     } catch (error) { next(error); }
 });
@@ -905,6 +997,38 @@ app.delete('/admin/api/articles/:id', requireAuth, async (req, res) => {
     await pool.query('DELETE FROM landing_articles WHERE id = $1', [req.params.id]);
     res.json({ success: true });
 });
+
+// หน้าอื่นๆ ที่สร้างจากระบบจัดการ Page — ต้องอยู่ท้ายสุดเพื่อไม่ให้กลืน route อื่น
+app.get('/:slug', async (req, res, next) => {
+    try {
+        const slug = req.params.slug;
+        if (RESERVED_SLUGS.includes(slug)) return next();
+        // หน้าแรกเสิร์ฟที่ / เท่านั้น กัน URL ซ้ำสองทางในสายตา Google
+        const page = await getPageBySlug(slug);
+        if (!page || page.is_home) return next();
+        if (!page.is_published) return next();
+
+        const settings = await buildPageContext(page);
+        const articlesRes = await pool.query(`
+            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
+            FROM landing_articles a
+            LEFT JOIN landing_categories c ON a.category_id = c.id
+            WHERE a.is_published = true
+            ORDER BY a.created_at DESC LIMIT 9
+        `);
+        res.render('index', {
+            settings,
+            latest_articles: articlesRes.rows,
+            templates: TEMPLATES,
+            sectionCatalogue: SECTIONS,
+            siteUrl: SITE_URL,
+            page,
+            pageUrl: SITE_URL + '/' + encodeURIComponent(page.slug)
+        });
+    } catch (err) { next(err); }
+});
+
+app.use((req, res) => res.status(404).send('ไม่พบหน้าที่ต้องการ'));
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
