@@ -4,7 +4,7 @@
     <div class="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-16 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-2">
       <div class="relative flex items-center justify-center lg:order-first">
         <% if (block.image) { %>
-        <img src="<%= block.image %>" alt="<%= block.title %>" class="w-full rounded-xl shadow-2xl ring-1 ring-gray-400/10">
+        <img src="<%= block.image %>" alt="<%= block.title %>" class="max-w-[400px]">
         <% } %>
       </div>
       <div class="lg:pl-8">
