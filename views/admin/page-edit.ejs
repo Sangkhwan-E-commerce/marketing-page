@@ -426,10 +426,16 @@
                     <div id="hero_editor_${index}" class="bg-white" style="height: 120px;"></div>
 
                     <div class="pt-8 ${heroTplNeedsImage(block.template) ? '' : 'hidden'}">
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">รูปภาพประกอบ</label>
-                        <input type="file" accept="image/*" onchange="uploadHeroImage(event, ${index})" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">รูปภาพหรือวิดีโอประกอบ</label>
+                        <input type="file" accept="image/*,video/mp4,video/webm" onchange="uploadHeroImage(event, ${index})" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
+                        <p class="text-xs text-gray-500 mt-1">รูปภาพ หรือวิดีโอ MP4 / WebM ขนาดไม่เกิน 50 MB</p>
                         <p id="hero_img_status_${index}" class="text-xs text-gray-500 mt-1"></p>
-                        <img id="hero_img_preview_${index}" src="${heroEscAttr(block.image)}" class="mt-2 max-h-28 w-auto rounded border border-gray-200 ${block.image ? '' : 'hidden'}">
+                        ${block.image ? (block.media_type === 'video'
+                            ? `<video src="${heroEscAttr(block.image)}" controls muted playsinline preload="metadata" class="mt-2 max-h-40 max-w-full rounded border"></video>`
+                            : `<img src="${heroEscAttr(block.image)}" class="mt-2 max-h-28 max-w-full rounded border" alt="ตัวอย่างสื่อ Hero">`) : ''}
+                        <label class="block text-xs font-semibold text-gray-600 mt-3 mb-1" for="hero_width_${index}">ความกว้างรูปภาพ / วิดีโอ (px)</label>
+                        <input id="hero_width_${index}" type="number" min="50" max="2400" step="1" placeholder="อัตโนมัติตามเลย์เอาต์" value="${heroEscAttr(String(block.media_width || ''))}" oninput="updateHeroBlock(${index}, 'media_width', this.value)" class="w-full border p-2 text-sm">
+                        <p class="text-xs text-gray-500 mt-1">50–2400 px เว้นว่างเพื่อใช้ขนาดเดิม ระบบจะย่อให้พอดีพื้นที่บนจอเล็ก</p>
                     </div>
 
                     <div class="pt-3 border-t">
@@ -480,19 +486,28 @@
             const file = event.target.files[0];
             if (!file) return;
             const status = document.getElementById(`hero_img_status_${index}`);
+            if (!(file.type.startsWith('image/') || ['video/mp4', 'video/webm'].includes(file.type))) {
+                status.innerText = 'รองรับเฉพาะรูปภาพ, MP4 และ WebM';
+                return;
+            }
+            if (file.size > 50 * 1024 * 1024) {
+                status.innerText = 'ไฟล์ต้องมีขนาดไม่เกิน 50 MB';
+                return;
+            }
+            const targetBlock = heroBlocks[index];
             status.innerText = 'กำลังอัปโหลด...';
             const formData = new FormData();
             formData.append('media', file);
             try {
-                const res = await fetch('/admin/api/upload-media', { method: 'POST', body: formData });
+                const res = await fetch('/admin/api/upload-hero-media', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.message || 'อัปโหลดไม่สำเร็จ');
-                heroBlocks[index].image = data.url;
+                if (!heroBlocks.includes(targetBlock)) return;
+                targetBlock.image = data.url;
+                targetBlock.media_type = data.media_type;
                 heroSyncInput();
-                const preview = document.getElementById(`hero_img_preview_${index}`);
-                preview.src = data.url;
-                preview.classList.remove('hidden');
-                status.innerText = 'อัปโหลดสำเร็จ';
+                renderHeroBlocks();
+                document.getElementById(`hero_img_status_${heroBlocks.indexOf(targetBlock)}`).innerText = 'อัปโหลดสำเร็จ กรุณาบันทึกการเปลี่ยนแปลง';
             } catch (err) {
                 status.innerText = err.message || 'อัปโหลดไม่สำเร็จ';
             }

@@ -12,7 +12,7 @@
       </div>
       <div class="relative flex items-center justify-center mt-10 lg:mt-0">
         <% if (block.image) { %>
-        <img src="<%= block.image %>" alt="<%= block.title %>" class="w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0">
+        <%- include('_media', { block: block, mediaClass: 'w-full max-w-full lg:max-w-none lg:w-[57rem] rounded-xl shadow-2xl ring-1 ring-gray-400/10 md:-ml-4 lg:-ml-0' }) %>
         <% } %>
       </div>
     </div>

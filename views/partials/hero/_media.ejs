@@ -1,0 +1,13 @@
+<%
+  var requestedWidth = Number(block.media_width);
+  var customWidth = Number.isFinite(requestedWidth) && requestedWidth >= 50
+    ? Math.min(2400, Math.round(requestedWidth)) : null;
+  var isBackground = typeof background !== 'undefined' && background;
+  var mediaStyle = customWidth ? 'width: ' + customWidth + 'px; max-width: 100%;' : '';
+  if (isBackground && customWidth) mediaStyle += ' left: 50%; transform: translateX(-50%);';
+%>
+<% if (block.media_type === 'video') { %>
+<video src="<%= block.image %>" aria-label="<%= block.title %>" class="<%= mediaClass %>" style="<%= mediaStyle %>" playsinline muted preload="metadata" <% if (isBackground) { %>autoplay loop<% } else { %>controls<% } %>></video>
+<% } else { %>
+<img src="<%= block.image %>" alt="<%= block.title %>" class="<%= mediaClass %>" style="<%= mediaStyle %>">
+<% } %>

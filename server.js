@@ -848,6 +848,8 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
                 title: (h.title || '').toString(),
                 desc: sanitizeHtml(h.desc || ''),
                 image: (h.image || '').toString(),
+                media_type: h.media_type === 'video' ? 'video' : 'image',
+                media_width: h.media_width ? clampNumber(h.media_width, 50, 2400, 600) : '',
                 buttons: (Array.isArray(h.buttons) ? h.buttons : []).map(b => ({
                     text: (b.text || '').toString(),
                     url: (b.url || '').toString(),
@@ -973,6 +975,14 @@ app.post('/admin/api/upload-image', requireAuth, upload.single('image'), async (
     } catch (error) { res.status(500).json({ success: false }); }
 });
 
+app.post('/admin/api/upload-hero-media', requireAuth, uploadSlide.single('media'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
+        const fileUrl = await uploadToR2(req.file, 'landingpage');
+        res.json({ success: true, url: fileUrl, media_type: req.file.mimetype.startsWith('video/') ? 'video' : 'image' });
+    } catch (error) { res.status(500).json({ success: false, message: 'อัปโหลดไม่สำเร็จ' }); }
+});
+
 app.post('/admin/api/upload-media', requireAuth, upload.single('media'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'ไม่มีไฟล์อัปโหลด' });
@@ -1096,7 +1106,7 @@ app.use((req, res) => res.status(404).send('ไม่พบหน้าที่
 app.use((err, req, res, next) => {
     console.error(err.stack);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-        const limitMb = req.path === '/admin/api/upload-slide' ? Math.round(SLIDE_MAX_BYTES / 1024 / 1024) : 5;
+        const limitMb = ['/admin/api/upload-slide', '/admin/api/upload-hero-media'].includes(req.path) ? Math.round(SLIDE_MAX_BYTES / 1024 / 1024) : 5;
         const message = `ไฟล์มีขนาดใหญ่เกินไป (จำกัดไม่เกิน ${limitMb}MB)`;
         if (req.path.startsWith('/admin/api/')) return res.status(400).json({ success: false, message });
         return res.status(400).send(message);
