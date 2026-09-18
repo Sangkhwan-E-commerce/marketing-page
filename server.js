@@ -320,6 +320,22 @@ async function initDB() {
             banner_list: '[]',
             banner_width_percent: '80',
             banner_max_width: '1200',
+
+            google_analytics_code: `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KBN65YV6D1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KBN65YV6D1');
+</script>`,
+            cookiehub_code: `<script src="https://cdn.cookiehub.eu/c2/9f66921c.js"></script>
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+  var cpm = {};
+  window.cookiehub.load(cpm);
+});
+</script>`,
             
             article_cta_title: 'พร้อมเปลี่ยนระบบร้านค้าของคุณหรือยัง?',
             article_cta_btn_text: 'ลองใช้ Lullapos ฟรี 1,000 ออเดอร์แรก',
@@ -762,6 +778,8 @@ app.post('/admin/site/save', requireAuth, upload.fields([
             banner_display_limit: body.banner_display_limit || '1',
             banner_version: Date.now().toString(),
             banner_list: body.banner_list || '[]',
+            google_analytics_code: body.google_analytics_code || '',
+            cookiehub_code: body.cookiehub_code || '',
             article_cta_title: body.article_cta_title,
             article_cta_btn_text: body.article_cta_btn_text,
             article_cta_btn_url: body.article_cta_btn_url,

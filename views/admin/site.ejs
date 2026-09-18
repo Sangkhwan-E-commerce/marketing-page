@@ -1,5 +1,5 @@
 <%- include('_head', { pageTitle: 'ตั้งค่าเว็บ' }) %>
-<%- include('_sidebar', { adminPage: 'site', tabs: [{ id: 'tab-general', label: 'ทั่วไป & Footer' }, { id: 'tab-banner', label: 'โฆษณา Modal' }, { id: 'tab-article-cta', label: 'CTA หน้าบทความ' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
+<%- include('_sidebar', { adminPage: 'site', tabs: [{ id: 'tab-general', label: 'ทั่วไป & Footer' }, { id: 'tab-tracking', label: 'Analytics & Cookie' }, { id: 'tab-banner', label: 'โฆษณา Modal' }, { id: 'tab-article-cta', label: 'CTA หน้าบทความ' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
 <%- include('_topbar', { heading: 'ตั้งค่าเว็บ' }) %>
 
                 <form action="/admin/site/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -58,6 +58,22 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">ข้อความ Copyright</label>
                                     <input type="text" name="footer_text" value="<%= settings.footer_text %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-sm" required>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div id="tab-tracking" class="tab-content space-y-6 hidden">
+                            <div class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-sm text-amber-900">
+                                โค้ดในส่วนนี้จะแทรกใน <code>&lt;head&gt;</code> ของหน้าเว็บไซต์โดยตรง ควรใช้เฉพาะโค้ดจากผู้ให้บริการที่เชื่อถือได้ และสามารถเว้นช่องว่างเพื่อปิดการใช้งานได้
+                            </div>
+                            <div>
+                                <label for="google_analytics_code" class="block text-sm font-semibold text-gray-700 mb-2">Google Analytics</label>
+                                <textarea id="google_analytics_code" name="google_analytics_code" rows="11" spellcheck="false" class="w-full border-gray-300 rounded-md border p-3 text-xs font-mono leading-5" placeholder="วางโค้ด Google Analytics ที่นี่"><%= settings.google_analytics_code || '' %></textarea>
+                                <p class="mt-2 text-xs text-gray-500">วางโค้ดทั้งหมดที่ได้รับจาก Google รวมแท็ก <code>&lt;script&gt;</code></p>
+                            </div>
+                            <div class="pt-6 border-t border-gray-200">
+                                <label for="cookiehub_code" class="block text-sm font-semibold text-gray-700 mb-2">CookieHub</label>
+                                <textarea id="cookiehub_code" name="cookiehub_code" rows="11" spellcheck="false" class="w-full border-gray-300 rounded-md border p-3 text-xs font-mono leading-5" placeholder="วางโค้ด CookieHub ที่นี่"><%= settings.cookiehub_code || '' %></textarea>
+                                <p class="mt-2 text-xs text-gray-500">วางโค้ดทั้งหมดที่ได้รับจาก CookieHub รวมแท็ก <code>&lt;script&gt;</code></p>
                             </div>
                         </div>
 
