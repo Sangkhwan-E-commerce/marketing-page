@@ -9,6 +9,9 @@
 <title><%= pageTitle %></title>
 <meta name="description" content="<%= _desc %>">
 <link rel="canonical" href="<%= pageUrl %>">
+<% if (settings.favicon_url) { %>
+<link rel="icon" href="<%= settings.favicon_url %>">
+<% } %>
 <meta name="robots" content="<%= _noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' %>">
 
 <meta property="og:type" content="<%= _type %>">

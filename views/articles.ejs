@@ -34,9 +34,6 @@
       noindex: (search && search.length > 0)
     }) %>
 <%- include('partials/seo/jsonld', { graph: listGraph }) %>
-    
-    <link rel="icon" type="image/png" href="<%= settings.favicon_url %>">
-    
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
       tailwind.config = {
