@@ -1,0 +1,11 @@
+{
+  "language": {
+    "th": "ไทย",
+    "en": "English",
+    "switch": "Change language"
+  },
+  "errors": {
+    "not_found": "Page not found",
+    "server_error": "An internal server error occurred. Please try again."
+  }
+}

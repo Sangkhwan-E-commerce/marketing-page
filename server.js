@@ -8,6 +8,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const createDOMPurify = require('dompurify');
 const { JSDOM } = require('jsdom');
+const { DEFAULT_LOCALE } = require('./i18n');
+const { isLocalizedSiteSetting } = require('./i18n/content-config');
+const { runI18nMigrations } = require('./db/i18n-migrations');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -441,6 +444,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             console.log('Created default page with ' + existing.rows.filter(r => isPageKey(r.key)).length + ' migrated settings');
         }
+        await runI18nMigrations(pool);
         console.log("Database initialized");
     } catch (err) {
         console.error("Database initialization failed:", err);
@@ -506,6 +510,12 @@ async function saveSettings(updates) {
             'INSERT INTO LANDING_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
             [key, value]
         );
+        if (isLocalizedSiteSetting(key)) {
+            await pool.query(
+                'INSERT INTO landing_site_translations (locale, key, value) VALUES ($1, $2, $3) ON CONFLICT (locale, key) DO UPDATE SET value = EXCLUDED.value',
+                [DEFAULT_LOCALE, key, value]
+            );
+        }
     }
 }
 
@@ -516,7 +526,39 @@ async function savePageSettings(pageId, updates) {
             'INSERT INTO landing_page_settings (page_id, key, value) VALUES ($1, $2, $3) ON CONFLICT (page_id, key) DO UPDATE SET value = EXCLUDED.value',
             [pageId, key, value]
         );
+        await pool.query(
+            'INSERT INTO landing_page_setting_translations (page_id, locale, key, value) VALUES ($1, $2, $3, $4) ON CONFLICT (page_id, locale, key) DO UPDATE SET value = EXCLUDED.value',
+            [pageId, DEFAULT_LOCALE, key, value]
+        );
     }
+}
+
+async function saveDefaultPageTranslation(pageId, title, slug, isPublished) {
+    await pool.query(`
+        INSERT INTO landing_page_translations (page_id, locale, title, slug, is_published)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (page_id, locale) DO UPDATE SET
+            title = EXCLUDED.title,
+            slug = EXCLUDED.slug,
+            is_published = EXCLUDED.is_published
+    `, [pageId, DEFAULT_LOCALE, title, slug, isPublished]);
+}
+
+async function syncDefaultArticleTranslation(articleId) {
+    await pool.query(`
+        INSERT INTO landing_article_translations
+            (article_id, locale, title, slug, cover_image, seo_description, content, is_published)
+        SELECT id, $2, title, slug, cover_image, seo_description, content, is_published
+        FROM landing_articles
+        WHERE id = $1
+        ON CONFLICT (article_id, locale) DO UPDATE SET
+            title = EXCLUDED.title,
+            slug = EXCLUDED.slug,
+            cover_image = EXCLUDED.cover_image,
+            seo_description = EXCLUDED.seo_description,
+            content = EXCLUDED.content,
+            is_published = EXCLUDED.is_published
+    `, [articleId, DEFAULT_LOCALE]);
 }
 
 const s3 = new S3Client({
@@ -810,6 +852,7 @@ app.post('/admin/pages', requireAuth, async (req, res, next) => {
             'INSERT INTO landing_pages (slug, title, is_home, sort_order) VALUES ($1, $2, false, $3) RETURNING id',
             [slug, title, Number(maxSort.rows[0].m) + 1]
         );
+        await saveDefaultPageTranslation(created.rows[0].id, title, slug, true);
         res.redirect('/admin/pages/' + created.rows[0].id);
     } catch (err) { next(err); }
 });
@@ -962,6 +1005,7 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
             'UPDATE landing_pages SET title = $1, slug = $2, is_published = $3, sort_order = $4 WHERE id = $5',
             [title, slug, published, parseInt(sortOrder, 10), page.id]
         );
+        await saveDefaultPageTranslation(page.id, title, slug, published);
         res.redirect('/admin/pages/' + page.id);
     } catch (error) { next(error); }
 });
@@ -1023,7 +1067,11 @@ app.get('/admin/api/categories', requireAuth, async (req, res) => {
     res.json(result.rows);
 });
 app.post('/admin/api/categories', requireAuth, async (req, res) => {
-    await pool.query('INSERT INTO landing_categories (name) VALUES ($1)', [req.body.name]);
+    const created = await pool.query('INSERT INTO landing_categories (name) VALUES ($1) RETURNING id', [req.body.name]);
+    await pool.query(
+        'INSERT INTO landing_category_translations (category_id, locale, name) VALUES ($1, $2, $3)',
+        [created.rows[0].id, DEFAULT_LOCALE, req.body.name]
+    );
     res.json({ success: true });
 });
 app.delete('/admin/api/categories/:id', requireAuth, async (req, res) => {
@@ -1058,10 +1106,12 @@ app.post('/admin/api/articles', requireAuth, upload.single('cover_image'), async
         const { category_id, title, seo_description, content, is_published } = req.body;
         const slug = Math.random().toString(36).substring(2, 15) + '-' + Date.now();
         
-        await pool.query(`
+        const created = await pool.query(`
             INSERT INTO landing_articles (category_id, title, slug, cover_image, seo_description, content, is_published)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING id
         `, [category_id || null, title, slug, cover_image, seo_description, sanitizeHtml(content), is_published === 'true']);
+        await syncDefaultArticleTranslation(created.rows[0].id);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
@@ -1078,6 +1128,7 @@ app.put('/admin/api/articles/:id', requireAuth, upload.single('cover_image'), as
             params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', cover_image, req.params.id];
         }
         await pool.query(query, params);
+        await syncDefaultArticleTranslation(req.params.id);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
