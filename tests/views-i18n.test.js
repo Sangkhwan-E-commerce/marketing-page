@@ -25,7 +25,7 @@ function publicSettings() {
 test('renders an English landing page with localized metadata and language switcher', async () => {
     const html = await ejs.renderFile(path.join(__dirname, '..', 'views', 'index.ejs'), {
         settings: {
-            section_order: '[]',
+            section_order: '[{"type":"articles","enabled":true,"bg":"bg-white"}]',
             site_name: 'Lullapos',
             seo_title: 'English Home',
             seo_description: 'Description',
@@ -36,11 +36,17 @@ test('renders an English landing page with localized metadata and language switc
             theme_color: '#000000',
             nav_items: '[]',
             footer_text: 'Footer',
-            banner_active: 'false'
+            banner_active: 'false',
+            articles_title: 'Latest articles',
+            articles_subtitle: 'Fresh advice',
+            articles_btn_text: 'View all articles'
         },
-        latest_articles: [],
+        latest_articles: [{
+            title: 'Retail Tips', slug: 'retail-tips', cover_image: '',
+            seo_description: 'Useful advice', category_name: 'Guides', created_at: '2026-09-29T00:00:00.000Z'
+        }],
         templates: {},
-        sectionCatalogue: [],
+        sectionCatalogue: [{ type: 'articles', defaultBg: 'bg-white' }],
         siteUrl: 'https://example.com',
         page: { id: 1, is_home: true, title: 'Home' },
         pageUrl: 'https://example.com/en',
@@ -52,6 +58,7 @@ test('renders an English landing page with localized metadata and language switc
             { locale: 'en', path: '/en', url: 'https://example.com/en' }
         ],
         localizedPath,
+        formatDate,
         t: createTranslator('en')
     });
 
@@ -59,6 +66,7 @@ test('renders an English landing page with localized metadata and language switc
     assert.match(html, /hreflang="th" href="https:\/\/example\.com\/"/);
     assert.match(html, /href="\/" hreflang="th"/);
     assert.match(html, /<meta property="og:locale" content="en_US">/);
+    assert.match(html, /href="\/en\/article\/retail-tips"/);
 });
 
 test('renders English article listings with localized paths and copy', async () => {

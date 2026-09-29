@@ -894,6 +894,7 @@ async function renderLandingPage(res, page, locale) {
         localeMeta: getLocaleMeta(normalized),
         languageLinks,
         localizedPath,
+        formatDate,
         t: createTranslator(normalized)
     });
 }
