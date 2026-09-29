@@ -1,15 +1,20 @@
 <%
-  // locals: nav (จาก buildNav), settings
+  // locals: nav (จาก buildNav), settings, locale, languageLinks, localizedPath, t
   var _nav = (typeof nav !== 'undefined' && nav) ? nav : [];
   var _logoHeight = settings.logo_height || 40;
+  var _locale = (typeof locale !== 'undefined' && locale) ? locale : 'th';
+  var _languageLinks = (typeof languageLinks !== 'undefined' && languageLinks) ? languageLinks : [];
+  var _otherLanguages = _languageLinks.filter(function(link) { return link.locale !== _locale; });
+  var _homePath = (typeof localizedPath === 'function') ? localizedPath(_locale, '/') : '/';
+  var _switchLabel = (typeof t === 'function') ? t('language.switch') : 'เปลี่ยนภาษา';
 %>
 <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
-  <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 lg:px-8" aria-label="เมนูหลัก">
-    <a href="/" class="shrink-0 transition hover:opacity-80">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 lg:px-8" aria-label="<%= _locale === 'en' ? 'Main navigation' : 'เมนูหลัก' %>">
+    <a href="<%= _homePath %>" class="shrink-0 transition hover:opacity-80">
       <img src="<%= settings.logo_url %>" alt="<%= settings.site_name || 'Lullapos' %>" class="w-auto max-w-[220px] object-contain" style="height: <%= _logoHeight %>px;">
     </a>
 
-    <% if (_nav.length) { %>
+    <% if (_nav.length || _otherLanguages.length) { %>
     <ul class="hidden items-center gap-1 md:flex">
       <% _nav.forEach(function (item, i) { %>
         <% if (item.children.length) { %>
@@ -41,6 +46,13 @@
         </li>
         <% } %>
       <% }); %>
+      <% _otherLanguages.forEach(function(link) { %>
+      <li>
+        <a href="<%= link.path %>" hreflang="<%= link.locale %>" lang="<%= link.locale %>" aria-label="<%= _switchLabel %>" class="ml-2 inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1.5 text-sm font-bold text-gray-700 transition hover:border-primary hover:text-primary">
+          <i class="bi bi-globe2" aria-hidden="true"></i><%= link.locale === 'en' ? 'EN' : 'ไทย' %>
+        </a>
+      </li>
+      <% }); %>
     </ul>
 
     <button type="button" id="nav-mobile-toggle" class="rounded-md p-2 text-gray-600 transition hover:bg-gray-100 md:hidden" aria-expanded="false" aria-label="เปิดเมนู">
@@ -49,7 +61,7 @@
     <% } %>
   </nav>
 
-  <% if (_nav.length) { %>
+  <% if (_nav.length || _otherLanguages.length) { %>
   <div id="nav-mobile-panel" class="hidden border-t border-gray-200 bg-white md:hidden">
     <ul class="mx-auto max-w-7xl px-6 py-3 lg:px-8">
       <% _nav.forEach(function (item, i) { %>
@@ -81,6 +93,13 @@
           <%= item.label %>
         </a>
         <% } %>
+      </li>
+      <% }); %>
+      <% _otherLanguages.forEach(function(link) { %>
+      <li>
+        <a href="<%= link.path %>" hreflang="<%= link.locale %>" lang="<%= link.locale %>" class="flex items-center gap-2 py-3 text-sm font-semibold text-gray-800 hover:text-primary">
+          <i class="bi bi-globe2 text-primary" aria-hidden="true"></i><%= link.locale === 'en' ? 'English' : 'ภาษาไทย' %>
+        </a>
       </li>
       <% }); %>
     </ul>

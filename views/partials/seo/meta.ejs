@@ -5,10 +5,17 @@
   var _desc = pageDescription || settings.seo_description || '';
   var _type = (typeof ogType !== 'undefined' && ogType) ? ogType : 'website';
   var _noindex = (typeof noindex !== 'undefined') && noindex;
+  var _localeMeta = (typeof localeMeta !== 'undefined' && localeMeta) ? localeMeta : { htmlLang: 'th', ogLocale: 'th_TH' };
+  var _languageLinks = (typeof languageLinks !== 'undefined' && languageLinks) ? languageLinks : [];
 %>
 <title><%= pageTitle %></title>
 <meta name="description" content="<%= _desc %>">
 <link rel="canonical" href="<%= pageUrl %>">
+<% _languageLinks.forEach(function(link) { %>
+<link rel="alternate" hreflang="<%= link.locale %>" href="<%= link.url %>">
+<% }); %>
+<% var _thaiDefault = _languageLinks.find(function(link) { return link.locale === 'th'; }); %>
+<% if (_thaiDefault) { %><link rel="alternate" hreflang="x-default" href="<%= _thaiDefault.url %>"><% } %>
 <% if (settings.favicon_url) { %>
 <link rel="icon" href="<%= settings.favicon_url %>">
 <% } %>
@@ -16,7 +23,10 @@
 
 <meta property="og:type" content="<%= _type %>">
 <meta property="og:site_name" content="<%= siteName %>">
-<meta property="og:locale" content="th_TH">
+<meta property="og:locale" content="<%= _localeMeta.ogLocale %>">
+<% _languageLinks.filter(function(link) { return link.locale !== _localeMeta.locale; }).forEach(function(link) { %>
+<meta property="og:locale:alternate" content="<%= link.locale === 'th' ? 'th_TH' : 'en_US' %>">
+<% }); %>
 <meta property="og:url" content="<%= pageUrl %>">
 <meta property="og:title" content="<%= pageTitle %>">
 <meta property="og:description" content="<%= _desc %>">

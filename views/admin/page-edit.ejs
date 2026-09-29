@@ -2,6 +2,24 @@
 <%- include('_sidebar', { adminPage: 'pages', tabs: [{ id: 'tab-page', label: '⚙️ ตั้งค่าหน้านี้' }, { id: 'tab-layout', label: '⇅ โครงสร้างหน้าเว็บ' }, { id: 'tab-hero', label: 'Hero Section' }, { id: 'tab-features3', label: 'Advocate Section' }, { id: 'tab-features4', label: 'Feature Section' }, { id: 'tab-stats', label: 'State Section' }, { id: 'tab-articles', label: 'บทความล่าสุด' }, { id: 'tab-faq', label: 'Function Section' }, { id: 'tab-cta', label: 'CTA Section' }, { id: 'tab-seo', label: 'ตั้งค่า SEO' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
 <%- include('_topbar', { heading: 'จัดการ Page' }) %>
 
+                <div class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 text-sm font-semibold text-gray-600">ภาษาของเนื้อหา</span>
+                        <% supportedLocales.forEach(function(code) { %>
+                        <a href="/admin/pages/<%= page.id %>?locale=<%= code %>" class="rounded-lg px-4 py-2 text-sm font-bold transition <%= locale === code ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' %>">
+                            <%= code === 'th' ? '🇹🇭 ไทย' : '🇬🇧 English' %>
+                        </a>
+                        <% }); %>
+                    </div>
+                    <span class="hidden text-xs text-gray-500 sm:block">แต่ละภาษามีข้อความ รูป Content, URL และสถานะเผยแพร่แยกกัน</span>
+                </div>
+
+                <% if (localeDraftCreated) { %>
+                <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                    สร้างฉบับร่างภาษาอังกฤษจากเนื้อหาภาษาไทยแล้ว กรุณาแปลข้อความ เปลี่ยนรูปที่ต้องการ และตรวจสอบก่อนเปิดเผยแพร่
+                </div>
+                <% } %>
+
                 <% if (typeof error !== 'undefined' && error) { %>
                 <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></div>
                 <% } %>
@@ -12,10 +30,11 @@
                     <% if (page.is_home) { %><span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">หน้าแรก</span><% } %>
                 </div>
 
-                <form action="/admin/pages/<%= page.id %>/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <form action="/admin/pages/<%= page.id %>/save?locale=<%= locale %>" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <input type="hidden" name="locale" value="<%= locale %>">
                     <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white z-20 rounded-t-xl">
                         <div>
-                            <p class="text-sm text-gray-500">เนื้อหาเหล่านี้เป็นของหน้านี้เท่านั้น</p>
+                            <p class="text-sm text-gray-500">กำลังแก้เนื้อหา<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %>ของหน้านี้</p>
                         </div>
                         <div class="mt-4 sm:mt-0">
                             <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition">
@@ -29,18 +48,23 @@
                         <div id="tab-page" class="tab-content space-y-4 hidden">
                             <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อหน้า</label><input type="text" name="page_title" value="<%= page.title %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
                             <% if (page.is_home) { %>
-                            <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded p-3">หน้านี้เป็นหน้าแรกของเว็บ เสิร์ฟที่ <code>/</code> เสมอ จึงเปลี่ยน URL และปิดการเผยแพร่ไม่ได้</p>
+                            <p class="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded p-3">หน้านี้เป็นหน้าแรก<%= locale === 'th' ? 'ภาษาไทย เสิร์ฟที่ ' : 'ภาษาอังกฤษ เสิร์ฟที่ ' %><code><%= locale === 'th' ? '/' : '/en' %></code> เสมอ จึงเปลี่ยน URL ไม่ได้</p>
+                            <% if (locale !== 'th') { %>
+                            <label class="flex items-center gap-2 text-sm text-gray-700">
+                                <input type="checkbox" name="is_published" <%= page.is_published ? 'checked' : '' %> class="h-4 w-4"> เผยแพร่หน้าภาษาอังกฤษ
+                            </label>
+                            <% } %>
                             <% } else { %>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">URL ของหน้า</label>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm text-gray-500">/</span>
+                                    <span class="text-sm text-gray-500"><%= locale === 'th' ? '/' : '/en/' %></span>
                                     <input type="text" name="page_slug" value="<%= page.slug %>" class="flex-1 border-gray-300 rounded-md border p-2 text-sm">
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">ใช้ a-z 0-9 ยัติภังค์ หรืออักษรไทย — เปลี่ยนแล้วลิงก์เดิมจะใช้ไม่ได้</p>
                             </div>
                             <label class="flex items-center gap-2 text-sm text-gray-700">
-                                <input type="checkbox" name="is_published" <%= page.is_published ? 'checked' : '' %> class="h-4 w-4"> เผยแพร่หน้านี้
+                                <input type="checkbox" name="is_published" <%= page.is_published ? 'checked' : '' %> class="h-4 w-4"> เผยแพร่หน้า<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %>
                             </label>
                             <% } %>
                             <div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<%= localeMeta.htmlLang %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,13 +49,13 @@
       '@id': siteUrl + '/#website',
       url: siteUrl + '/',
       name: siteName,
-      inLanguage: 'th-TH',
+      inLanguage: localeMeta.intlLocale,
       publisher: { '@id': siteUrl + '/#organization' },
-      potentialAction: {
+      potentialAction: locale === 'th' ? {
         '@type': 'SearchAction',
-        target: { '@type': 'EntryPoint', urlTemplate: siteUrl + '/articles?search={search_term_string}' },
+        target: { '@type': 'EntryPoint', urlTemplate: siteUrl + localizedPath(locale, '/articles?search={search_term_string}') },
         'query-input': 'required name=search_term_string'
-      }
+      } : undefined
     },
     {
       '@type': 'SoftwareApplication',
@@ -74,13 +74,13 @@
       url: thisUrl,
       name: settings.seo_title,
       description: settings.seo_description,
-      inLanguage: 'th-TH',
+      inLanguage: localeMeta.intlLocale,
       isPartOf: { '@id': siteUrl + '/#website' }
     },
     {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: siteUrl + '/' },
+        { '@type': 'ListItem', position: 1, name: locale === 'en' ? 'Home' : 'หน้าแรก', item: siteUrl + localizedPath(locale, '/') },
         { '@type': 'ListItem', position: 2, name: thisPage.title, item: thisUrl }
       ]
     }
@@ -105,7 +105,9 @@
       pageDescription: settings.seo_description,
       pageUrl: thisUrl,
       pageImage: settings.seo_thumbnail_url,
-      ogType: 'website'
+      ogType: 'website',
+      localeMeta: localeMeta,
+      languageLinks: languageLinks
     }) %>
 <meta name="keywords" content="<%= settings.seo_keywords %>">
 <%- include('partials/seo/jsonld', { graph: graph }) %>
