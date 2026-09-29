@@ -2,21 +2,9 @@
 <%- include('_sidebar', { adminPage: 'pages', tabs: [{ id: 'tab-page', label: '⚙️ ตั้งค่าหน้านี้' }, { id: 'tab-layout', label: '⇅ โครงสร้างหน้าเว็บ' }, { id: 'tab-hero', label: 'Hero Section' }, { id: 'tab-features3', label: 'Advocate Section' }, { id: 'tab-features4', label: 'Feature Section' }, { id: 'tab-stats', label: 'State Section' }, { id: 'tab-articles', label: 'บทความล่าสุด' }, { id: 'tab-faq', label: 'Function Section' }, { id: 'tab-cta', label: 'CTA Section' }, { id: 'tab-seo', label: 'ตั้งค่า SEO' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
 <%- include('_topbar', { heading: 'จัดการ Page' }) %>
 
-                <div class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 text-sm font-semibold text-gray-600">ภาษาของเนื้อหา</span>
-                        <% supportedLocales.forEach(function(code) { %>
-                        <a href="/admin/pages/<%= page.id %>?locale=<%= code %>" class="rounded-lg px-4 py-2 text-sm font-bold transition <%= locale === code ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' %>">
-                            <%= code === 'th' ? '🇹🇭 ไทย' : '🇬🇧 English' %>
-                        </a>
-                        <% }); %>
-                    </div>
-                    <span class="hidden text-xs text-gray-500 sm:block">แต่ละภาษามีข้อความ รูป Content, URL และสถานะเผยแพร่แยกกัน</span>
-                </div>
-
                 <% if (localeDraftCreated) { %>
                 <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                    สร้างฉบับร่างภาษาอังกฤษจากเนื้อหาภาษาไทยแล้ว กรุณาแปลข้อความ เปลี่ยนรูปที่ต้องการ และตรวจสอบก่อนเปิดเผยแพร่
+                    สร้างฉบับร่าง<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %>จากเนื้อหาภาษาอื่นแล้ว กรุณาแปลข้อความ เปลี่ยนรูปที่ต้องการ และตรวจสอบก่อนเปิดเผยแพร่
                 </div>
                 <% } %>
 

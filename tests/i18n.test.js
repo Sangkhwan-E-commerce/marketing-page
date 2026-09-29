@@ -15,7 +15,12 @@ const {
     isLocalizedSiteSetting,
     SHARED_BRAND_ASSET_KEYS
 } = require('../i18n/content-config');
-const { buildPageLanguageLinks, pagePath } = require('../i18n/page-localization');
+const {
+    articlePath,
+    buildArticleLanguageLinks,
+    buildPageLanguageLinks,
+    pagePath
+} = require('../i18n/page-localization');
 
 test('supports Thai as the default locale and English as the second locale', () => {
     assert.equal(DEFAULT_LOCALE, 'th');
@@ -75,4 +80,17 @@ test('omits unpublished translations from language switch links', () => {
 
     assert.deepEqual(links, [{ locale: 'th', path: '/', url: '/' }]);
     assert.equal(pagePath({ is_home: true, slug: 'home' }, 'en'), '/en');
+});
+
+test('maps article language links to each localized slug', () => {
+    const links = buildArticleLanguageLinks([
+        { locale: 'th', slug: 'เคล็ดลับร้านค้า', is_published: true },
+        { locale: 'en', slug: 'retail-tips', is_published: true }
+    ], 'https://example.com');
+
+    assert.equal(articlePath({ slug: 'retail-tips' }, 'en'), '/en/article/retail-tips');
+    assert.deepEqual(links, [
+        { locale: 'th', path: '/article/%E0%B9%80%E0%B8%84%E0%B8%A5%E0%B9%87%E0%B8%94%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B9%89%E0%B8%B2', url: 'https://example.com/article/%E0%B9%80%E0%B8%84%E0%B8%A5%E0%B9%87%E0%B8%94%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B9%89%E0%B8%B2' },
+        { locale: 'en', path: '/en/article/retail-tips', url: 'https://example.com/en/article/retail-tips' }
+    ]);
 });

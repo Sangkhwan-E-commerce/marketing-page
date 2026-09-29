@@ -1,5 +1,5 @@
 <%
-  // adminPage: 'site' | 'pages' | 'blog'  |  tabs: [{ id, label }] ของหน้านั้น
+  // adminPage: 'site' | 'pages' | 'nav' | 'blog'  |  tabs: [{ id, label }]
   var _tabs = (typeof tabs !== 'undefined' && tabs) ? tabs : [];
   var navItem = function (key) {
     return adminPage === key
@@ -18,17 +18,17 @@
     <nav class="flex flex-1 flex-col overflow-y-auto no-scrollbar px-4 py-6">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <li>
-                <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2">เมนูหลัก</div>
+                <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2"><%= adminT('admin.main_menu') %></div>
                 <ul role="list" class="-mx-2 space-y-1">
-                    <li><a href="/admin/site" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('site') %>">⚙️ ตั้งค่าเว็บ</a></li>
-                    <li><a href="/admin/pages" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('pages') %>">📄 จัดการ Page</a></li>
-                    <li><a href="/admin/nav" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('nav') %>">🧭 Navbar & เมนู</a></li>
-                    <li><a href="/admin/blog" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('blog') %>">📝 จัดการบทความ (Blog)</a></li>
+                    <li><a href="/admin/site" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('site') %>">⚙️ <%= adminT('admin.site_settings') %></a></li>
+                    <li><a href="/admin/pages" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('pages') %>">📄 <%= adminT('admin.pages') %></a></li>
+                    <li><a href="/admin/nav" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('nav') %>">🧭 <%= adminT('admin.navigation') %></a></li>
+                    <li><a href="/admin/blog" class="w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors <%= navItem('blog') %>">📝 <%= adminT('admin.blog') %></a></li>
                 </ul>
             </li>
             <% if (_tabs.length) { %>
             <li>
-                <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2"><%= typeof tabsTitle !== 'undefined' ? tabsTitle : 'หัวข้อในหน้านี้' %></div>
+                <div class="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-2"><%= typeof tabsTitle !== 'undefined' ? tabsTitle : adminT('admin.page_sections') %></div>
                 <ul role="list" class="-mx-2 space-y-1">
                     <% _tabs.forEach(function (t) { %>
                     <li><button type="button" class="sidebar-menu-btn w-full flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors" data-target="<%= t.id %>"><%= t.label %></button></li>

@@ -15,4 +15,18 @@ function buildPageLanguageLinks(rows, siteUrl = '') {
     }).filter(Boolean);
 }
 
-module.exports = { buildPageLanguageLinks, pagePath };
+function articlePath(article, locale) {
+    return localizedPath(locale, '/article/' + encodeURIComponent(article.slug));
+}
+
+function buildArticleLanguageLinks(rows, siteUrl = '') {
+    const byLocale = new Map((rows || []).map(row => [row.locale, row]));
+    return SUPPORTED_LOCALES.map(locale => {
+        const article = byLocale.get(locale);
+        if (!article || !article.is_published) return null;
+        const path = articlePath(article, locale);
+        return { locale, path, url: siteUrl ? siteUrl + path : path };
+    }).filter(Boolean);
+}
+
+module.exports = { articlePath, buildArticleLanguageLinks, buildPageLanguageLinks, pagePath };

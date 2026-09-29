@@ -37,9 +37,76 @@
         </main>
     </div>
 
+    <div id="category-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-lg rounded-xl bg-white shadow-xl">
+            <div class="flex items-center justify-between border-b px-6 py-4">
+                <h3 class="text-lg font-bold">หมวดหมู่ — <%= locale === 'th' ? 'ภาษาไทย' : 'English' %></h3>
+                <button type="button" onclick="blogUI.closeCategoryModal()" class="text-2xl text-gray-400 hover:text-gray-700">&times;</button>
+            </div>
+            <div class="max-h-[70vh] space-y-4 overflow-y-auto p-6">
+                <div class="flex gap-2">
+                    <input id="new-category-name" type="text" class="flex-1 rounded border p-2 text-sm" placeholder="ชื่อหมวดหมู่ใหม่">
+                    <button type="button" onclick="blogUI.addCategory()" class="rounded bg-primary px-4 py-2 text-sm font-bold text-white">เพิ่ม</button>
+                </div>
+                <ul id="category-list" class="space-y-2"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="article-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+        <div class="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-xl">
+            <div class="flex items-center justify-between border-b px-6 py-4">
+                <div>
+                    <h3 id="article-modal-title" class="text-lg font-bold">แก้ไขบทความ</h3>
+                    <p id="article-copy-notice" class="mt-1 hidden text-xs text-blue-700">สร้างฉบับร่าง<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %>จากบทความอีกภาษาแล้ว</p>
+                </div>
+                <button type="button" onclick="blogUI.closeArticleEditor()" class="text-2xl text-gray-400 hover:text-gray-700">&times;</button>
+            </div>
+            <div class="space-y-4 overflow-y-auto p-6">
+                <input id="edit-article-id" type="hidden">
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">หัวข้อบทความ</label>
+                    <input id="article-title" type="text" class="w-full rounded border p-2 text-sm" required>
+                </div>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">URL Slug</label>
+                        <div class="flex items-center gap-2"><span class="text-sm text-gray-500"><%= locale === 'th' ? '/article/' : '/en/article/' %></span><input id="article-slug" type="text" class="min-w-0 flex-1 rounded border p-2 text-sm" placeholder="article-url"></div>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">หมวดหมู่</label>
+                        <select id="article-category" class="w-full rounded border p-2 text-sm"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">SEO Description</label>
+                    <textarea id="article-seo" rows="3" class="w-full rounded border p-2 text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">รูปปกของภาษานี้</label>
+                    <input id="article-cover" type="file" accept="image/*" class="w-full text-sm">
+                    <img id="article-cover-preview" class="mt-3 hidden max-h-36 rounded border object-cover" alt="Cover preview">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">เนื้อหาบทความ</label>
+                    <div id="article-quill-editor" class="min-h-64 bg-white"></div>
+                </div>
+                <label class="flex items-center gap-2 text-sm font-semibold"><input id="article-published" type="checkbox" class="h-4 w-4"> เผยแพร่บทความ<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %></label>
+            </div>
+            <div class="flex justify-end gap-2 border-t px-6 py-4">
+                <button type="button" onclick="blogUI.closeArticleEditor()" class="rounded border px-4 py-2 text-sm font-semibold text-gray-600">ยกเลิก</button>
+                <button type="button" onclick="blogUI.saveArticle()" class="rounded bg-primary px-5 py-2 text-sm font-bold text-white">บันทึกบทความ</button>
+            </div>
+        </div>
+    </div>
+
     <script>
 <%- include('_shared-js') %>
         // --- ระบบ Blog Management (Tab 11) ---
+        const BLOG_LOCALE = '<%= locale %>';
+        const BLOG_DATE_LOCALE = BLOG_LOCALE === 'en' ? 'en-US' : 'th-TH';
+        const withLocale = (url) => url + (url.includes('?') ? '&' : '?') + 'locale=' + encodeURIComponent(BLOG_LOCALE);
+        const blogEsc = (value) => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         const blogUI = {
             currentPage: 1, totalPages: 1, quillBlog: null, categories: [],
             initEditor: function() {
@@ -68,25 +135,37 @@
                 };
             },
             loadCategories: async function() {
-                const res = await fetch('/admin/api/categories'); this.categories = await res.json();
+                const res = await fetch(withLocale('/admin/api/categories')); this.categories = await res.json();
                 const select = document.getElementById('article-category'); select.innerHTML = '<option value="">-- ไม่เลือกหมวดหมู่ --</option>';
                 const list = document.getElementById('category-list'); list.innerHTML = '';
                 this.categories.forEach(c => {
-                    select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-                    list.innerHTML += `<li class="flex justify-between items-center border p-2 rounded text-sm bg-gray-50"><span>${c.name}</span> <button onclick="blogUI.deleteCategory(${c.id})" class="text-red-500 hover:font-bold">ลบ</button></li>`;
+                    select.innerHTML += `<option value="${c.id}">${blogEsc(c.name)}</option>`;
+                    const value = BLOG_LOCALE === 'th' ? c.name : (c.localized_name || '');
+                    list.innerHTML += `<li class="border p-3 rounded text-sm bg-gray-50">
+                        <div class="flex items-center gap-2">
+                            <input id="category-name-${c.id}" class="min-w-0 flex-1 rounded border p-2" value="${blogEsc(value)}" placeholder="${BLOG_LOCALE === 'en' ? blogEsc(c.name) : 'ชื่อหมวดหมู่'}">
+                            <button onclick="blogUI.saveCategory(${c.id})" class="text-blue-600 font-bold hover:underline">บันทึก</button>
+                            <button onclick="blogUI.deleteCategory(${c.id})" class="text-red-500 hover:font-bold">ลบ</button>
+                        </div>
+                        ${BLOG_LOCALE === 'en' && !c.has_translation ? '<p class="mt-1 text-xs text-amber-600">ยังไม่มีคำแปล — ข้อความจางคือชื่อภาษาไทย</p>' : ''}
+                    </li>`;
                 });
             },
-            addCategory: async function() { const name = document.getElementById('new-category-name').value; if(!name) return; await fetch('/admin/api/categories', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name}) }); document.getElementById('new-category-name').value = ''; this.loadCategories(); },
-            deleteCategory: async function(id) { if(confirm('ยืนยันลบหมวดหมู่?')) { await fetch(`/admin/api/categories/${id}`, { method: 'DELETE' }); this.loadCategories(); } },
+            addCategory: async function() { const name = document.getElementById('new-category-name').value; if(!name) return; await fetch(withLocale('/admin/api/categories'), { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name, locale: BLOG_LOCALE}) }); document.getElementById('new-category-name').value = ''; this.loadCategories(); },
+            saveCategory: async function(id) { const name = document.getElementById(`category-name-${id}`).value.trim(); if(!name) return; await fetch(withLocale(`/admin/api/categories/${id}`), { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name, locale: BLOG_LOCALE}) }); this.loadCategories(); },
+            deleteCategory: async function(id) { if(confirm('ยืนยันลบหมวดหมู่?')) { await fetch(withLocale(`/admin/api/categories/${id}`), { method: 'DELETE' }); this.loadCategories(); } },
             showCategoryModal: function() { document.getElementById('category-modal').classList.remove('hidden'); document.getElementById('category-modal').classList.add('flex'); },
+            closeCategoryModal: function() { document.getElementById('category-modal').classList.add('hidden'); document.getElementById('category-modal').classList.remove('flex'); },
             loadArticles: async function() {
                 const tbody = document.getElementById('articles-tbody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">กำลังโหลด...</td></tr>';
-                const res = await fetch(`/admin/api/articles?page=${this.currentPage}`); const data = await res.json();
+                const res = await fetch(`/admin/api/articles?page=${this.currentPage}&locale=${encodeURIComponent(BLOG_LOCALE)}`); const data = await res.json();
                 this.totalPages = data.totalPages || 1; document.getElementById('pagination-info').innerText = `หน้า ${this.currentPage} จาก ${this.totalPages}`;
                 tbody.innerHTML = ''; if(data.articles.length === 0) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">ยังไม่มีบทความ</td></tr>';
                 data.articles.forEach(a => {
-                    const status = a.is_published ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">เผยแพร่</span>' : '<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">ซ่อน</span>';
-                    tbody.innerHTML += `<tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium text-gray-900">${a.title}</td><td class="px-6 py-4">${a.category_name || '-'}</td><td class="px-6 py-4">${status}</td><td class="px-6 py-4 text-xs text-gray-500">${new Date(a.created_at).toLocaleDateString('th-TH')}</td><td class="px-6 py-4 text-right space-x-2"><button onclick="blogUI.editArticle(${a.id})" class="text-blue-600 hover:underline">แก้ไข</button><button onclick="blogUI.deleteArticle(${a.id})" class="text-red-600 hover:underline">ลบ</button></td></tr>`;
+                    const status = !a.has_translation
+                        ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">ยังไม่แปล</span>'
+                        : (a.is_published ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">เผยแพร่</span>' : '<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">ฉบับร่าง</span>');
+                    tbody.innerHTML += `<tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium text-gray-900">${blogEsc(a.title)}</td><td class="px-6 py-4">${blogEsc(a.category_name || '-')}</td><td class="px-6 py-4">${status}</td><td class="px-6 py-4 text-xs text-gray-500">${new Date(a.created_at).toLocaleDateString(BLOG_DATE_LOCALE)}</td><td class="px-6 py-4 text-right space-x-2"><button onclick="blogUI.editArticle(${a.id})" class="text-blue-600 hover:underline">${a.has_translation ? 'แก้ไข' : 'เริ่มแปล'}</button><button onclick="blogUI.deleteArticle(${a.id})" class="text-red-600 hover:underline">ลบ</button></td></tr>`;
                 });
             },
             prevPage: function() { if(this.currentPage > 1) { this.currentPage--; this.loadArticles(); } },
@@ -94,34 +173,40 @@
             showArticleEditor: function() {
                 this.initEditor();
                 document.getElementById('edit-article-id').value = ''; document.getElementById('article-title').value = '';
-                document.getElementById('article-category').value = ''; document.getElementById('article-seo').value = '';
+                document.getElementById('article-slug').value = ''; document.getElementById('article-category').value = ''; document.getElementById('article-seo').value = '';
                 document.getElementById('article-cover').value = ''; document.getElementById('article-published').checked = true;
+                document.getElementById('article-cover-preview').classList.add('hidden'); document.getElementById('article-copy-notice').classList.add('hidden');
                 this.quillBlog.root.innerHTML = ''; document.getElementById('article-modal-title').innerText = 'เขียนบทความใหม่';
                 document.getElementById('article-modal').classList.remove('hidden'); document.getElementById('article-modal').classList.add('flex');
             },
             closeArticleEditor: function() { document.getElementById('article-modal').classList.add('hidden'); document.getElementById('article-modal').classList.remove('flex'); },
             editArticle: async function(id) {
                 this.showArticleEditor(); document.getElementById('article-modal-title').innerText = 'กำลังโหลดข้อมูล...';
-                const res = await fetch(`/admin/api/articles/${id}`); const a = await res.json();
+                const res = await fetch(withLocale(`/admin/api/articles/${id}`)); const a = await res.json();
                 document.getElementById('edit-article-id').value = a.id; document.getElementById('article-title').value = a.title;
-                document.getElementById('article-category').value = a.category_id || ''; document.getElementById('article-seo').value = a.seo_description || '';
+                document.getElementById('article-slug').value = a.slug || ''; document.getElementById('article-category').value = a.category_id || ''; document.getElementById('article-seo').value = a.seo_description || '';
                 document.getElementById('article-published').checked = a.is_published; this.quillBlog.root.innerHTML = a.content || '';
+                const cover = document.getElementById('article-cover-preview'); if(a.cover_image) { cover.src = a.cover_image; cover.classList.remove('hidden'); } else { cover.classList.add('hidden'); }
+                document.getElementById('article-copy-notice').classList.toggle('hidden', !a.localeDraftCreated);
                 document.getElementById('article-modal-title').innerText = 'แก้ไขบทความ';
             },
             saveArticle: async function() {
                 const id = document.getElementById('edit-article-id').value;
                 const formData = new FormData();
-                formData.append('title', document.getElementById('article-title').value); formData.append('category_id', document.getElementById('article-category').value);
+                formData.append('locale', BLOG_LOCALE); formData.append('title', document.getElementById('article-title').value); formData.append('slug', document.getElementById('article-slug').value); formData.append('category_id', document.getElementById('article-category').value);
                 formData.append('seo_description', document.getElementById('article-seo').value); formData.append('content', this.quillBlog.root.innerHTML);
                 formData.append('is_published', document.getElementById('article-published').checked);
                 const file = document.getElementById('article-cover').files[0]; if(file) formData.append('cover_image', file);
-                const url = id ? `/admin/api/articles/${id}` : '/admin/api/articles'; const method = id ? 'PUT' : 'POST';
+                const url = withLocale(id ? `/admin/api/articles/${id}` : '/admin/api/articles'); const method = id ? 'PUT' : 'POST';
                 document.getElementById('article-modal-title').innerText = 'กำลังบันทึก...';
-                await fetch(url, { method: method, body: formData });
+                const response = await fetch(url, { method: method, body: formData });
+                const result = await response.json(); if(!response.ok || !result.success) { alert(result.message || result.error || 'บันทึกไม่สำเร็จ'); document.getElementById('article-modal-title').innerText = 'แก้ไขบทความ'; return; }
                 this.closeArticleEditor(); this.loadArticles();
             },
-            deleteArticle: async function(id) { if(confirm('ยืนยันลบบทความถาวร?')) { await fetch(`/admin/api/articles/${id}`, { method: 'DELETE' }); this.loadArticles(); } }
+            deleteArticle: async function(id) { if(confirm('ยืนยันลบบทความถาวร?')) { await fetch(withLocale(`/admin/api/articles/${id}`), { method: 'DELETE' }); this.loadArticles(); } }
         };
+        blogUI.loadCategories();
+        blogUI.loadArticles();
     </script>
 </body>
 </html>

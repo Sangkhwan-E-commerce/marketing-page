@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<%= localeMeta.htmlLang %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%
   var siteName = settings.site_name || 'Lullapos';
-  var articleUrl = siteUrl + '/article/' + encodeURIComponent(article.slug);
+  var articleUrl = siteUrl + localizedPath(locale, '/article/' + encodeURIComponent(article.slug));
   var articleImage = article.cover_image || settings.seo_thumbnail_url;
   var articleDesc = article.seo_description || settings.seo_description;
   var publishedAt = article.created_at ? new Date(article.created_at).toISOString() : undefined;
@@ -17,7 +17,7 @@
       headline: article.title,
       description: articleDesc,
       image: articleImage ? [articleImage] : undefined,
-      inLanguage: 'th-TH',
+      inLanguage: localeMeta.intlLocale,
       datePublished: publishedAt,
       dateModified: publishedAt,
       articleSection: article.category_name || undefined,
@@ -32,8 +32,8 @@
     {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: siteUrl + '/' },
-        { '@type': 'ListItem', position: 2, name: 'บทความ', item: siteUrl + '/articles' },
+        { '@type': 'ListItem', position: 1, name: t('nav.home'), item: siteUrl + localizedPath(locale, '/') },
+        { '@type': 'ListItem', position: 2, name: t('articles.title'), item: siteUrl + localizedPath(locale, '/articles') },
         { '@type': 'ListItem', position: 3, name: article.title, item: articleUrl }
       ]
     }
@@ -44,7 +44,9 @@
       pageDescription: articleDesc,
       pageUrl: articleUrl,
       pageImage: articleImage,
-      ogType: 'article'
+      ogType: 'article',
+      localeMeta: localeMeta,
+      languageLinks: languageLinks
     }) %>
 <% if (publishedAt) { %>
 <meta property="article:published_time" content="<%= publishedAt %>">
@@ -52,7 +54,7 @@
 <% } %>
 <% if (article.category_name) { %><meta property="article:section" content="<%= article.category_name %>"><% } %>
 <%- include('partials/seo/jsonld', { graph: articleGraph }) %>
-    
+
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script> tailwind.config = { theme: { extend: { colors: { primary: '<%= settings.theme_color %>' } } } } </script>    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -70,7 +72,7 @@
                     <span class="text-xs font-bold tracking-widest text-primary uppercase bg-primary/10 px-3 py-1 rounded-full"><%= article.category_name %></span>
                 <% } %>
                 <h1 class="mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl leading-tight"><%= article.title %></h1>
-                <p class="mt-4 text-sm text-gray-500">เผยแพร่เมื่อ: <%= new Date(article.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                <p class="mt-4 text-sm text-gray-500"><%= t('articles.published_on') %>: <%= formatDate(article.created_at, locale, { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
             </div>
 
             <% if(article.cover_image) { %>
@@ -80,7 +82,7 @@
             <div class="prose prose-lg prose-blue max-w-none mx-auto prose-img:rounded-xl prose-img:shadow-sm">
                 <%- article.content %>
             </div>
-            
+
             <div class="mt-16 pt-10 border-t border-gray-200 text-center">
                 <h3 class="text-2xl font-bold mb-6 text-gray-900"><%= settings.article_cta_title %></h3>
                 <a href="<%= settings.article_cta_btn_url %>" class="inline-block bg-primary text-white font-bold px-10 py-4 rounded-full hover:opacity-90 shadow-lg transition transform hover:-translate-y-1">
@@ -94,8 +96,8 @@
     <section class="bg-white py-16 border-t border-gray-100">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mb-10 flex items-center justify-between">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900">บทความที่น่าสนใจเพิ่มเติม</h2>
-                <a href="/articles" class="text-sm font-semibold text-primary hover:underline hidden sm:block">ดูทั้งหมด &rarr;</a>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900"><%= t('articles.related') %></h2>
+                <a href="<%= localizedPath(locale, '/articles') %>" class="text-sm font-semibold text-primary hover:underline hidden sm:block"><%= t('articles.view_all') %> &rarr;</a>
             </div>
             <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                 <% related_articles.forEach(function(relArticle) { %>
@@ -104,18 +106,18 @@
                         <% if(relArticle.cover_image) { %>
                             <img src="<%= relArticle.cover_image %>" alt="<%= relArticle.title %>" class="aspect-[16/9] w-full rounded-xl bg-gray-200 object-cover">
                         <% } else { %>
-                            <div class="aspect-[16/9] w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-sm">ไม่มีรูปภาพ</div>
+                            <div class="aspect-[16/9] w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-sm"><%= t('articles.no_image') %></div>
                         <% } %>
                         <div class="absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
                     </div>
                     <div class="max-w-xl w-full">
                         <div class="mt-6 flex items-center gap-x-4 text-xs">
-                            <time datetime="<%= relArticle.created_at %>" class="text-gray-500"><%= new Date(relArticle.created_at).toLocaleDateString('th-TH') %></time>
+                            <time datetime="<%= relArticle.created_at %>" class="text-gray-500"><%= formatDate(relArticle.created_at, locale) %></time>
                             <% if(relArticle.category_name) { %><span class="relative z-10 rounded-full bg-white border border-gray-200 px-2.5 py-0.5 font-medium text-gray-600"><%= relArticle.category_name %></span><% } %>
                         </div>
                         <div class="group relative">
                             <h3 class="mt-3 text-base font-semibold leading-6 text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                                <a href="/article/<%= encodeURIComponent(relArticle.slug) %>"><span class="absolute inset-0"></span><%= relArticle.title %></a>
+                                <a href="<%= localizedPath(locale, '/article/' + encodeURIComponent(relArticle.slug)) %>"><span class="absolute inset-0"></span><%= relArticle.title %></a>
                             </h3>
                             <p class="mt-2 line-clamp-2 text-sm leading-6 text-gray-600"><%= relArticle.seo_description %></p>
                         </div>
@@ -124,7 +126,7 @@
                 <% }); %>
             </div>
             <div class="mt-10 text-center sm:hidden">
-                <a href="/articles" class="text-sm font-semibold text-primary hover:underline">ดูบทความทั้งหมด &rarr;</a>
+                <a href="<%= localizedPath(locale, '/articles') %>" class="text-sm font-semibold text-primary hover:underline"><%= t('articles.view_all_articles') %> &rarr;</a>
             </div>
         </div>
     </section>

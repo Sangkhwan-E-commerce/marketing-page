@@ -12,11 +12,12 @@ const {
     DEFAULT_LOCALE,
     SUPPORTED_LOCALES,
     createTranslator,
+    formatDate,
     getLocaleMeta,
     localizedPath,
     normalizeLocale
 } = require('./i18n');
-const { buildPageLanguageLinks } = require('./i18n/page-localization');
+const { buildArticleLanguageLinks, buildPageLanguageLinks } = require('./i18n/page-localization');
 const { LOCALIZED_SITE_SETTING_KEYS, isLocalizedSiteSetting } = require('./i18n/content-config');
 const { runI18nMigrations } = require('./db/i18n-migrations');
 
@@ -49,6 +50,23 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24
     }
 }));
+
+function getAdminLocale(req) {
+    const requested = (req.body && req.body.locale) || (req.query && req.query.locale);
+    if (requested && SUPPORTED_LOCALES.includes(String(requested).toLowerCase())) {
+        req.session.adminLocale = normalizeLocale(requested);
+    }
+    return normalizeLocale(req.session.adminLocale || DEFAULT_LOCALE);
+}
+
+app.use('/admin', (req, res, next) => {
+    const locale = getAdminLocale(req);
+    res.locals.locale = locale;
+    res.locals.localeMeta = getLocaleMeta(locale);
+    res.locals.supportedLocales = SUPPORTED_LOCALES;
+    res.locals.adminT = createTranslator(locale);
+    next();
+});
 
 // เลย์เอาต์ที่เลือกได้ในหน้าแอดมิน (id ต้องตรงกับชื่อไฟล์ใน views/partials/)
 const TEMPLATES = {
@@ -496,17 +514,21 @@ async function listPages() {
     return res.rows;
 }
 
-async function listPagesWithLocales() {
+async function listPagesWithLocales(locale = DEFAULT_LOCALE) {
     const res = await pool.query(`
-        SELECT p.*,
-               en.title AS en_title,
-               en.slug AS en_slug,
-               en.is_published AS en_is_published,
-               (en.page_id IS NOT NULL) AS has_en_translation
+        SELECT p.id, p.is_home, p.sort_order, p.created_at,
+               COALESCE(t.title, fallback.title, p.title) AS title,
+               COALESCE(t.slug, fallback.slug, p.slug) AS slug,
+               COALESCE(t.is_published, false) AS is_published,
+               (t.page_id IS NOT NULL) AS has_translation
         FROM landing_pages p
-        LEFT JOIN landing_page_translations en ON en.page_id = p.id AND en.locale = 'en'
+        LEFT JOIN landing_page_translations t ON t.page_id = p.id AND t.locale = $1
+        LEFT JOIN LATERAL (
+            SELECT title, slug FROM landing_page_translations
+            WHERE page_id = p.id ORDER BY locale = $2 DESC, locale LIMIT 1
+        ) fallback ON true
         ORDER BY p.is_home DESC, p.sort_order ASC, p.id ASC
-    `);
+    `, [normalizeLocale(locale), DEFAULT_LOCALE]);
     return res.rows;
 }
 
@@ -680,7 +702,6 @@ async function saveLocalizedPageSettings(pageId, locale, updates) {
 
 async function ensurePageLocaleDraft(pageId, locale) {
     const normalized = normalizeLocale(locale);
-    if (normalized === DEFAULT_LOCALE) return false;
     const exists = await getLocalizedPage(pageId, normalized);
     if (exists) return false;
 
@@ -691,14 +712,19 @@ async function ensurePageLocaleDraft(pageId, locale) {
             INSERT INTO landing_page_translations (page_id, locale, title, slug, is_published)
             SELECT page_id, $2, title, slug, false
             FROM landing_page_translations
-            WHERE page_id = $1 AND locale = $3
+            WHERE page_id = $1
+            ORDER BY locale = $3 DESC, locale
+            LIMIT 1
             ON CONFLICT (page_id, locale) DO NOTHING
         `, [pageId, normalized, DEFAULT_LOCALE]);
         await client.query(`
             INSERT INTO landing_page_setting_translations (page_id, locale, key, value)
             SELECT page_id, $2, key, value
             FROM landing_page_setting_translations
-            WHERE page_id = $1 AND locale = $3
+            WHERE page_id = $1 AND locale = COALESCE(
+                (SELECT locale FROM landing_page_setting_translations WHERE page_id = $1 AND locale = $3 LIMIT 1),
+                (SELECT locale FROM landing_page_setting_translations WHERE page_id = $1 ORDER BY locale LIMIT 1)
+            )
             ON CONFLICT (page_id, locale, key) DO NOTHING
         `, [pageId, normalized, DEFAULT_LOCALE]);
         await client.query('COMMIT');
@@ -741,6 +767,40 @@ async function syncDefaultArticleTranslation(articleId) {
             content = EXCLUDED.content,
             is_published = EXCLUDED.is_published
     `, [articleId, DEFAULT_LOCALE]);
+}
+
+async function ensureArticleLocaleDraft(articleId, locale) {
+    const normalized = normalizeLocale(locale);
+    const result = await pool.query(`
+        INSERT INTO landing_article_translations
+            (article_id, locale, title, slug, cover_image, seo_description, content, is_published)
+        SELECT article_id, $2, title, slug, cover_image, seo_description, content, false
+        FROM landing_article_translations
+        WHERE article_id = $1
+        ORDER BY locale = $3 DESC, locale
+        LIMIT 1
+        ON CONFLICT (article_id, locale) DO NOTHING
+        RETURNING article_id
+    `, [articleId, normalized, DEFAULT_LOCALE]);
+    return result.rows.length > 0;
+}
+
+async function articleSlugTaken(slug, locale, exceptId) {
+    const result = await pool.query(`
+        SELECT 1 FROM landing_article_translations
+        WHERE slug = $1 AND locale = $2 AND article_id <> $3
+        LIMIT 1
+    `, [slug, normalizeLocale(locale), exceptId || 0]);
+    return result.rows.length > 0;
+}
+
+async function getArticleTranslations(articleId) {
+    const result = await pool.query(`
+        SELECT locale, slug, is_published
+        FROM landing_article_translations
+        WHERE article_id = $1
+    `, [articleId]);
+    return result.rows;
 }
 
 const s3 = new S3Client({
@@ -810,22 +870,20 @@ async function renderLandingPage(res, page, locale) {
     const normalized = normalizeLocale(locale);
     const settings = await buildPageContext(page, normalized);
     const nav = buildNav(settings.nav_items, await listPagesForLocale(normalized), normalized);
-    let latestArticles = [];
-    if (normalized === DEFAULT_LOCALE) {
-        const articlesRes = await pool.query(`
-            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
-            FROM landing_articles a
-            LEFT JOIN landing_categories c ON a.category_id = c.id
-            WHERE a.is_published = true
-            ORDER BY a.created_at DESC LIMIT 9
-        `);
-        latestArticles = articlesRes.rows;
-    }
+    const articlesRes = await pool.query(`
+        SELECT t.title, t.slug, t.cover_image, t.seo_description,
+               c.name AS category_name, a.created_at
+        FROM landing_articles a
+        JOIN landing_article_translations t ON t.article_id = a.id AND t.locale = $1
+        LEFT JOIN landing_category_translations c ON c.category_id = a.category_id AND c.locale = $1
+        WHERE t.is_published = true
+        ORDER BY a.created_at DESC LIMIT 9
+    `, [normalized]);
     const languageLinks = buildPageLanguageLinks(await getPageTranslations(page.id), SITE_URL);
     const currentLink = languageLinks.find(link => link.locale === normalized);
     res.render('index', {
         settings,
-        latest_articles: latestArticles,
+        latest_articles: articlesRes.rows,
         templates: TEMPLATES,
         sectionCatalogue: SECTIONS,
         siteUrl: SITE_URL,
@@ -840,6 +898,113 @@ async function renderLandingPage(res, page, locale) {
     });
 }
 
+async function renderArticlesPage(req, res, locale) {
+    const normalized = normalizeLocale(locale);
+    const settings = await buildPageContext(await getHomePage(), normalized);
+    const nav = buildNav(settings.nav_items, await listPagesForLocale(normalized), normalized);
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = 9;
+    const offset = (page - 1) * limit;
+    const search = String(req.query.search || '').trim().slice(0, 200);
+    const category = String(req.query.category || '').replace(/[^0-9]/g, '');
+    const params = [normalized];
+    let queryStr = `
+        FROM landing_articles a
+        JOIN landing_article_translations t ON t.article_id = a.id AND t.locale = $1
+        LEFT JOIN landing_category_translations c ON c.category_id = a.category_id AND c.locale = $1
+        WHERE t.is_published = true
+    `;
+    if (search) {
+        params.push(`%${search}%`);
+        queryStr += ` AND (t.title ILIKE $${params.length} OR t.seo_description ILIKE $${params.length} OR t.content ILIKE $${params.length})`;
+    }
+    if (category) {
+        params.push(category);
+        queryStr += ` AND a.category_id = $${params.length}`;
+    }
+
+    const countRes = await pool.query(`SELECT COUNT(*) ${queryStr}`, params);
+    const total = parseInt(countRes.rows[0].count, 10);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const articlesRes = await pool.query(`
+        SELECT a.id, a.created_at, t.title, t.slug, t.cover_image, t.seo_description,
+               c.name AS category_name
+        ${queryStr}
+        ORDER BY a.created_at DESC LIMIT ${limit} OFFSET ${offset}
+    `, params);
+    const catRes = await pool.query(`
+        SELECT c.id, t.name
+        FROM landing_categories c
+        JOIN landing_category_translations t ON t.category_id = c.id AND t.locale = $1
+        ORDER BY t.name ASC
+    `, [normalized]);
+    const languageLinks = SUPPORTED_LOCALES.map(code => {
+        const path = localizedPath(code, '/articles');
+        return { locale: code, path, url: SITE_URL + path };
+    });
+
+    res.render('articles', {
+        siteUrl: SITE_URL,
+        nav,
+        settings,
+        articles: articlesRes.rows,
+        categories: catRes.rows,
+        currentPage: page,
+        totalPages,
+        search,
+        selectedCategory: category,
+        locale: normalized,
+        localeMeta: getLocaleMeta(normalized),
+        languageLinks,
+        localizedPath,
+        formatDate,
+        t: createTranslator(normalized)
+    });
+}
+
+async function renderArticlePage(req, res, next, locale) {
+    const normalized = normalizeLocale(locale);
+    const settings = await buildPageContext(await getHomePage(), normalized);
+    const nav = buildNav(settings.nav_items, await listPagesForLocale(normalized), normalized);
+    const articleRes = await pool.query(`
+        SELECT a.id, a.category_id, a.created_at,
+               t.title, t.slug, t.cover_image, t.seo_description, t.content, t.is_published,
+               c.name AS category_name
+        FROM landing_articles a
+        JOIN landing_article_translations t ON t.article_id = a.id AND t.locale = $2
+        LEFT JOIN landing_category_translations c ON c.category_id = a.category_id AND c.locale = $2
+        WHERE t.slug = $1 AND t.is_published = true
+        LIMIT 1
+    `, [req.params.slug, normalized]);
+    if (articleRes.rows.length === 0) return next();
+    const article = articleRes.rows[0];
+    const relatedRes = await pool.query(`
+        SELECT a.id, a.created_at, t.title, t.slug, t.cover_image, t.seo_description,
+               c.name AS category_name
+        FROM landing_articles a
+        JOIN landing_article_translations t ON t.article_id = a.id AND t.locale = $2
+        LEFT JOIN landing_category_translations c ON c.category_id = a.category_id AND c.locale = $2
+        WHERE t.is_published = true AND a.id <> $1
+        ORDER BY CASE WHEN a.category_id = $3 THEN 1 ELSE 0 END DESC, RANDOM()
+        LIMIT 6
+    `, [article.id, normalized, article.category_id || 0]);
+    const languageLinks = buildArticleLanguageLinks(await getArticleTranslations(article.id), SITE_URL);
+
+    res.render('article', {
+        siteUrl: SITE_URL,
+        nav,
+        settings,
+        article,
+        related_articles: relatedRes.rows,
+        locale: normalized,
+        localeMeta: getLocaleMeta(normalized),
+        languageLinks,
+        localizedPath,
+        formatDate,
+        t: createTranslator(normalized)
+    });
+}
+
 app.get('/robots.txt', (req, res) => {
     res.type('text/plain');
     res.send(`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml`);
@@ -847,36 +1012,47 @@ app.get('/robots.txt', (req, res) => {
 
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const articles = await pool.query('SELECT slug, created_at FROM landing_articles WHERE is_published = true ORDER BY created_at DESC');
-        const extraPages = await pool.query('SELECT slug, created_at FROM landing_pages WHERE is_published = true AND is_home = false ORDER BY sort_order ASC');
+        const articles = await pool.query(`
+            SELECT t.locale, t.slug, a.created_at
+            FROM landing_articles a
+            JOIN landing_article_translations t ON t.article_id = a.id
+            WHERE t.is_published = true
+            ORDER BY a.created_at DESC
+        `);
+        const pages = await pool.query(`
+            SELECT t.locale, t.slug, p.is_home, p.created_at
+            FROM landing_pages p
+            JOIN landing_page_translations t ON t.page_id = p.id
+            WHERE t.is_published = true
+            ORDER BY p.is_home DESC, p.sort_order ASC
+        `);
         const lastmod = (d) => new Date(d).toISOString().slice(0, 10);
         const newest = articles.rows.length ? lastmod(articles.rows[0].created_at) : lastmod(Date.now());
-        let urls = `
+        let urls = '';
+        const activeLocales = new Set(pages.rows.filter(page => page.is_home).map(page => page.locale));
+        pages.rows.forEach(page => {
+            const pagePath = localizedPath(page.locale, page.is_home ? '/' : '/' + encodeURIComponent(page.slug));
+            urls += `
   <url>
-    <loc>${SITE_URL}/</loc>
-    <lastmod>${newest}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+    <loc>${SITE_URL}${pagePath}</loc>
+    <lastmod>${lastmod(page.created_at)}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>${page.is_home ? '1.0' : '0.8'}</priority>
+  </url>`;
+        });
+        activeLocales.forEach(locale => {
+            urls += `
   <url>
-    <loc>${SITE_URL}/articles</loc>
+    <loc>${SITE_URL}${localizedPath(locale, '/articles')}</loc>
     <lastmod>${newest}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-  </url>`;
-        extraPages.rows.forEach(pg => {
-            urls += `
-  <url>
-    <loc>${SITE_URL}/${encodeURIComponent(pg.slug)}</loc>
-    <lastmod>${lastmod(pg.created_at)}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
   </url>`;
         });
         articles.rows.forEach(a => {
             urls += `
   <url>
-    <loc>${SITE_URL}/article/${encodeURIComponent(a.slug)}</loc>
+    <loc>${SITE_URL}${localizedPath(a.locale, '/article/' + encodeURIComponent(a.slug))}</loc>
     <lastmod>${lastmod(a.created_at)}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -908,101 +1084,19 @@ app.get('/en', async (req, res, next) => {
 });
 
 app.get('/articles', async (req, res, next) => {
-    try {
-        // หน้ารายการ/หน้าบทความใช้ค่าเว็บ บวกค่าเริ่มต้นจากหน้าแรก (เช่น SEO fallback)
-        const settings = await buildPageContext(await getHomePage());
-        const nav = buildNav(settings.nav_items, await listPages());
-        
-        const page = parseInt(req.query.page) || 1;
-        const limit = 9;
-        const offset = (page - 1) * limit;
-        
-        const search = req.query.search || '';
-        const category = req.query.category || '';
-        
-        let queryStr = `
-            FROM landing_articles a 
-            LEFT JOIN landing_categories c ON a.category_id = c.id 
-            WHERE a.is_published = true
-        `;
-        let params = [];
-        
-        if (search) {
-            params.push(`%${search}%`);
-            queryStr += ` AND (a.title ILIKE $${params.length} OR a.seo_description ILIKE $${params.length} OR a.content ILIKE $${params.length})`;
-        }
-        
-        if (category) {
-            params.push(category);
-            queryStr += ` AND a.category_id = $${params.length}`;
-        }
-        
-        const countRes = await pool.query(`SELECT COUNT(*) ${queryStr}`, params);
-        const total = parseInt(countRes.rows[0].count);
-        const totalPages = Math.ceil(total / limit);
-        
-        const articlesQuery = `
-            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
-            ${queryStr}
-            ORDER BY a.created_at DESC LIMIT ${limit} OFFSET ${offset}
-        `;
-        const articlesRes = await pool.query(articlesQuery, params);
-        
-        const catRes = await pool.query('SELECT * FROM landing_categories ORDER BY name ASC');
-        
-        res.render('articles', { 
-            siteUrl: SITE_URL,
-            nav,
-            settings, 
-            articles: articlesRes.rows,
-            categories: catRes.rows,
-            currentPage: page,
-            totalPages: totalPages,
-            search: search,
-            selectedCategory: category
-        });
-    } catch (err) {
-        next(err);
-    }
+    try { await renderArticlesPage(req, res, DEFAULT_LOCALE); } catch (err) { next(err); }
 });
 
-// --- อัปเดตส่วนดึงบทความสำหรับแสดงในหน้าบทความเดี่ยว ---
+app.get('/en/articles', async (req, res, next) => {
+    try { await renderArticlesPage(req, res, 'en'); } catch (err) { next(err); }
+});
+
 app.get('/article/:slug', async (req, res, next) => {
-    try {
-        const settings = await buildPageContext(await getHomePage());
-        const nav = buildNav(settings.nav_items, await listPages());
-        
-        // 1. ดึงข้อมูลบทความหลัก
-        const articleRes = await pool.query(`
-            SELECT a.*, c.name as category_name 
-            FROM landing_articles a 
-            LEFT JOIN landing_categories c ON a.category_id = c.id 
-            WHERE a.slug = $1 AND a.is_published = true
-        `, [req.params.slug]);
+    try { await renderArticlePage(req, res, next, DEFAULT_LOCALE); } catch (err) { next(err); }
+});
 
-        if (articleRes.rows.length === 0) return res.status(404).send('ไม่พบบทความ');
-        const article = articleRes.rows[0];
-
-        // 2. ดึงบทความที่เกี่ยวข้อง 6 บทความ (สุ่ม/เน้นหมวดเดียวกัน ไม่เอาบทความปัจจุบัน)
-        const relatedRes = await pool.query(`
-            SELECT a.title, a.slug, a.cover_image, a.seo_description, c.name as category_name, a.created_at
-            FROM landing_articles a 
-            LEFT JOIN landing_categories c ON a.category_id = c.id 
-            WHERE a.is_published = true AND a.id != $1
-            ORDER BY CASE WHEN a.category_id = $2 THEN 1 ELSE 0 END DESC, RANDOM() 
-            LIMIT 6
-        `, [article.id, article.category_id || 0]);
-
-        res.render('article', { 
-            siteUrl: SITE_URL,
-            nav,
-            settings, 
-            article: article,
-            related_articles: relatedRes.rows 
-        });
-    } catch (err) {
-        next(err);
-    }
+app.get('/en/article/:slug', async (req, res, next) => {
+    try { await renderArticlePage(req, res, next, 'en'); } catch (err) { next(err); }
 });
 
 const wakeupLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 3, message: 'Too Many Requests' });
@@ -1024,7 +1118,7 @@ app.get('/admin', requireAuth, (req, res) => res.redirect('/admin/site'));
 
 app.get('/admin/site', requireAuth, async (req, res, next) => {
     try {
-        const locale = normalizeLocale(req.query.locale);
+        const locale = getAdminLocale(req);
         const localeDraftCreated = await ensureSiteLocaleDraft(locale);
         const settings = await getSettings(locale);
         res.render('admin/site', { settings, locale, localeDraftCreated, supportedLocales: SUPPORTED_LOCALES, templates: TEMPLATES, sectionCatalogue: SECTIONS, sectionBgs: SECTION_BGS });
@@ -1036,7 +1130,7 @@ app.post('/admin/site/save', requireAuth, upload.fields([
 ]), async (req, res, next) => {
     try {
         const body = req.body;
-        const locale = normalizeLocale(body.locale || req.query.locale);
+        const locale = getAdminLocale(req);
         await ensureSiteLocaleDraft(locale);
         const sharedUpdates = {
             logo_height: clampNumber(body.logo_height, 20, 400, 80),
@@ -1072,25 +1166,29 @@ app.post('/admin/site/save', requireAuth, upload.fields([
 
 app.get('/admin/pages', requireAuth, async (req, res, next) => {
     try {
-        res.render('admin/pages', { settings: await getSettings(), pages: await listPagesWithLocales(), error: req.query.error || null });
+        const locale = getAdminLocale(req);
+        res.render('admin/pages', { settings: await getSettings(locale), pages: await listPagesWithLocales(locale), locale, error: req.query.error || null });
     } catch (err) { next(err); }
 });
 
 app.post('/admin/pages', requireAuth, async (req, res, next) => {
     try {
+        const locale = getAdminLocale(req);
         const title = (req.body.title || '').toString().trim();
         if (!title) return res.redirect('/admin/pages?error=' + encodeURIComponent('กรุณากรอกชื่อหน้า'));
         const slug = slugify(req.body.slug || title);
-        const problem = slugError(slug) || (await slugTaken(slug) ? 'URL นี้ถูกใช้แล้ว' : null);
+        const problem = slugError(slug) || (await localizedSlugTaken(slug, locale) ? 'URL นี้ถูกใช้แล้วในภาษานี้' : null);
         if (problem) return res.redirect('/admin/pages?error=' + encodeURIComponent(problem));
+        const legacySuffix = `-${locale}-${Date.now()}`;
+        const legacySlug = await slugTaken(slug) ? slug.slice(0, 100 - legacySuffix.length) + legacySuffix : slug;
 
         const maxSort = await pool.query('SELECT COALESCE(MAX(sort_order), 0) AS m FROM landing_pages');
         const created = await pool.query(
             'INSERT INTO landing_pages (slug, title, is_home, sort_order) VALUES ($1, $2, false, $3) RETURNING id',
-            [slug, title, Number(maxSort.rows[0].m) + 1]
+            [legacySlug, title, Number(maxSort.rows[0].m) + 1]
         );
-        await saveDefaultPageTranslation(created.rows[0].id, title, slug, true);
-        res.redirect('/admin/pages/' + created.rows[0].id);
+        await savePageTranslation(created.rows[0].id, locale, title, slug, locale === DEFAULT_LOCALE);
+        res.redirect('/admin/pages/' + created.rows[0].id + '?locale=' + locale);
     } catch (err) { next(err); }
 });
 
@@ -1109,7 +1207,7 @@ app.get('/admin/pages/:id', requireAuth, async (req, res, next) => {
     try {
         const basePage = await getPageById(req.params.id);
         if (!basePage) return res.status(404).send('ไม่พบหน้านี้');
-        const locale = normalizeLocale(req.query.locale);
+        const locale = getAdminLocale(req);
         const localeDraftCreated = await ensurePageLocaleDraft(basePage.id, locale);
         const page = await getLocalizedPage(basePage.id, locale);
         if (!page) return res.status(404).send('ไม่พบข้อมูลภาษานี้');
@@ -1134,7 +1232,7 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
         const basePage = await getPageById(req.params.id);
         if (!basePage) return res.status(404).send('ไม่พบหน้านี้');
         const body = req.body;
-        const locale = normalizeLocale(body.locale || req.query.locale);
+        const locale = getAdminLocale(req);
         await ensurePageLocaleDraft(basePage.id, locale);
         const page = await getLocalizedPage(basePage.id, locale);
         if (!page) return res.status(404).send('ไม่พบข้อมูลภาษานี้');
@@ -1251,8 +1349,8 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
         }
         if (locale === DEFAULT_LOCALE) {
             await pool.query(
-                'UPDATE landing_pages SET title = $1, slug = $2, is_published = $3, sort_order = $4 WHERE id = $5',
-                [title, slug, published, parseInt(sortOrder, 10), page.id]
+                'UPDATE landing_pages SET title = $1, is_published = $2, sort_order = $3 WHERE id = $4',
+                [title, published, parseInt(sortOrder, 10), page.id]
             );
         }
         await savePageTranslation(page.id, locale, title, slug, published);
@@ -1262,7 +1360,7 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
 
 app.get('/admin/nav', requireAuth, async (req, res, next) => {
     try {
-        const locale = normalizeLocale(req.query.locale);
+        const locale = getAdminLocale(req);
         const localeDraftCreated = await ensureSiteLocaleDraft(locale);
         res.render('admin/nav', {
             settings: await getSettings(locale),
@@ -1276,7 +1374,7 @@ app.get('/admin/nav', requireAuth, async (req, res, next) => {
 
 app.post('/admin/nav/save', requireAuth, async (req, res, next) => {
     try {
-        const locale = normalizeLocale(req.body.locale || req.query.locale);
+        const locale = getAdminLocale(req);
         await ensureSiteLocaleDraft(locale);
         await saveLocalizedSiteSettings(locale, { nav_items: JSON.stringify(normalizeNavItems(req.body.nav_items)) });
         res.redirect('/admin/nav?locale=' + locale);
@@ -1285,7 +1383,13 @@ app.post('/admin/nav/save', requireAuth, async (req, res, next) => {
 
 app.get('/admin/blog', requireAuth, async (req, res, next) => {
     try {
-        res.render('admin/blog', { settings: await getSettings() });
+        const locale = getAdminLocale(req);
+        await ensureSiteLocaleDraft(locale);
+        res.render('admin/blog', {
+            settings: await getSettings(locale),
+            locale,
+            supportedLocales: SUPPORTED_LOCALES
+        });
     } catch (err) { next(err); }
 });
 
@@ -1323,15 +1427,42 @@ app.post('/admin/api/upload-slide', requireAuth, uploadSlide.single('slide_image
 });
 
 app.get('/admin/api/categories', requireAuth, async (req, res) => {
-    const result = await pool.query('SELECT * FROM landing_categories ORDER BY id DESC');
+    const locale = getAdminLocale(req);
+    const result = await pool.query(`
+        SELECT c.id, c.created_at,
+               COALESCE(t.name, th.name, c.name) AS name,
+               t.name AS localized_name,
+               (t.category_id IS NOT NULL) AS has_translation
+        FROM landing_categories c
+        LEFT JOIN landing_category_translations t ON t.category_id = c.id AND t.locale = $1
+        LEFT JOIN landing_category_translations th ON th.category_id = c.id AND th.locale = $2
+        ORDER BY c.id DESC
+    `, [locale, DEFAULT_LOCALE]);
     res.json(result.rows);
 });
 app.post('/admin/api/categories', requireAuth, async (req, res) => {
-    const created = await pool.query('INSERT INTO landing_categories (name) VALUES ($1) RETURNING id', [req.body.name]);
+    const locale = getAdminLocale(req);
+    const name = String(req.body.name || '').trim().slice(0, 255);
+    if (!name) return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อหมวดหมู่' });
+    const created = await pool.query('INSERT INTO landing_categories (name) VALUES ($1) RETURNING id', [name]);
     await pool.query(
         'INSERT INTO landing_category_translations (category_id, locale, name) VALUES ($1, $2, $3)',
-        [created.rows[0].id, DEFAULT_LOCALE, req.body.name]
+        [created.rows[0].id, locale, name]
     );
+    res.json({ success: true });
+});
+app.put('/admin/api/categories/:id', requireAuth, async (req, res) => {
+    const locale = getAdminLocale(req);
+    const name = String(req.body.name || '').trim().slice(0, 255);
+    if (!name) return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อหมวดหมู่' });
+    if (locale === DEFAULT_LOCALE) {
+        await pool.query('UPDATE landing_categories SET name = $1 WHERE id = $2', [name, req.params.id]);
+    }
+    await pool.query(`
+        INSERT INTO landing_category_translations (category_id, locale, name)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (category_id, locale) DO UPDATE SET name = EXCLUDED.name
+    `, [req.params.id, locale, name]);
     res.json({ success: true });
 });
 app.delete('/admin/api/categories/:id', requireAuth, async (req, res) => {
@@ -1340,55 +1471,108 @@ app.delete('/admin/api/categories/:id', requireAuth, async (req, res) => {
 });
 
 app.get('/admin/api/articles', requireAuth, async (req, res) => {
+    const locale = getAdminLocale(req);
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
     const countRes = await pool.query('SELECT COUNT(*) FROM landing_articles');
     const total = parseInt(countRes.rows[0].count);
     const result = await pool.query(`
-        SELECT a.id, a.title, a.is_published, a.created_at, c.name as category_name 
-        FROM landing_articles a LEFT JOIN landing_categories c ON a.category_id = c.id 
+        SELECT a.id, COALESCE(t.title, th.title, a.title) AS title,
+               COALESCE(t.is_published, false) AS is_published,
+               (t.article_id IS NOT NULL) AS has_translation,
+               a.created_at, COALESCE(c.name, cth.name, base_category.name) AS category_name
+        FROM landing_articles a
+        LEFT JOIN landing_categories base_category ON base_category.id = a.category_id
+        LEFT JOIN landing_article_translations t ON t.article_id = a.id AND t.locale = $3
+        LEFT JOIN landing_article_translations th ON th.article_id = a.id AND th.locale = $4
+        LEFT JOIN landing_category_translations c ON c.category_id = a.category_id AND c.locale = $3
+        LEFT JOIN landing_category_translations cth ON cth.category_id = a.category_id AND cth.locale = $4
         ORDER BY a.created_at DESC LIMIT $1 OFFSET $2
-    `, [limit, offset]);
+    `, [limit, offset, locale, DEFAULT_LOCALE]);
     res.json({ articles: result.rows, totalPages: Math.ceil(total / limit), currentPage: page });
 });
 
 app.get('/admin/api/articles/:id', requireAuth, async (req, res) => {
-    const result = await pool.query('SELECT * FROM landing_articles WHERE id = $1', [req.params.id]);
-    res.json(result.rows[0]);
+    const locale = getAdminLocale(req);
+    const localeDraftCreated = await ensureArticleLocaleDraft(req.params.id, locale);
+    const result = await pool.query(`
+        SELECT a.id, a.category_id, a.created_at,
+               t.title, t.slug, t.cover_image, t.seo_description, t.content, t.is_published,
+               t.locale
+        FROM landing_articles a
+        JOIN landing_article_translations t ON t.article_id = a.id AND t.locale = $2
+        WHERE a.id = $1
+    `, [req.params.id, locale]);
+    if (!result.rows[0]) return res.status(404).json({ success: false });
+    res.json(Object.assign({}, result.rows[0], { localeDraftCreated }));
 });
 
 app.post('/admin/api/articles', requireAuth, upload.single('cover_image'), async (req, res) => {
     try {
+        const locale = getAdminLocale(req);
         let cover_image = null;
         if (req.file) cover_image = await uploadToR2(req.file, 'landingpage/thumbnail');
         
         const { category_id, title, seo_description, content, is_published } = req.body;
-        const slug = Math.random().toString(36).substring(2, 15) + '-' + Date.now();
+        const cleanTitle = String(title || '').trim().slice(0, 255);
+        if (!cleanTitle) return res.status(400).json({ success: false, message: 'กรุณากรอกหัวข้อบทความ' });
+        const slug = slugify(req.body.slug || cleanTitle);
+        if (!slug) return res.status(400).json({ success: false, message: 'กรุณากรอก URL ของบทความ' });
+        if (await articleSlugTaken(slug, locale)) return res.status(409).json({ success: false, message: 'URL บทความนี้ถูกใช้แล้ว' });
+        const legacySlugResult = await pool.query('SELECT 1 FROM landing_articles WHERE slug = $1 LIMIT 1', [slug]);
+        const legacySlug = legacySlugResult.rows.length ? `${slug}-${locale}-${Date.now()}` : slug;
         
         const created = await pool.query(`
             INSERT INTO landing_articles (category_id, title, slug, cover_image, seo_description, content, is_published)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
-        `, [category_id || null, title, slug, cover_image, seo_description, sanitizeHtml(content), is_published === 'true']);
-        await syncDefaultArticleTranslation(created.rows[0].id);
+        `, [category_id || null, cleanTitle, legacySlug, cover_image, seo_description, sanitizeHtml(content), locale === DEFAULT_LOCALE && is_published === 'true']);
+        await pool.query(`
+            INSERT INTO landing_article_translations
+                (article_id, locale, title, slug, cover_image, seo_description, content, is_published)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        `, [created.rows[0].id, locale, cleanTitle, slug, cover_image, seo_description, sanitizeHtml(content), is_published === 'true']);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 app.put('/admin/api/articles/:id', requireAuth, upload.single('cover_image'), async (req, res) => {
     try {
+        const locale = getAdminLocale(req);
         const { category_id, title, seo_description, content, is_published } = req.body;
-        let query = `UPDATE landing_articles SET category_id=$1, title=$2, seo_description=$3, content=$4, is_published=$5 WHERE id=$6`;
-        let params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', req.params.id];
-        
-        if (req.file) {
-            const cover_image = await uploadToR2(req.file, 'landingpage/thumbnail');
-            query = `UPDATE landing_articles SET category_id=$1, title=$2, seo_description=$3, content=$4, is_published=$5, cover_image=$6 WHERE id=$7`;
-            params = [category_id || null, title, seo_description, sanitizeHtml(content), is_published === 'true', cover_image, req.params.id];
+        const cleanTitle = String(title || '').trim().slice(0, 255);
+        if (!cleanTitle) return res.status(400).json({ success: false, message: 'กรุณากรอกหัวข้อบทความ' });
+        await ensureArticleLocaleDraft(req.params.id, locale);
+        const current = await pool.query(
+            'SELECT slug, cover_image FROM landing_article_translations WHERE article_id = $1 AND locale = $2',
+            [req.params.id, locale]
+        );
+        if (!current.rows[0]) return res.status(404).json({ success: false, message: 'ไม่พบบทความ' });
+        const slug = slugify(req.body.slug || cleanTitle);
+        if (!slug) return res.status(400).json({ success: false, message: 'กรุณากรอก URL ของบทความ' });
+        if (await articleSlugTaken(slug, locale, req.params.id)) return res.status(409).json({ success: false, message: 'URL บทความนี้ถูกใช้แล้วในภาษานี้' });
+        const coverImage = req.file
+            ? await uploadToR2(req.file, 'landingpage/thumbnail')
+            : current.rows[0].cover_image;
+        const cleanContent = sanitizeHtml(content);
+        const published = is_published === 'true';
+
+        if (locale === DEFAULT_LOCALE) {
+            await pool.query(`
+                UPDATE landing_articles
+                SET category_id=$1, title=$2, cover_image=$3,
+                    seo_description=$4, content=$5, is_published=$6
+                WHERE id=$7
+            `, [category_id || null, cleanTitle, coverImage, seo_description, cleanContent, published, req.params.id]);
+        } else {
+            await pool.query('UPDATE landing_articles SET category_id = $1 WHERE id = $2', [category_id || null, req.params.id]);
         }
-        await pool.query(query, params);
-        await syncDefaultArticleTranslation(req.params.id);
+        await pool.query(`
+            UPDATE landing_article_translations
+            SET title=$1, slug=$2, cover_image=$3, seo_description=$4, content=$5, is_published=$6
+            WHERE article_id=$7 AND locale=$8
+        `, [cleanTitle, slug, coverImage, seo_description, cleanContent, published, req.params.id, locale]);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });

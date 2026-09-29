@@ -1,37 +1,40 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<%= localeMeta.htmlLang %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%
   var siteName = settings.site_name || 'Lullapos';
-  var listTitle = 'บทความทั้งหมด - ' + settings.seo_title + (currentPage > 1 ? ' (หน้า ' + currentPage + ')' : '');
-  var listUrl = siteUrl + '/articles' + (currentPage > 1 ? '?page=' + currentPage : '');
+  var listTitle = t('articles.all') + ' - ' + settings.seo_title + (currentPage > 1 ? ' (' + t('articles.page_of', { page: currentPage, total: totalPages }) + ')' : '');
+  var listPath = localizedPath(locale, '/articles');
+  var listUrl = siteUrl + listPath + (currentPage > 1 ? '?page=' + currentPage : '');
   var listGraph = [
     {
       '@type': 'CollectionPage',
       '@id': listUrl + '#page',
       url: listUrl,
       name: listTitle,
-      inLanguage: 'th-TH',
+      inLanguage: localeMeta.intlLocale,
       isPartOf: { '@id': siteUrl + '/#website' }
     },
     {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: siteUrl + '/' },
-        { '@type': 'ListItem', position: 2, name: 'บทความ', item: siteUrl + '/articles' }
+        { '@type': 'ListItem', position: 1, name: locale === 'en' ? 'Home' : 'หน้าแรก', item: siteUrl + localizedPath(locale, '/') },
+        { '@type': 'ListItem', position: 2, name: t('articles.all'), item: siteUrl + listPath }
       ]
     }
   ];
 %>
 <%- include('partials/seo/meta', {
       pageTitle: listTitle,
-      pageDescription: 'แหล่งรวมความรู้และเทคนิคการจัดการร้านค้า',
+      pageDescription: t('articles.description'),
       pageUrl: listUrl,
       pageImage: settings.seo_thumbnail_url,
       ogType: 'website',
-      noindex: (search && search.length > 0)
+      noindex: (search && search.length > 0),
+      localeMeta: localeMeta,
+      languageLinks: languageLinks
     }) %>
 <%- include('partials/seo/jsonld', { graph: listGraph }) %>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
@@ -57,39 +60,39 @@
     <main class="flex-grow pb-24">
         <div class="bg-primary/5 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">บทความและเทคนิคธุรกิจ</h1>
-                <p class="mt-4 text-lg text-gray-600">รวบรวมเคล็ดลับที่จะช่วยให้ร้านค้าของคุณเติบโตได้อย่างยั่งยืน</p>
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"><%= t('articles.title') %></h1>
+                <p class="mt-4 text-lg text-gray-600"><%= t('articles.subtitle') %></p>
             </div>
         </div>
 
         <div class="mx-auto max-w-7xl px-6 lg:px-8 mt-12">
-            <form action="/articles" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-12 flex flex-col sm:flex-row gap-4 items-center">
+            <form action="<%= listPath %>" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-12 flex flex-col sm:flex-row gap-4 items-center">
                 <div class="w-full sm:flex-1 relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
                     </div>
-                    <input type="text" name="search" value="<%= search %>" placeholder="ค้นหาบทความ..." class="block w-full rounded-md border-0 py-2.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6">
+                    <input type="text" name="search" value="<%= search %>" placeholder="<%= t('articles.search_placeholder') %>" class="block w-full rounded-md border-0 py-2.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6">
                 </div>
-                
+
                 <div class="w-full sm:w-64">
                     <select name="category" class="block w-full rounded-md border-0 py-3 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6 cursor-pointer bg-white">
-                        <option value="">-- ทุกหมวดหมู่ --</option>
+                        <option value=""><%= t('articles.all_categories') %></option>
                         <% categories.forEach(function(cat) { %>
                             <option value="<%= cat.id %>" <%= selectedCategory == cat.id ? 'selected' : '' %>><%= cat.name %></option>
                         <% }); %>
                     </select>
                 </div>
-                
-                <button type="submit" class="w-full sm:w-auto rounded-md bg-primary px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition flex-shrink-0">ค้นหา</button>
+
+                <button type="submit" class="w-full sm:w-auto rounded-md bg-primary px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-80 transition flex-shrink-0"><%= t('articles.search') %></button>
             </form>
 
             <% if (articles.length === 0) { %>
                 <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
                     <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <h3 class="mt-2 text-sm font-semibold text-gray-900">ไม่พบบทความ</h3>
-                    <p class="mt-1 text-sm text-gray-500">ลองค้นหาด้วยคำอื่น หรือเลือกหมวดหมู่อื่น</p>
+                    <h3 class="mt-2 text-sm font-semibold text-gray-900"><%= t('articles.no_results') %></h3>
+                    <p class="mt-1 text-sm text-gray-500"><%= t('articles.no_results_hint') %></p>
                     <div class="mt-6">
-                        <a href="/articles" class="text-primary hover:underline font-medium">ล้างการค้นหา</a>
+                        <a href="<%= listPath %>" class="text-primary hover:underline font-medium"><%= t('articles.clear_search') %></a>
                     </div>
                 </div>
             <% } else { %>
@@ -100,18 +103,18 @@
                             <% if(article.cover_image) { %>
                                 <img src="<%= article.cover_image %>" alt="<%= article.title %>" class="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]">
                             <% } else { %>
-                                <div class="aspect-[16/9] w-full rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400">ไม่มีรูปภาพ</div>
+                                <div class="aspect-[16/9] w-full rounded-2xl bg-gray-200 flex items-center justify-center text-gray-400"><%= t('articles.no_image') %></div>
                             <% } %>
                             <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10"></div>
                         </div>
                         <div class="max-w-xl w-full">
                             <div class="mt-8 flex items-center gap-x-4 text-xs">
-                                <time datetime="<%= article.created_at %>" class="text-gray-500"><%= new Date(article.created_at).toLocaleDateString('th-TH') %></time>
+                                <time datetime="<%= article.created_at %>" class="text-gray-500"><%= formatDate(article.created_at, locale, { year: 'numeric', month: 'short', day: 'numeric' }) %></time>
                                 <% if(article.category_name) { %><span class="relative z-10 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary"><%= article.category_name %></span><% } %>
                             </div>
                             <div class="group relative">
                                 <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-primary transition-colors">
-                                    <a href="/article/<%= encodeURIComponent(article.slug) %>"><span class="absolute inset-0"></span><%= article.title %></a>
+                                    <a href="<%= localizedPath(locale, '/article/' + encodeURIComponent(article.slug)) %>"><span class="absolute inset-0"></span><%= article.title %></a>
                                 </h3>
                                 <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600"><%= article.seo_description %></p>
                             </div>
@@ -123,13 +126,13 @@
                 <% if (totalPages > 1) { %>
                 <div class="mt-16 flex items-center justify-center border-t border-gray-200 pt-8 gap-x-4">
                     <% if (currentPage > 1) { %>
-                        <a href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>&category=<%= encodeURIComponent(selectedCategory) %>" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">&laquo; ย้อนกลับ</a>
+                        <a href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>&category=<%= encodeURIComponent(selectedCategory) %>" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">&laquo; <%= t('articles.previous') %></a>
                     <% } %>
-                    
-                    <span class="text-sm text-gray-600 font-medium bg-gray-100 px-4 py-2 rounded-md">หน้า <%= currentPage %> จาก <%= totalPages %></span>
+
+                    <span class="text-sm text-gray-600 font-medium bg-gray-100 px-4 py-2 rounded-md"><%= t('articles.page_of', { page: currentPage, total: totalPages }) %></span>
 
                     <% if (currentPage < totalPages) { %>
-                        <a href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>&category=<%= encodeURIComponent(selectedCategory) %>" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">หน้าถัดไป &raquo;</a>
+                        <a href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>&category=<%= encodeURIComponent(selectedCategory) %>" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><%= t('articles.next') %> &raquo;</a>
                     <% } %>
                 </div>
                 <% } %>

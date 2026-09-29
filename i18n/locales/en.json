@@ -7,5 +7,42 @@
   "errors": {
     "not_found": "Page not found",
     "server_error": "An internal server error occurred. Please try again."
+  },
+  "nav": {
+    "home": "Home"
+  },
+  "admin": {
+    "title": "Website Admin",
+    "main_menu": "Main menu",
+    "site_settings": "Site settings",
+    "pages": "Pages",
+    "navigation": "Navbar and navigation",
+    "blog": "Blog articles",
+    "page_sections": "Sections on this page",
+    "view_site": "View live website",
+    "logout": "Log out",
+    "language": "Content language",
+    "editing_th": "Managing Thai content",
+    "editing_en": "Managing English content"
+  },
+  "articles": {
+    "title": "Business Articles and Insights",
+    "subtitle": "Practical ideas to help your business grow sustainably",
+    "all": "All Articles",
+    "description": "Business management insights and practical retail tips",
+    "search_placeholder": "Search articles...",
+    "all_categories": "-- All categories --",
+    "search": "Search",
+    "no_results": "No articles found",
+    "no_results_hint": "Try another search term or category",
+    "clear_search": "Clear search",
+    "previous": "Previous",
+    "next": "Next",
+    "page_of": "Page {{page}} of {{total}}",
+    "no_image": "No image",
+    "published_on": "Published",
+    "related": "More articles you may like",
+    "view_all": "View all",
+    "view_all_articles": "View all articles"
   }
 }
