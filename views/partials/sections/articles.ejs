@@ -19,7 +19,7 @@
         </div>
         <div class="max-w-xl w-full">
           <div class="mt-8 flex items-center gap-x-4 text-xs">
-            <time datetime="<%= article.created_at %>" class="text-gray-500"><%= formatDate(article.created_at, locale) %></time>
+            <time datetime="<%= article.created_at %>" class="text-gray-500"><%= new Date(article.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'th-TH') %></time>
             <% if(article.category_name) { %><span class="relative z-10 rounded-full bg-primary/10 px-3 py-1.5 font-medium text-primary"><%= article.category_name %></span><% } %>
           </div>
           <div class="group relative">

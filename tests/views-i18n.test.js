@@ -58,7 +58,6 @@ test('renders an English landing page with localized metadata and language switc
             { locale: 'en', path: '/en', url: 'https://example.com/en' }
         ],
         localizedPath,
-        formatDate,
         t: createTranslator('en')
     });
 
