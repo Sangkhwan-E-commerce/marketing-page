@@ -49,6 +49,8 @@ test('provides locale metadata and locale-aware date formatting', () => {
 test('keeps only logo and favicon as shared brand images', () => {
     assert.deepEqual(SHARED_BRAND_ASSET_KEYS, ['logo_url', 'favicon_url']);
     assert.equal(isLocalizedSiteSetting('banner_list'), true);
+    assert.equal(isLocalizedSiteSetting('banner_active'), true);
+    assert.equal(isLocalizedSiteSetting('facebook_url'), true);
     assert.equal(isLocalizedSiteSetting('logo_url'), false);
     assert.equal(isLocalizedSiteSetting('favicon_url'), false);
 });

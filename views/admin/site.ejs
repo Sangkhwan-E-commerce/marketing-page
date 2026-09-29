@@ -2,10 +2,25 @@
 <%- include('_sidebar', { adminPage: 'site', tabs: [{ id: 'tab-general', label: 'ทั่วไป & Footer' }, { id: 'tab-tracking', label: 'Analytics & Cookie' }, { id: 'tab-banner', label: 'โฆษณา Modal' }, { id: 'tab-article-cta', label: 'CTA หน้าบทความ' }], tabsTitle: 'หัวข้อในหน้านี้' }) %>
 <%- include('_topbar', { heading: 'ตั้งค่าเว็บ' }) %>
 
-                <form action="/admin/site/save" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 text-sm font-semibold text-gray-600">ภาษาของเนื้อหา</span>
+                        <% supportedLocales.forEach(function(code) { %>
+                        <a href="/admin/site?locale=<%= code %>" class="rounded-lg px-4 py-2 text-sm font-bold transition <%= locale === code ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' %>"><%= code === 'th' ? '🇹🇭 ไทย' : '🇬🇧 English' %></a>
+                        <% }); %>
+                    </div>
+                    <span class="hidden text-xs text-gray-500 sm:block">Logo, Favicon, Theme และ Tracking ใช้ร่วมกันทุกภาษา</span>
+                </div>
+
+                <% if (localeDraftCreated) { %>
+                <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">สร้างฉบับร่างการตั้งค่าภาษาอังกฤษจากภาษาไทยแล้ว กรุณาแปล Footer, Banner และ CTA ก่อนใช้งาน</div>
+                <% } %>
+
+                <form action="/admin/site/save?locale=<%= locale %>" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <input type="hidden" name="locale" value="<%= locale %>">
                     <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white z-20 rounded-t-xl">
                         <div>
-                            <p class="text-sm text-gray-500">ค่าเหล่านี้ใช้ร่วมกันทุกหน้าของเว็บไซต์</p>
+                            <p class="text-sm text-gray-500">กำลังแก้เนื้อหา<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %> — ช่องที่มีป้าย “ใช้ร่วมกัน” จะมีผลกับทั้งสองภาษา</p>
                         </div>
                         <div class="mt-4 sm:mt-0">
                             <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition">
@@ -20,7 +35,7 @@
                             <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อเว็บไซต์ (ใช้ใน og:site_name และท้ายชื่อหน้าบทความ)</label><input type="text" name="site_name" value="<%= settings.site_name %>" class="w-full border-gray-300 rounded-md border p-2 text-sm"></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-lg border border-gray-100">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon (PNG/ICO)</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon (PNG/ICO) <span class="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] text-gray-600">ใช้ร่วมกัน</span></label>
                                     <input type="file" name="favicon" accept="image/*" onchange="previewImage(this, 'preview-favicon')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
                                     <div class="mt-3">
                                         <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
@@ -28,7 +43,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Logo โปร่งใส (PNG)</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Logo โปร่งใส (PNG) <span class="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] text-gray-600">ใช้ร่วมกัน</span></label>
                                     <input type="file" name="logo" accept="image/png" onchange="previewImage(this, 'preview-logo')" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-80">
                                     <div class="mt-3">
                                         <p class="text-xs text-gray-500 mb-1">รูปภาพปัจจุบันที่แสดงผล:</p>
@@ -42,7 +57,7 @@
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">สีธีมหลัก (เช่น <code>rgb(244 97 100 / 98%)</code> หรือ <code>#F46164</code>)</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">สีธีมหลัก <span class="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] text-gray-600">ใช้ร่วมกัน</span> (เช่น <code>rgb(244 97 100 / 98%)</code> หรือ <code>#F46164</code>)</label>
                                 <input type="text" name="theme_color" value="<%= settings.theme_color %>" class="w-full border-gray-300 rounded-md shadow-sm border p-2" required>
                             </div>
                             
@@ -63,7 +78,7 @@
 
                         <div id="tab-tracking" class="tab-content space-y-6 hidden">
                             <div class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-sm text-amber-900">
-                                โค้ดในส่วนนี้จะแทรกใน <code>&lt;head&gt;</code> ของหน้าเว็บไซต์โดยตรง ควรใช้เฉพาะโค้ดจากผู้ให้บริการที่เชื่อถือได้ และสามารถเว้นช่องว่างเพื่อปิดการใช้งานได้
+                                โค้ดในส่วนนี้ใช้ร่วมกันทุกภาษาและจะแทรกใน <code>&lt;head&gt;</code> ของหน้าเว็บไซต์โดยตรง ควรใช้เฉพาะโค้ดจากผู้ให้บริการที่เชื่อถือได้ และสามารถเว้นช่องว่างเพื่อปิดการใช้งานได้
                             </div>
                             <div>
                                 <label for="google_analytics_code" class="block text-sm font-semibold text-gray-700 mb-2">Google Analytics</label>
@@ -122,7 +137,7 @@
                                         <label class="block text-sm font-semibold mb-1">ความกว้างสูงสุด (px)</label>
                                         <input type="number" name="banner_max_width" value="<%= settings.banner_max_width || 1200 %>" min="200" max="3000" step="10" class="w-full border-gray-300 rounded-md border p-2 text-sm shadow-sm">
                                     </div>
-                                    <p class="md:col-span-2 text-xs text-gray-500">ตั้งครั้งเดียว มีผลกับทุกสไลด์ — สไลด์จะกว้างตาม % ของหน้าจอ แต่ไม่เกินค่า px ที่กำหนด</p>
+                                    <p class="md:col-span-2 text-xs text-gray-500">ขนาด Modal ใช้ร่วมกันทุกภาษา ส่วนรายการสไลด์ รูป วิดีโอ ข้อความ และสถานะเปิดใช้งานแยกตามภาษา</p>
                                 </div>
                                 <p class="text-xs text-gray-500 mb-4">💡 แนะนำให้ใช้ภาพอัตราส่วน <strong>16:9</strong> (เช่น 1920×1080 px) ระบบจะครอบภาพให้เป็น 16:9 โดยอัตโนมัติก่อนอัปโหลด (ยกเว้นไฟล์ GIF และ SVG ที่อัปโหลดตามต้นฉบับ)<br>🎬 อัปวิดีโอสั้นแทนรูปได้ รองรับ <strong>MP4</strong> และ <strong>WebM</strong> ไม่เกิน 50MB — วิดีโอจะเล่นเองแบบ<strong>ไม่มีเสียง</strong> และรอจนเล่นจบจึงเลื่อนสไลด์ถัดไป ระบบครอบวิดีโอให้ไม่ได้ กรุณาตัดต่อมาเป็น 16:9</p>
                                 <input type="hidden" id="banner_list_input" name="banner_list" value="<%= settings.banner_list || '[]' %>">

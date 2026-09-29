@@ -17,7 +17,7 @@ const {
     normalizeLocale
 } = require('./i18n');
 const { buildPageLanguageLinks } = require('./i18n/page-localization');
-const { isLocalizedSiteSetting } = require('./i18n/content-config');
+const { LOCALIZED_SITE_SETTING_KEYS, isLocalizedSiteSetting } = require('./i18n/content-config');
 const { runI18nMigrations } = require('./db/i18n-migrations');
 
 const app = express();
@@ -623,6 +623,35 @@ async function saveSettings(updates) {
     }
 }
 
+async function saveLocalizedSiteSettings(locale, updates) {
+    const normalized = normalizeLocale(locale);
+    if (normalized === DEFAULT_LOCALE) return saveSettings(updates);
+    for (const [key, value] of Object.entries(updates)) {
+        if (value === undefined || !isLocalizedSiteSetting(key)) continue;
+        await pool.query(
+            'INSERT INTO landing_site_translations (locale, key, value) VALUES ($1, $2, $3) ON CONFLICT (locale, key) DO UPDATE SET value = EXCLUDED.value',
+            [normalized, key, value]
+        );
+    }
+}
+
+async function ensureSiteLocaleDraft(locale) {
+    const normalized = normalizeLocale(locale);
+    if (normalized === DEFAULT_LOCALE) return false;
+    const before = await pool.query(
+        'SELECT COUNT(*)::int AS count FROM landing_site_translations WHERE locale = $1',
+        [normalized]
+    );
+    await pool.query(`
+        INSERT INTO landing_site_translations (locale, key, value)
+        SELECT $1, key, value
+        FROM landing_site_translations
+        WHERE locale = $2 AND key = ANY($3::varchar[])
+        ON CONFLICT (locale, key) DO NOTHING
+    `, [normalized, DEFAULT_LOCALE, LOCALIZED_SITE_SETTING_KEYS]);
+    return Number(before.rows[0].count) === 0;
+}
+
 async function savePageSettings(pageId, updates) {
     for (const [key, value] of Object.entries(updates)) {
         if (value === undefined) continue;
@@ -761,6 +790,21 @@ function requireAuth(req, res, next) {
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 const sanitizeHtml = (dirty) => DOMPurify.sanitize(dirty);
+
+function sanitizeBannerList(raw) {
+    try {
+        const parsed = JSON.parse(raw || '[]');
+        if (!Array.isArray(parsed)) return '[]';
+        return JSON.stringify(parsed.slice(0, 30).map(slide => ({
+            img_url: String((slide && slide.img_url) || '').slice(0, 2000),
+            media_type: slide && slide.media_type === 'video' ? 'video' : 'image',
+            link_url: String((slide && slide.link_url) || '').slice(0, 2000),
+            content: sanitizeHtml((slide && slide.content) || '')
+        })));
+    } catch (error) {
+        return '[]';
+    }
+}
 
 async function renderLandingPage(res, page, locale) {
     const normalized = normalizeLocale(locale);
@@ -980,8 +1024,10 @@ app.get('/admin', requireAuth, (req, res) => res.redirect('/admin/site'));
 
 app.get('/admin/site', requireAuth, async (req, res, next) => {
     try {
-        const settings = await getSettings();
-        res.render('admin/site', { settings, templates: TEMPLATES, sectionCatalogue: SECTIONS, sectionBgs: SECTION_BGS });
+        const locale = normalizeLocale(req.query.locale);
+        const localeDraftCreated = await ensureSiteLocaleDraft(locale);
+        const settings = await getSettings(locale);
+        res.render('admin/site', { settings, locale, localeDraftCreated, supportedLocales: SUPPORTED_LOCALES, templates: TEMPLATES, sectionCatalogue: SECTIONS, sectionBgs: SECTION_BGS });
     } catch (err) { next(err); }
 });
 
@@ -990,33 +1036,37 @@ app.post('/admin/site/save', requireAuth, upload.fields([
 ]), async (req, res, next) => {
     try {
         const body = req.body;
-        const updates = {
-            site_name: body.site_name,
+        const locale = normalizeLocale(body.locale || req.query.locale);
+        await ensureSiteLocaleDraft(locale);
+        const sharedUpdates = {
             logo_height: clampNumber(body.logo_height, 20, 400, 80),
-           
             theme_color: body.theme_color,
+            facebook_icon: body.facebook_icon,
+            line_icon: body.line_icon,
+            banner_width_percent: clampNumber(body.banner_width_percent, 10, 100, 80),
+            banner_max_width: clampNumber(body.banner_max_width, 200, 3000, 1200),
+            google_analytics_code: body.google_analytics_code || '',
+            cookiehub_code: body.cookiehub_code || '',
+        };
+        const localizedUpdates = {
+            site_name: body.site_name,
             footer_text: body.footer_text,
             facebook_url: body.facebook_url,
             line_url: body.line_url,
-            facebook_icon: body.facebook_icon,
-            line_icon: body.line_icon,
             banner_active: body.banner_active === 'on' ? 'true' : 'false',
             banner_display_type: body.banner_display_type || 'always',
-            banner_width_percent: clampNumber(body.banner_width_percent, 10, 100, 80),
-            banner_max_width: clampNumber(body.banner_max_width, 200, 3000, 1200),
             banner_display_limit: body.banner_display_limit || '1',
             banner_version: Date.now().toString(),
-            banner_list: body.banner_list || '[]',
-            google_analytics_code: body.google_analytics_code || '',
-            cookiehub_code: body.cookiehub_code || '',
+            banner_list: sanitizeBannerList(body.banner_list),
             article_cta_title: body.article_cta_title,
             article_cta_btn_text: body.article_cta_btn_text,
             article_cta_btn_url: body.article_cta_btn_url,
         };
-        if (req.files['favicon']) updates.favicon_url = await uploadToR2(req.files['favicon'][0], 'landingpage');
-        if (req.files['logo']) updates.logo_url = await uploadToR2(req.files['logo'][0], 'landingpage');
-        await saveSettings(updates);
-        res.redirect('/admin/site');
+        if (req.files['favicon']) sharedUpdates.favicon_url = await uploadToR2(req.files['favicon'][0], 'landingpage');
+        if (req.files['logo']) sharedUpdates.logo_url = await uploadToR2(req.files['logo'][0], 'landingpage');
+        await saveSettings(sharedUpdates);
+        await saveLocalizedSiteSettings(locale, localizedUpdates);
+        res.redirect('/admin/site?locale=' + locale);
     } catch (error) { next(error); }
 });
 
@@ -1212,14 +1262,24 @@ app.post('/admin/pages/:id/save', requireAuth, upload.fields([
 
 app.get('/admin/nav', requireAuth, async (req, res, next) => {
     try {
-        res.render('admin/nav', { settings: await getSettings(), pages: await listPages() });
+        const locale = normalizeLocale(req.query.locale);
+        const localeDraftCreated = await ensureSiteLocaleDraft(locale);
+        res.render('admin/nav', {
+            settings: await getSettings(locale),
+            pages: await listPagesForLocale(locale),
+            locale,
+            localeDraftCreated,
+            supportedLocales: SUPPORTED_LOCALES
+        });
     } catch (err) { next(err); }
 });
 
 app.post('/admin/nav/save', requireAuth, async (req, res, next) => {
     try {
-        await saveSettings({ nav_items: JSON.stringify(normalizeNavItems(req.body.nav_items)) });
-        res.redirect('/admin/nav');
+        const locale = normalizeLocale(req.body.locale || req.query.locale);
+        await ensureSiteLocaleDraft(locale);
+        await saveLocalizedSiteSettings(locale, { nav_items: JSON.stringify(normalizeNavItems(req.body.nav_items)) });
+        res.redirect('/admin/nav?locale=' + locale);
     } catch (err) { next(err); }
 });
 

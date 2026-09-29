@@ -2,6 +2,7 @@ const { DEFAULT_LOCALE } = require('../i18n');
 const { LOCALIZED_SITE_SETTING_KEYS } = require('../i18n/content-config');
 
 const MIGRATION_NAME = '001_i18n_foundation';
+const SITE_SETTINGS_MIGRATION_NAME = '002_localize_site_content_settings';
 
 async function runI18nMigrations(pool) {
     const client = await pool.connect();
@@ -123,6 +124,24 @@ async function runI18nMigrations(pool) {
             );
         }
 
+        const siteSettingsApplied = await client.query(
+            'SELECT 1 FROM landing_schema_migrations WHERE name = $1',
+            [SITE_SETTINGS_MIGRATION_NAME]
+        );
+        if (siteSettingsApplied.rows.length === 0) {
+            await client.query(`
+                INSERT INTO landing_site_translations (locale, key, value)
+                SELECT $1, key, value
+                FROM LANDING_settings
+                WHERE key = ANY($2::varchar[])
+                ON CONFLICT (locale, key) DO NOTHING
+            `, [DEFAULT_LOCALE, LOCALIZED_SITE_SETTING_KEYS]);
+            await client.query(
+                'INSERT INTO landing_schema_migrations (name) VALUES ($1)',
+                [SITE_SETTINGS_MIGRATION_NAME]
+            );
+        }
+
         await client.query('COMMIT');
     } catch (error) {
         await client.query('ROLLBACK');
@@ -132,4 +151,4 @@ async function runI18nMigrations(pool) {
     }
 }
 
-module.exports = { MIGRATION_NAME, runI18nMigrations };
+module.exports = { MIGRATION_NAME, SITE_SETTINGS_MIGRATION_NAME, runI18nMigrations };

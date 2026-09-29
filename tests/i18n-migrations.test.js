@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { MIGRATION_NAME, runI18nMigrations } = require('../db/i18n-migrations');
+const { MIGRATION_NAME, SITE_SETTINGS_MIGRATION_NAME, runI18nMigrations } = require('../db/i18n-migrations');
 
 function createPool(options = {}) {
     const calls = [];
@@ -11,7 +11,8 @@ function createPool(options = {}) {
             calls.push({ sql: normalized, params });
             if (options.failOn && normalized.includes(options.failOn)) throw new Error('migration failed');
             if (normalized.startsWith('SELECT 1 FROM landing_schema_migrations')) {
-                return { rows: options.applied ? [{ exists: 1 }] : [] };
+                const applied = options.applied || (options.appliedMigrations || []).includes(params[0]);
+                return { rows: applied ? [{ exists: 1 }] : [] };
             }
             return { rows: [] };
         },
@@ -45,6 +46,17 @@ test('does not rerun an applied migration', async () => {
     assert.equal(calls.some(call => call.sql.includes('CREATE TABLE IF NOT EXISTS landing_site_translations')), false);
     assert.equal(calls.some(call => call.params && call.params[0] === MIGRATION_NAME && call.sql.startsWith('INSERT')), false);
     assert.equal(calls.at(-2).sql, 'COMMIT');
+});
+
+test('adds newly localized site keys when the foundation migration already exists', async () => {
+    const { calls, pool } = createPool({ appliedMigrations: [MIGRATION_NAME] });
+    await runI18nMigrations(pool);
+
+    assert.equal(calls.some(call => call.sql.includes('CREATE TABLE IF NOT EXISTS landing_site_translations')), false);
+    const backfill = calls.find(call => call.sql.includes('WHERE key = ANY'));
+    assert.ok(backfill);
+    assert.equal(backfill.params[1].includes('banner_active'), true);
+    assert.equal(calls.some(call => call.params && call.params[0] === SITE_SETTINGS_MIGRATION_NAME && call.sql.startsWith('INSERT')), true);
 });
 
 test('rolls back and releases the client when migration fails', async () => {

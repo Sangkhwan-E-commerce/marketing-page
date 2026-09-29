@@ -2,10 +2,25 @@
 <%- include('_sidebar', { adminPage: 'nav', tabs: [] }) %>
 <%- include('_topbar', { heading: 'Navbar & เมนู' }) %>
 
-                <form action="/admin/nav/save" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-2 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 text-sm font-semibold text-gray-600">ภาษาของเมนู</span>
+                        <% supportedLocales.forEach(function(code) { %>
+                        <a href="/admin/nav?locale=<%= code %>" class="rounded-lg px-4 py-2 text-sm font-bold transition <%= locale === code ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' %>"><%= code === 'th' ? '🇹🇭 ไทย' : '🇬🇧 English' %></a>
+                        <% }); %>
+                    </div>
+                    <span class="hidden text-xs text-gray-500 sm:block">เมนูแต่ละภาษามีข้อความ ลำดับ และลิงก์แยกกัน</span>
+                </div>
+
+                <% if (localeDraftCreated) { %>
+                <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">คัดลอกโครงสร้างเมนูภาษาไทยมาเป็นฉบับร่างภาษาอังกฤษแล้ว กรุณาแปลชื่อเมนูและตรวจสอบปลายทาง</div>
+                <% } %>
+
+                <form action="/admin/nav/save?locale=<%= locale %>" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <input type="hidden" name="locale" value="<%= locale %>">
                     <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 bg-white z-20 rounded-t-xl">
                         <div>
-                            <p class="text-sm text-gray-500">เมนูนี้แสดงบนทุกหน้าของเว็บไซต์</p>
+                            <p class="text-sm text-gray-500">กำลังแก้เมนู<%= locale === 'th' ? 'ภาษาไทย' : 'ภาษาอังกฤษ' %></p>
                         </div>
                         <div class="mt-4 sm:mt-0">
                             <button type="submit" class="inline-flex items-center rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition">
@@ -42,6 +57,7 @@
 
         // --- Navbar & เมนู (สองระดับ, แถวยุบ/กางได้) ---
         const NAV_PAGES = <%- JSON.stringify(pages.map(function (p) { return { id: p.id, title: p.title, slug: p.slug, is_home: p.is_home, is_published: p.is_published }; })) %>;
+        const NAV_PREFIX = '<%= locale === 'en' ? '/en' : '' %>';
 
         const navContainer = document.getElementById('nav-container');
         const navInput = document.getElementById('nav_items_input');
@@ -68,7 +84,7 @@
             if (item.type === 'url') return item.url ? item.url : '— ยังไม่ใส่ลิงก์ —';
             const pg = NAV_PAGES.find(p => String(p.id) === String(item.page_id));
             if (!pg) return '— ยังไม่เลือกหน้า —';
-            return (pg.is_home ? '/' : '/' + pg.slug) + (pg.is_published ? '' : ' (ยังไม่เผยแพร่)');
+            return (pg.is_home ? (NAV_PREFIX || '/') : NAV_PREFIX + '/' + pg.slug) + (pg.is_published ? '' : ' (ยังไม่เผยแพร่)');
         }
 
         function targetFields(item, path) {
