@@ -10,13 +10,18 @@ module.exports = {
     settings: [
         {
             key: 'tone', type: 'select', default: 'light',
-            label: { th: 'สีพื้นการ์ด', en: 'Card colour' },
+            label: { th: 'สีพื้นสำเร็จรูป', en: 'Preset colour' },
             options: [
                 { value: 'light', label: { th: 'ขาว', en: 'White' } },
                 { value: 'dark', label: { th: 'เข้ม', en: 'Dark' } },
                 { value: 'blue', label: { th: 'น้ำเงิน', en: 'Blue' } }
             ]
         },
+        { key: 'show_change', type: 'boolean', default: true, label: { th: 'แสดงเปอร์เซ็นต์เทียบเมื่อวาน', en: 'Show change vs yesterday' } },
+        { key: 'show_meta', type: 'boolean', default: true, label: { th: 'แสดงจำนวนบิลและยอดเฉลี่ยต่อบิล', en: 'Show bill count and average' } },
+        { key: 'show_chart', type: 'boolean', default: true, label: { th: 'แสดงกราฟรายชั่วโมง', en: 'Show the hourly chart' } },
+        { key: 'show_hours', type: 'boolean', default: true, label: { th: 'แสดงเลขชั่วโมงใต้กราฟ', en: 'Show hour labels' } },
+        { key: 'show_peak', type: 'boolean', default: true, label: { th: 'แสดงป้าย "ขายดีสุด"', en: 'Show the "Peak" label' } },
         { key: 'showPayments', type: 'boolean', default: true, label: { th: 'แสดงช่องทางชำระ (เฉพาะขนาด 2x2)', en: 'Show payment methods (2x2 only)' } }
     ],
     text: {

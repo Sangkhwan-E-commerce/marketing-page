@@ -189,3 +189,12 @@ a { color: inherit; }
 
 /* แถบบอกว่าเป็นหน้าดูตัวอย่างฉบับร่าง */
 .lp-preview-bar { position: sticky; top: 0; z-index: 50; background: #f59e0b; color: #1f2937; text-align: center; font-size: 0.85rem; font-weight: 700; padding: 8px 16px; }
+
+/* สีพื้นจากโค้ดสี (bg_color) ที่เป็นสีอ่อน — ตัวอักษรเข้ม ใช้สไตล์พื้นฐานของการ์ด (ไม่ใช้สีเน้นของ tone light) */
+.lp-tone-custom { color: var(--lp-ink); }
+
+/* ซ่อนชื่อการ์ด (show_title = false) แต่ยังให้โปรแกรมอ่านหน้าจอ/Google อ่านได้ */
+.lp-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.lp-card-head.is-untitled { justify-content: flex-end; }
+.lp-tone-custom .lp-badge { background: rgba(15, 23, 42, 0.12); color: inherit; }
+.lp-tone-custom .lp-card-arrow { background: rgba(15, 23, 42, 0.1); }

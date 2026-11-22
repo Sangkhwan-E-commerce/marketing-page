@@ -10,12 +10,16 @@ module.exports = {
     settings: [
         {
             key: 'tone', type: 'select', default: 'orange',
-            label: { th: 'สีพื้นการ์ด', en: 'Card colour' },
+            label: { th: 'สีพื้นสำเร็จรูป', en: 'Preset colour' },
             options: [
                 { value: 'orange', label: { th: 'ส้ม', en: 'Orange' } },
                 { value: 'light', label: { th: 'ขาว', en: 'White' } }
             ]
-        }
+        },
+        { key: 'show_within', type: 'boolean', default: true, label: { th: 'แสดงข้อความ "หมดอายุใน 7 วัน"', en: 'Show "expire within 7 days"' } },
+        { key: 'show_first', type: 'boolean', default: true, label: { th: 'แสดงล็อตที่ใกล้หมดอายุที่สุด (ขนาด 1x1)', en: 'Show the nearest lot (1x1)' } },
+        { key: 'show_list', type: 'boolean', default: true, label: { th: 'แสดงรายการล็อต (ขนาด 2x1)', en: 'Show the lot list (2x1)' } },
+        { key: 'show_fefo', type: 'boolean', default: true, label: { th: 'แสดงบรรทัด "ขายล็อตที่หมดอายุก่อน"', en: 'Show the "earliest lot first" line' } }
     ],
     text: {
         th: {

@@ -14,7 +14,7 @@
     background: repeating-linear-gradient(135deg, rgba(37, 99, 235, 0.18) 0 6px, rgba(37, 99, 235, 0.09) 6px 12px);
     transform-origin: bottom; transition: transform 0.8s cubic-bezier(.2, .8, .2, 1);
 }
-.w-sales-col.is-peak .w-sales-bar { background: var(--lp-primary); }
+.w-sales-col.is-peak .w-sales-bar { background: var(--w-accent, var(--lp-primary)); }
 .w-sales-hour { font-size: 0.68rem; opacity: 0.55; font-variant-numeric: tabular-nums; }
 .w-sales-tip { position: absolute; bottom: calc(var(--h) + 30px); left: 50%; transform: translateX(-50%); font-size: 0.68rem; font-weight: 700; background: var(--lp-ink); color: #fff; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .lp-card:not([data-booted]) .w-sales-bar { transform: scaleY(0.05); }
@@ -25,15 +25,15 @@
 .w-sales-legend { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.8rem; }
 .w-sales-legend li { display: inline-flex; align-items: center; gap: 6px; opacity: 0.85; }
 .w-dot { display: inline-block; width: 9px; height: 9px; border-radius: 999px; }
-.w-pay-qr { background: var(--lp-primary); }
+.w-pay-qr { background: var(--w-accent, var(--lp-primary)); }
 .w-pay-cash { background: var(--lp-green); }
 .w-pay-card { background: var(--lp-amber); }
 
 /* การ์ดสีเข้ม/น้ำเงิน */
 .lp-tone-dark .w-sales-bar, .lp-tone-blue .w-sales-bar { background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0 6px, rgba(255, 255, 255, 0.1) 6px 12px); }
-.lp-tone-dark .w-sales-col.is-peak .w-sales-bar, .lp-tone-blue .w-sales-col.is-peak .w-sales-bar { background: #fff; }
+.lp-tone-dark .w-sales-col.is-peak .w-sales-bar, .lp-tone-blue .w-sales-col.is-peak .w-sales-bar { background: var(--w-accent, #fff); }
 .lp-tone-dark .w-sales-tip, .lp-tone-blue .w-sales-tip { background: #fff; color: var(--lp-ink); }
-.lp-tone-blue .w-pay-qr { background: #fff; }
+.lp-tone-blue .w-pay-qr { background: var(--w-accent, #fff); }
 .lp-tone-dark .w-sales-change.is-up, .lp-tone-blue .w-sales-change.is-up { background: rgba(255, 255, 255, 0.18); color: inherit; }
 
 /* ขนาด 2x1 (แท็บเล็ตขึ้นไป): ตัวเลขซ้าย กราฟขวา ไม่มีป้ายชั่วโมง */
@@ -44,3 +44,7 @@
     .lp-size-2x1 .w-sales-chart { margin-top: 0; min-height: 0; height: 100%; flex: 1 1 auto; gap: 4px; }
     .lp-size-2x1 .w-sales-hour, .lp-size-2x1 .w-sales-tip { display: none; }
 }
+
+/* ไม่มีเลขชั่วโมง → แท่งกราฟชิดล่าง */
+.w-sales-chart.no-hours .w-sales-col { gap: 0; }
+.w-sales-chart.no-hours .w-sales-tip { bottom: calc(var(--h) + 8px); }

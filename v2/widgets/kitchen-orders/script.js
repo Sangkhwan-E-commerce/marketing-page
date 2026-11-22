@@ -47,5 +47,6 @@ LP.widget('kitchen-orders', function (card, ctx) {
         waitingEl.textContent = ctx.format(waiting);
     }
 
-    setInterval(tick, 4000);
+    var seconds = Math.min(20, Math.max(2, Number(root.getAttribute('data-interval')) || 4));
+    setInterval(tick, seconds * 1000);
 });

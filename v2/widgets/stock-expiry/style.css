@@ -27,3 +27,10 @@
 @media (max-width: 639.98px) {
     .lp-size-2x1 .w-exp { flex-direction: column; }
 }
+
+/* สีเน้น (accent_color) = สีตัวเลข · ซ่อนบางส่วนตามที่ตั้ง */
+.w-exp-count { color: var(--w-accent, inherit); }
+.lp-tone-light .w-exp-count, .lp-tone-light .w-exp-first { color: var(--w-accent, var(--lp-orange)); }
+.w-exp.no-first .w-exp-first { display: none; }
+.lp-size-2x1 .w-exp.no-list .w-exp-list { display: none; }
+.lp-size-2x1 .w-exp.no-list .w-exp-first { display: block; }

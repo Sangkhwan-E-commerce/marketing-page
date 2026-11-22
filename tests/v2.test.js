@@ -54,9 +54,51 @@ test('layout drops unknown widgets and falls back to supported size/source', () 
 
 test('settings keep only known keys with valid values', () => {
     const w = widgets.get('sales-today');
-    assert.deepEqual(resolveSettings(w, {}), { tone: 'light', showPayments: true });
-    assert.deepEqual(resolveSettings(w, { tone: 'purple', showPayments: 'yes', extra: 1 }), { tone: 'light', showPayments: true });
-    assert.deepEqual(resolveSettings(w, { tone: 'dark', showPayments: false }), { tone: 'dark', showPayments: false });
+    const defaults = resolveSettings(w, {});
+    assert.equal(defaults.tone, 'light');
+    assert.equal(defaults.showPayments, true);
+    const bad = resolveSettings(w, { tone: 'purple', showPayments: 'yes', extra: 1, bg_color: 'red', accent_color: '#12345', title_th: 5 });
+    assert.deepEqual(bad, defaults, 'invalid values fall back to defaults');
+    assert.ok(!('extra' in bad));
+    const good = resolveSettings(w, { tone: 'dark', showPayments: false, bg_color: '#FACC15', title_th: '  ยอดวันนี้  ', title_en: 'Today' });
+    assert.equal(good.tone, 'dark');
+    assert.equal(good.showPayments, false);
+    assert.equal(good.bg_color, '#facc15');
+    assert.equal(good.title_th, 'ยอดวันนี้');
+    assert.equal(good.title_en, 'Today');
+});
+
+test('every widget gets the shared card settings, after its own, and every setting has a default', () => {
+    for (const w of widgets.values()) {
+        const keys = w.settings.map(s => s.key);
+        assert.deepEqual(keys.slice(-6), ['title', 'show_title', 'show_doc_link', 'bg_color', 'text_color', 'accent_color'], w.id);
+        for (const s of w.settings) assert.ok('default' in s, `${w.id}.${s.key} has a default`);
+        assert.ok(!keys.some(k => /badge/.test(k)), 'the sample/live badge can never be hidden');
+    }
+    const described = describeWidgets(widgets).find(w => w.id === 'bills-total');
+    assert.ok(described.settings.find(s => s.key === 'title').localized);
+    assert.equal(described.settings.find(s => s.key === 'bg_color').group, 'common');
+    assert.equal(described.settings.find(s => s.key === 'format').group, 'widget');
+});
+
+test('card shell applies colour codes, custom titles and hides title/manual link on request', async () => {
+    const layout = [{ widget: 'stock-expiry', settings: { bg_color: '#0F172A', accent_color: '#22c55e', title_th: 'ของใกล้หมดอายุ', show_doc_link: false } },
+        { widget: 'sales-today', settings: { bg_color: '#facc15', show_title: false, text_color: '#111111' } }];
+    await withServer('/v2', { loadPublished: async () => layout }, async base => {
+        const html = await (await fetch(`${base}/v2`)).text();
+        const exp = /<article[^>]*data-widget="stock-expiry"[\s\S]*?<\/article>/.exec(html)[0];
+        assert.match(exp, /class="lp-card lp-tone-dark /, 'dark colour → light text set');
+        assert.match(exp, /style="background-color: #0f172a; --w-accent: #22c55e"/);
+        assert.match(exp, /<h2 class="lp-card-title">ของใกล้หมดอายุ<\/h2>/);
+        assert.ok(!exp.includes('lp-card-arrow'), 'manual link hidden');
+        assert.match(exp, /class="lp-badge"/, 'sample badge stays');
+        const sales = /<article[^>]*data-widget="sales-today"[\s\S]*?<\/article>/.exec(html)[0];
+        assert.match(sales, /class="lp-card lp-tone-custom /, 'light colour → dark text, no white-card accents');
+        assert.match(sales, /style="background-color: #facc15; color: #111111"/);
+        assert.match(sales, /lp-card-title lp-sr-only/, 'title hidden visually but still in the page');
+        const en = await (await fetch(`${base}/v2/en`)).text();
+        assert.match(en, /<h2 class="lp-card-title">Expiring lots<\/h2>/, 'no English title set → the card’s own English name');
+    });
 });
 
 test('widget description for the admin has no functions or local paths', () => {

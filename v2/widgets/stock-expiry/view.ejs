@@ -1,7 +1,7 @@
-<div class="w-exp">
+<div class="w-exp<%= settings.show_first ? '' : ' no-first' %><%= settings.show_list ? '' : ' no-list' %>">
     <div class="w-exp-main">
         <div class="w-exp-count"><span data-countup="<%= data.count %>"><%= fmt(data.count) %></span> <small><%= text.lots %></small></div>
-        <p class="w-exp-within"><%= text.within %></p>
+        <% if (settings.show_within) { %><p class="w-exp-within"><%= text.within %></p><% } %>
         <% if (data.lots[0]) { %>
         <p class="w-exp-first"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
             <%= data.lots[0].product %> · <%= text.days_left.replace('{n}', data.lots[0].daysLeft) %></p>
@@ -14,6 +14,6 @@
             <span class="w-exp-name"><%= l.product %><small><%= l.lot %> · <%= fmt(l.qty) %> <%= l.unit %></small></span>
         </li>
         <% }) %>
-        <li class="w-exp-fefo"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> <%= text.fefo %></li>
+        <% if (settings.show_fefo) { %><li class="w-exp-fefo"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> <%= text.fefo %></li><% } %>
     </ul>
 </div>

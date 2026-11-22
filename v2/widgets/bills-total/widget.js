@@ -15,7 +15,7 @@ module.exports = {
     settings: [
         {
             key: 'tone', type: 'select', default: 'blue',
-            label: { th: 'สีพื้นการ์ด', en: 'Card colour' },
+            label: { th: 'สีพื้นสำเร็จรูป', en: 'Preset colour' },
             options: [
                 { value: 'blue', label: { th: 'น้ำเงิน', en: 'Blue' } },
                 { value: 'dark', label: { th: 'เข้ม', en: 'Dark' } },
@@ -40,7 +40,13 @@ module.exports = {
                 { value: 'mock', label: { th: 'แสดงตัวเลขตัวอย่าง (มีป้าย "ตัวอย่าง")', en: 'Show a sample number (marked "Sample")' } },
                 { value: 'hide', label: { th: 'ซ่อนการ์ด', en: 'Hide the card' } }
             ]
-        }
+        },
+        { key: 'caption', type: 'text', localized: true, default: '', maxLength: 80,
+            label: { th: 'ข้อความใต้ตัวเลข', en: 'Line under the number' },
+            hint: { th: 'เว้นว่าง = "ทุกระบบ ตั้งแต่เปิดใช้งาน"', en: 'Empty = "every module, since launch"' } },
+        { key: 'show_caption', type: 'boolean', default: true, label: { th: 'แสดงข้อความใต้ตัวเลข', en: 'Show the line under the number' } },
+        { key: 'show_channels', type: 'boolean', default: true, label: { th: 'แสดงรายชื่อระบบ', en: 'Show the module list' } },
+        { key: 'show_updated', type: 'boolean', default: true, label: { th: 'แสดง "อัปเดตทุก 10 นาที" (ข้อมูลจริง)', en: 'Show "Updated every 10 minutes" (live)' } }
     ],
     text: {
         th: {

@@ -5,7 +5,7 @@ const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
 const ejs = require('ejs');
-const { loadWidgets, describeWidgets, SIZES } = require('./registry');
+const { loadWidgets, describeWidgets, SIZES, HEX_RE } = require('./registry');
 const { createLayoutSource, normalizeLayout, DEFAULT_LAYOUT } = require('./layout');
 const { createSiteSource, normalizeSiteSettings, FIELDS: SITE_FIELDS, DEFAULT_SITE } = require('./site-settings');
 const { buildHead, buildRobotsTxt, buildSitemap, buildLlmsTxt, buildManifest, localAsset } = require('./seo');
@@ -18,6 +18,22 @@ const DEFAULT_SITE_URL = 'https://lullapos.com';
 const TONES = ['light', 'dark', 'blue', 'green', 'orange'];
 
 const trimSlash = url => url.replace(/\/+$/, '');
+
+// สีพื้นเป็นโค้ดสี → ใช้ชุดสีตัวอักษรของ tone "dark" (ตัวอักษรขาว) หรือ "light" (ตัวอักษรเข้ม) แล้วแต่แบบไหนอ่านง่ายกว่า (WCAG contrast)
+function luminance(hex) {
+    const [r, g, b] = [1, 3, 5]
+        .map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+        .map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+const INK = luminance('#0f172a');
+function toneForBackground(hex) {
+    const l = luminance(hex);
+    const whiteText = 1.05 / (l + 0.05);
+    const inkText = (l + 0.05) / (INK + 0.05);
+    // พื้นอ่อน = 'custom' (ตัวอักษรเข้ม ไม่ใช้สีเน้นของการ์ดขาว — เช่นตัวเลขสีส้มบนพื้นส้มจะหายไป)
+    return whiteText >= inkText ? 'dark' : 'custom';
+}
 
 function bundle(files) {
     return files.filter(Boolean).map(file => `/* ${path.basename(path.dirname(file))} */\n${fs.readFileSync(file, 'utf8')}`).join('\n');
@@ -102,6 +118,13 @@ function createV2App({
         if (data && data.hidden) return null; // การ์ดขอซ่อนตัวเอง (เช่น ข้อมูลจริงยังไม่ถึงเกณฑ์)
         // การ์ดข้อมูลจริงที่ต้องถอยไปใช้ตัวอย่าง บอกผ่าน data.source → ป้ายบนการ์ดตรงกับตัวเลขที่แสดงเสมอ
         const source = data && (data.source === 'live' || data.source === 'mock') ? data.source : entry.source;
+        const s = entry.settings;
+        const hex = (v) => (HEX_RE.test(v || '') ? v : null);
+        const bg = hex(s.bg_color);
+        const ink = hex(s.text_color);
+        const accent = hex(s.accent_color);
+        // สไตล์ของกรอบการ์ด: สีพื้น/สีตัวอักษรตรงๆ + สีเน้นเป็นตัวแปร --w-accent ให้ Widget ใช้ (ว่าง = สีเดิมของ Widget)
+        const style = [bg && `background-color: ${bg}`, ink && `color: ${ink}`, accent && `--w-accent: ${accent}`].filter(Boolean).join('; ');
         const html = await ejs.renderFile(widget.viewPath, {
             data, text, locale, settings: entry.settings, size: entry.size,
             fmt: (value, options) => formatNumber(value, locale, options),
@@ -114,9 +137,12 @@ function createV2App({
             source,
             mobile: entry.mobile,
             header: widget.header !== false,
-            tone: TONES.includes(entry.settings.tone) ? entry.settings.tone : (widget.tone || 'light'),
-            name: text.name,
-            docUrl: widget.docPath ? `${appUrl}${widget.docPath}` : null,
+            showTitle: s.show_title !== false,
+            tone: bg ? toneForBackground(bg) : (TONES.includes(s.tone) ? s.tone : (widget.tone || 'light')),
+            style,
+            // ชื่อที่ตั้งเองของภาษานั้น → ชื่อเดิมของการ์ดในภาษานั้น
+            name: s[`title_${locale}`] || text.name,
+            docUrl: widget.docPath && s.show_doc_link !== false ? `${appUrl}${widget.docPath}` : null,
             html
         };
     }
@@ -187,4 +213,4 @@ function createV2App({
     return app;
 }
 
-module.exports = { createV2App };
+module.exports = { createV2App, toneForBackground };

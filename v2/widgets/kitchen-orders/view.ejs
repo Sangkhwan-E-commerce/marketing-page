@@ -1,6 +1,6 @@
-<div class="w-kds" data-animate="<%= data.animate ? '1' : '0' %>"
+<div class="w-kds<%= settings.show_time ? '' : ' no-time' %>" data-animate="<%= data.animate ? '1' : '0' %>" data-interval="<%= data.interval %>"
      data-labels="<%= JSON.stringify({ status: text.status, minutes: text.minutes }) %>">
-    <p class="w-kds-summary"><b class="w-kds-waiting"><%= fmt(data.waiting) %></b> <%= text.waiting %></p>
+    <p class="w-kds-summary<%= settings.show_summary ? '' : ' lp-sr-only' %>"><b class="w-kds-waiting"><%= fmt(data.waiting) %></b> <%= text.waiting %></p>
     <ol class="w-kds-list">
         <% data.tickets.forEach(function (t) { %>
         <li class="w-kds-ticket is-<%= t.status %>">

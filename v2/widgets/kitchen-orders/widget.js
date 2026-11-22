@@ -8,7 +8,10 @@ module.exports = {
     docPath: '/doc/restaurant/kitchen-display',
     tone: 'dark',
     settings: [
-        { key: 'animate', type: 'boolean', default: true, label: { th: 'จำลองออเดอร์ใหม่เข้ามาเรื่อยๆ', en: 'Simulate new orders arriving' } }
+        { key: 'animate', type: 'boolean', default: true, label: { th: 'จำลองออเดอร์ใหม่เข้ามาเรื่อยๆ', en: 'Simulate new orders arriving' } },
+        { key: 'interval', type: 'number', default: 4, min: 2, max: 20, label: { th: 'ออเดอร์ใหม่เข้าทุกกี่วินาที', en: 'Seconds between new orders' } },
+        { key: 'show_summary', type: 'boolean', default: true, label: { th: 'แสดงจำนวนออเดอร์ที่รอทำ', en: 'Show the number waiting' } },
+        { key: 'show_time', type: 'boolean', default: true, label: { th: 'แสดงเวลารอของแต่ละออเดอร์', en: 'Show waiting time per order' } }
     ],
     text: {
         th: {
@@ -38,7 +41,8 @@ module.exports = {
         return {
             tickets,
             waiting: tickets.filter(t => t.status !== 'ready').length,
-            animate: settings.animate
+            animate: settings.animate,
+            interval: settings.interval
         };
     }
 };

@@ -31,10 +31,10 @@
         <section class="lp-grid" aria-label="Lullapos">
             <% cards.forEach(function (card) { %>
             <article class="lp-card lp-tone-<%= card.tone %> lp-size-<%= card.size %><%= card.mobile ? '' : ' lp-hide-mobile' %>"
-                     data-widget="<%= card.id %>" data-key="<%= card.key %>" data-size="<%= card.size %>">
+                     data-widget="<%= card.id %>" data-key="<%= card.key %>" data-size="<%= card.size %>"<% if (card.style) { %> style="<%= card.style %>"<% } %>>
                 <% if (card.header) { %>
-                <header class="lp-card-head">
-                    <h2 class="lp-card-title"><%= card.name %></h2>
+                <header class="lp-card-head<%= card.showTitle ? "" : " is-untitled" %>">
+                    <h2 class="lp-card-title<%= card.showTitle ? "" : " lp-sr-only" %>"><%= card.name %></h2>
                     <div class="lp-card-tools">
                         <% if (card.source === 'live') { %>
                             <span class="lp-badge lp-badge-live"><i class="bi bi-broadcast" aria-hidden="true"></i> <%= t('badge.live') %></span>

@@ -10,7 +10,7 @@
     border-left: 4px solid transparent;
     transition: background 0.4s ease, border-color 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
 }
-.w-kds-ticket.is-new { border-left-color: var(--lp-amber); background: rgba(245, 158, 11, 0.14); }
+.w-kds-ticket.is-new { border-left-color: var(--w-accent, var(--lp-amber)); background: rgba(245, 158, 11, 0.14); }
 .w-kds-ticket.is-cooking { border-left-color: #60a5fa; }
 .w-kds-ticket.is-ready { border-left-color: var(--lp-green); opacity: 0.7; }
 .w-kds-ticket.is-entering { transform: translateY(-12px); opacity: 0; }
@@ -19,7 +19,7 @@
 .w-kds-no { font-weight: 700; font-variant-numeric: tabular-nums; }
 .w-kds-table { opacity: 0.7; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .w-kds-status { margin-left: auto; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); white-space: nowrap; }
-.is-new .w-kds-status { background: var(--lp-amber); color: #1f2937; }
+.is-new .w-kds-status { background: var(--w-accent, var(--lp-amber)); color: #1f2937; }
 .is-ready .w-kds-status { background: var(--lp-green); color: #fff; }
 .w-kds-items { list-style: none; margin: 6px 0 0; padding: 0; font-size: 0.82rem; line-height: 1.45; }
 .w-kds-items li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -29,3 +29,5 @@
 .lp-tone-light .w-kds-status { background: #e2e8f0; }
 
 @media (min-width: 640px) { .lp-size-2x2 .w-kds-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; } }
+
+.w-kds.no-time .w-kds-time { display: none; }
