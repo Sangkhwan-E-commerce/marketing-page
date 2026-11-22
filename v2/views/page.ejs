@@ -37,7 +37,7 @@
                     <h2 class="lp-card-title<%= card.showTitle ? "" : " lp-sr-only" %>"><%= card.name %></h2>
                     <div class="lp-card-tools">
                         <% if (card.source === 'live') { %>
-                            <span class="lp-badge lp-badge-live"><i class="bi bi-broadcast" aria-hidden="true"></i> <%= t('badge.live') %></span>
+                            <span class="lp-badge lp-badge-live" title="<%= t('badge.live_title') %>"><i class="bi bi-broadcast" aria-hidden="true"></i> <%= t('badge.live') %></span>
                         <% } else { %>
                             <span class="lp-badge" title="<%= t('badge.mock_title') %>"><%= t('badge.mock') %></span>
                         <% } %>

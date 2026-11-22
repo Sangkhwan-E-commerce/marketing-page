@@ -52,7 +52,7 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
         { key: 'chart_position', type: 'select', default: 'auto', label: { th: 'ตำแหน่งกราฟ', en: 'Chart position' },
             options: [opt('auto', 'อัตโนมัติตามขนาดการ์ด', 'Automatic for the card size'), opt('right', 'กราฟอยู่ขวา', 'Chart on the right'), opt('left', 'กราฟอยู่ซ้าย', 'Chart on the left'),
                 opt('top', 'กราฟอยู่บน', 'Chart on top'), opt('bottom', 'กราฟอยู่ล่าง', 'Chart below'), opt('none', 'แสดงเฉพาะตัวเลข', 'Number only'), opt('only', 'แสดงเฉพาะกราฟ', 'Chart only')],
-            hint: { th: 'อัตโนมัติ: 1x1 = เฉพาะตัวเลข · 2x2/1x2 = กราฟล่าง · การ์ดกว้าง = กราฟขวา', en: 'Automatic: 1x1 = number only · 2x2/1x2 = below · wide cards = right' } },
+            hint: { th: 'อัตโนมัติ: 1x1 = เฉพาะตัวเลข · 2x2/1x2 = กราฟล่าง · การ์ดกว้าง = กราฟขวา · การ์ด 1x1 พื้นที่น้อย แนะนำ "เฉพาะตัวเลข" หรือ "เฉพาะกราฟ"', en: 'Automatic: 1x1 = number only · 2x2/1x2 = below · wide cards = right · 1x1 is small: "Number only" or "Chart only" work best' } },
         { key: 'show_axis', type: 'boolean', default: true, label: { th: 'แสดงช่วงวันที่ใต้กราฟ', en: 'Show dates under the chart' } },
         { key: 'min_live', type: 'number', default: 1, min: 1, max: 100000000000, label: metric.minLabel },
         { key: 'fallback', type: 'select', default: 'mock', label: { th: 'ถ้ายังไม่ถึงเกณฑ์หรือดึงข้อมูลไม่ได้', en: 'Below the minimum or no data' },

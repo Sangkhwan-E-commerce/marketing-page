@@ -1,5 +1,6 @@
 .w-bills { display: flex; height: 100%; min-height: 0; gap: 16px; }
-.w-bills-body { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+.w-bills-body { display: flex; flex-direction: column; min-width: 0; }
+.w-bills-body > :first-child { margin-top: auto; } /* ชิดล่างเมื่อที่พอ — ดูหมายเหตุ .lp-card-body ใน v2.css */
 .w-bills-num { font-size: clamp(2.2rem, 4.6vw, 3.2rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--w-accent, inherit); white-space: nowrap; }
 .w-bills-num small { font-size: 1rem; font-weight: 700; opacity: 0.8; letter-spacing: 0; }
 .w-bills-caption { margin: 8px 0 0; font-size: 0.85rem; opacity: 0.85; }
@@ -26,7 +27,8 @@
 .w-bills.pos-top { flex-direction: column-reverse; }
 .w-bills.pos-right .w-bills-body, .w-bills.pos-left .w-bills-body { flex: 0 0 auto; max-width: 50%; }
 .w-bills.pos-bottom .w-bills-body, .w-bills.pos-top .w-bills-body { flex: 0 0 auto; }
-.w-bills.pos-none { flex-direction: column; justify-content: flex-end; }
+.w-bills.pos-none { flex-direction: column; }
+.w-bills.pos-none .w-bills-body, .w-bills.pos-only .w-bills-chart { flex: 1 1 auto; }
 .w-bills.pos-only .w-bills-body { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
 .w-bills.pos-only .w-bills-chart { flex: 1 1 auto; }
 
@@ -45,3 +47,17 @@
 }
 .lp-tone-light .w-bills-chart { color: var(--w-accent, var(--lp-primary)); }
 .w-bills-cur { font-size: 0.6em; margin-right: 2px; opacity: 0.75; }
+
+/* การ์ด 1x1 (สูง 1 แถว แคบ): ตัวเลขเล็กลง และเหลือ ตัวเลข + ข้อความใต้ตัวเลข + ช่วงเวลา */
+@media (min-width: 640px) {
+    .lp-size-1x1 .w-bills-num { font-size: clamp(2rem, 2.8vw, 2.6rem); }
+    .lp-size-1x1 .w-bills-channels, .lp-size-1x1 .w-bills-updated { display: none; }
+}
+
+/* 1x1 ที่เลือกให้มีกราฟ: พื้นที่น้อยมาก — ตัวเลขเล็ก ระยะชิด กราฟเป็นแถบเตี้ย ไม่มีแกนวันที่ */
+@media (min-width: 640px) {
+    .lp-size-1x1 .w-bills:not(.pos-none):not(.pos-only) { gap: 6px; }
+    .lp-size-1x1 .w-bills:not(.pos-none):not(.pos-only) .w-bills-num { font-size: 1.9rem; }
+    .lp-size-1x1 .w-bills:not(.pos-none):not(.pos-only) .w-bills-axis { display: none; }
+    .lp-size-1x1 .w-bills-plot { min-height: 28px; }
+}

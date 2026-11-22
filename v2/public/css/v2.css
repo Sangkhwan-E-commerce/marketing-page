@@ -123,9 +123,11 @@ a { color: inherit; }
 
 /* ---------- กรอบการ์ดกลาง ---------- */
 .lp-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.lp-card-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.35; }
+.lp-card-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.35; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .lp-card-tools { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.lp-card-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+/* ⚠️ ห้ามจัดเนื้อหาชิดล่างด้วย justify-content: flex-end — ถ้าเนื้อหาสูงกว่าการ์ด จะล้นขึ้นไปทับหัวการ์ด (เจอจริง 2026-11-22)
+   ใช้ margin-top: auto ที่ลูกตัวแรกแทน: ที่พอ = ชิดล่าง · ที่ไม่พอ = เริ่มจากบนแล้วถูกตัดด้านล่าง */
+.lp-card-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 
 .lp-badge {
     display: inline-flex;
