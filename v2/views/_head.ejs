@@ -1,0 +1,36 @@
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= head.title %></title>
+    <meta name="description" content="<%= head.description %>">
+    <meta name="robots" content="<%= head.robots %>">
+    <link rel="canonical" href="<%= head.canonical %>">
+    <% head.alternates.forEach(function (a) { %><link rel="alternate" hreflang="<%= a.hreflang %>" href="<%= a.href %>">
+    <% }) %>
+    <meta name="theme-color" content="<%= head.themeColor %>">
+    <link rel="icon" href="<%= head.icons.favicon %>" type="<%= head.icons.faviconType %>">
+    <% if (head.icons.png32) { %><link rel="icon" href="<%= head.icons.png32 %>" sizes="32x32" type="image/png"><% } %>
+    <link rel="apple-touch-icon" href="<%= head.icons.apple %>">
+    <link rel="manifest" href="<%= head.manifest %>">
+
+    <meta property="og:type" content="<%= head.og.type %>">
+    <meta property="og:site_name" content="<%= head.og.site_name %>">
+    <meta property="og:title" content="<%= head.og.title %>">
+    <meta property="og:description" content="<%= head.og.description %>">
+    <meta property="og:url" content="<%= head.og.url %>">
+    <meta property="og:image" content="<%= head.og.image %>">
+    <meta property="og:image:type" content="<%= head.og.image_type %>">
+    <meta property="og:image:width" content="<%= head.og.image_width %>">
+    <meta property="og:image:height" content="<%= head.og.image_height %>">
+    <meta property="og:image:alt" content="<%= head.og.image_alt %>">
+    <meta property="og:locale" content="<%= head.og.locale %>">
+    <meta property="og:locale:alternate" content="<%= head.og.locale_alternate %>">
+    <meta name="twitter:card" content="<%= head.twitter.card %>">
+    <% if (head.twitter.site) { %><meta name="twitter:site" content="<%= head.twitter.site %>"><% } %>
+    <meta name="twitter:title" content="<%= head.og.title %>">
+    <meta name="twitter:description" content="<%= head.og.description %>">
+    <meta name="twitter:image" content="<%= head.og.image %>">
+    <meta name="twitter:image:alt" content="<%= head.og.image_alt %>">
+    <% if (head.verification.google) { %><meta name="google-site-verification" content="<%= head.verification.google %>"><% } %>
+    <% if (head.verification.bing) { %><meta name="msvalidate.01" content="<%= head.verification.bing %>"><% } %>
+
+    <script type="application/ld+json"><%- head.jsonLd %></script>

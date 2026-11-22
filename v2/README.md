@@ -41,8 +41,32 @@
 - ข้อมูลจริงจาก Lullapos (ภายหลัง): บัญชีฐานข้อมูลอ่านอย่างเดียว · ยอดรวมทั้งระบบเท่านั้น ห้ามระบุร้าน · เก็บผลชั่วคราว · พังแล้วกลับไปใช้ข้อมูลตัวอย่าง
 - **ย้าย `/v2` มาเป็นหน้าแรก `/` เฉพาะเมื่อเจ้าของบอกว่า v2 เสร็จและพร้อมย้าย** — ขั้นตอน: ต่อแอปที่ `/` แทน `/v2` · ถอดเส้นทาง/หลังบ้านเก่า · 301 จาก `/v2/*` และ URL หน้า/บทความเดิม · เปิด sitemap/robots · ลบตาราง `landing_*` ทีหลัง (สำรองก่อน เจ้าของรันเอง)
 
+## ตั้งค่าเว็บไซต์ + SEO / AI SEO
+
+`site-settings.js` (ช่องตั้งค่า `FIELDS` + ค่าตั้งต้น `DEFAULT_SITE`) → `seo.js` สร้างของทั้งหมดด้านล่าง · หน้า Admin อ่านช่องตั้งค่าจาก `/api/site-settings.json`
+
+| กลุ่ม | ช่อง |
+|---|---|
+| brand | โลโก้ ความสูงโลโก้ favicon (SVG/PNG ≥512) apple-touch-icon (180 พื้นทึบ) สีธีม |
+| texts (th/en) | ชื่อเว็บ title description ย่อหน้า "Lullapos คืออะไร" ข้อความแทนรูปแชร์ — ภาษาอังกฤษว่าง = ใช้ไทย |
+| share | รูปแชร์ 1200×630 แยกไทย/อังกฤษ |
+| social / contact | LINE Facebook YouTube TikTok Instagram X · อีเมล โทร |
+| verification | Google Search Console · Bing Webmaster |
+| robots | `allow_ai` ให้บอท AI อ่านเว็บได้ (ค่าตั้งต้น = ได้) |
+
+สิ่งที่หน้าเว็บส่งออก:
+
+- `<head>`: title, description, robots, canonical, hreflang th/en/x-default, theme-color, favicon/apple-touch/manifest, OpenGraph (รูป ขนาด alt locale), Twitter card, meta ยืนยันเจ้าของเว็บ (เฉพาะที่ตั้งไว้)
+- JSON-LD: `Organization` (โลโก้ sameAs ช่องทางติดต่อ) · `WebSite` · `WebPage` · `SoftwareApplication` (featureList จากทะเบียน Widget) — **ห้ามเพิ่มคะแนนรีวิว ราคา หรือตัวเลขที่ไม่จริง**
+- `/robots.txt` (ที่ /v2 = Disallow ทั้งหมด), `/sitemap.xml` (มี hreflang), `/llms.txt` (สรุปเว็บให้ AI ตาม llmstxt.org), `/site.webmanifest`, `/favicon.ico` (301 ไปรูปจริง)
+- ย่อหน้า "Lullapos คืออะไร" เป็นข้อความจริงในหน้า ไม่ใช่รูป — ช่วยให้ Google และ AI สรุปถูก
+- URL ใน canonical/og/sitemap ใช้ `SITE_URL` (ค่าตั้งต้น `https://lullapos.com`) + base
+
+ไฟล์ใน `public/brand/`: `logo.png` (โลโก้จริงจาก pos-free-app) · `icon.svg` + PNG 32/48/192/512 + `apple-touch-icon.png` (ไอคอนตัว L ชั่วคราว จนกว่าจะอัปโหลด favicon จริงในหน้า Admin) · `og-th.png` / `og-en.png`
+
 ## ยังไม่ได้ทำ
 
-- หน้า Admin "Marketing web" ใน pos-free-app + ตาราง `lp_*` (ตอนนี้ใช้ `DEFAULT_LAYOUT`)
+- หน้า Admin "Marketing web" ใน pos-free-app + ตาราง `lp_*` (ตอนนี้ใช้ `DEFAULT_LAYOUT` และ `DEFAULT_SITE`) — ส่ง `loadPublished` / `loadSiteSettings` เข้า `createV2App`
+- favicon สำรองจาก `site_settings.favicon_url` ของ pos-free-app เมื่อต่อฐานข้อมูลแล้ว
 - หน้าดูตัวอย่างฉบับร่างสำหรับฝังในหน้า Admin
 - Widget ข้อมูลจริงตัวแรก

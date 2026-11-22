@@ -1,12 +1,7 @@
 <!DOCTYPE html>
-<html lang="<%= locale %>">
+<html lang="<%= head.lang %>">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><%= t('meta.title') %></title>
-    <meta name="description" content="<%= t('meta.description') %>">
-    <% if (noindex) { %><meta name="robots" content="noindex, nofollow"><% } %>
-    <link rel="alternate" hreflang="<%= altLocale %>" href="<%= altUrl %>">
+<%- include('_head', { head: head }) %>
     <link rel="stylesheet" href="<%= base %>/assets/vendor/fonts/anuphan/font.css">
     <link rel="stylesheet" href="<%= base %>/assets/vendor/bootstrap-icons/1.11.3/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<%= base %>/assets/css/v2.css">
@@ -14,7 +9,7 @@
 </head>
 <body class="lp-body">
     <header class="lp-topbar">
-        <a class="lp-brand" href="<%= selfUrl %>">Lullapos</a>
+        <a class="lp-brand" href="<%= selfUrl %>"><img src="<%= logo %>" alt="<%= texts.site_name %>" style="height: <%= site.brand.logo_height %>px"></a>
         <nav class="lp-topbar-actions">
             <a class="lp-link" href="<%= altUrl %>" hreflang="<%= altLocale %>"><i class="bi bi-translate" aria-hidden="true"></i> <%= t('nav.lang') %></a>
             <a class="lp-btn lp-btn-dark" href="<%= appUrl %>"><%= t('nav.cta') %></a>
@@ -63,6 +58,8 @@
             <p class="lp-note"><%= t('footer.note') %></p>
         </section>
     </main>
+
+<%- include('_footer') %>
 
     <script src="<%= base %>/assets/js/v2.js"></script>
     <script src="<%= base %>/assets/widgets.js"></script>

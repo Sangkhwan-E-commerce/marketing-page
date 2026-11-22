@@ -170,3 +170,19 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ---------- โลโก้ + ท้ายหน้า ---------- */
+.lp-brand img { display: block; width: auto; max-width: 180px; object-fit: contain; }
+.lp-footer { max-width: 1240px; margin: 0 auto; padding: 8px 16px 40px; }
+.lp-about { background: var(--lp-card); border-radius: var(--lp-radius); padding: var(--lp-pad); }
+.lp-about h2 { margin: 0 0 8px; font-size: 1.1rem; }
+.lp-about p { margin: 0; color: var(--lp-muted); max-width: 860px; }
+.lp-footer-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; margin-top: 20px; }
+.lp-footer-logo { height: 28px; width: auto; }
+.lp-social { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
+.lp-social a { width: 38px; height: 38px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: var(--lp-card); text-decoration: none; font-size: 1.05rem; }
+.lp-social a:hover { color: var(--lp-primary); }
+.lp-footer-meta { justify-content: flex-start; color: var(--lp-muted); font-size: 0.85rem; margin-top: 14px; }
+.lp-footer-meta a { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.lp-footer-meta a:hover { color: var(--lp-ink); }
+.lp-social a:focus-visible, .lp-footer-meta a:focus-visible, .lp-brand:focus-visible { outline: 3px solid var(--lp-primary); outline-offset: 2px; }

@@ -1,8 +1,6 @@
 // 🌟 ข้อความของโครงหน้า v2 (แถบบน หัวข้อ ป้าย ปุ่ม) — ข้อความในการ์ดอยู่ใน widget.js ของแต่ละ Widget
 const MESSAGES = {
     th: {
-        'meta.title': 'Lullapos — ระบบร้านค้าครบในที่เดียว',
-        'meta.description': 'ดูหน้าจอจริงของ Lullapos ในรูปแบบแผงการ์ด: ขายหน้าร้าน ครัว สต็อก สมาชิก บัญชี และอีกหลายระบบ',
         'nav.lang': 'English',
         'nav.cta': 'เริ่มใช้งาน',
         'hero.eyebrow': 'Lullapos',
@@ -16,11 +14,11 @@ const MESSAGES = {
         'footer.cta_title': 'พร้อมลองกับร้านของคุณหรือยัง',
         'footer.cta': 'เริ่มใช้งาน Lullapos',
         'footer.note': 'ตัวเลขในการ์ดที่มีป้าย "ตัวอย่าง" เป็นข้อมูลสมมุติของร้านตัวอย่าง',
+        'footer.manual': 'คู่มือการใช้งาน',
+        'about.title': '{name} คืออะไร',
         'empty': 'ยังไม่มีการ์ดที่เปิดแสดง'
     },
     en: {
-        'meta.title': 'Lullapos — one system for your whole store',
-        'meta.description': 'See real Lullapos screens as a dashboard of cards: POS, kitchen, stock, members, accounting and more.',
         'nav.lang': 'ภาษาไทย',
         'nav.cta': 'Get started',
         'hero.eyebrow': 'Lullapos',
@@ -34,6 +32,8 @@ const MESSAGES = {
         'footer.cta_title': 'Ready to try it with your store?',
         'footer.cta': 'Start using Lullapos',
         'footer.note': 'Numbers on cards marked "Sample" come from a made-up sample store.',
+        'footer.manual': 'User manual',
+        'about.title': 'What is {name}?',
         'empty': 'No cards are switched on yet'
     }
 };

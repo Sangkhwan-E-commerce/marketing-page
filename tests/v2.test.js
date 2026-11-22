@@ -78,7 +78,8 @@ test('/v2 renders Thai and English pages, noindex, sample badges, no external as
         assert.match(html, /href="\/v2\/assets\/css\/v2\.css"/);
         assert.match(html, /href="\/v2\/en"/);
         // ห้ามโหลดสคริปต์/สไตล์จากเว็บภายนอก
-        assert.ok(!/<(script|link)[^>]+(src|href)="https?:\/\//.test(html.replace(/<link rel="alternate"[^>]*>/g, '')));
+        // (ลิงก์ canonical/hreflang เป็น URL เต็มได้ — ไม่ใช่การโหลดไฟล์)
+        assert.ok(!/<(script|link)[^>]+(src|href)="https?:\/\//.test(html.replace(/<link rel="(alternate|canonical)"[^>]*>/g, '')));
 
         const en = await (await fetch(`${base}/v2/en`)).text();
         assert.match(en, /<html lang="en">/);
@@ -127,5 +128,125 @@ test('published layout is used, and a failing loader falls back to the default l
     await withServer('/v2', { loadPublished: async () => { throw new Error('db down'); } }, async base => {
         const html = await (await fetch(`${base}/v2`)).text();
         assert.match(html, /data-widget="sales-today"/);
+    });
+});
+
+// ---------- ตั้งค่าเว็บไซต์ + SEO ----------
+const { normalizeSiteSettings, DEFAULT_SITE } = require('../v2/site-settings');
+
+test('site settings fall back field by field and reject bad values', () => {
+    const s = normalizeSiteSettings({
+        brand: { logo_url: 'javascript:alert(1)', logo_height: 999, theme_color: 'red', favicon_url: 'https://cdn.example.com/f.png' },
+        texts: { th: { title: '  ชื่อใหม่  ', description: '' }, en: { title: '' } },
+        social: { facebook: 'https://facebook.com/lullapos', line: 'not a url' },
+        contact: { email: 'bad-email' },
+        robots: { allow_ai: 'no' }
+    });
+    assert.equal(s.brand.logo_url, DEFAULT_SITE.brand.logo_url);
+    assert.equal(s.brand.logo_height, 80);
+    assert.equal(s.brand.theme_color, DEFAULT_SITE.brand.theme_color);
+    assert.equal(s.brand.favicon_url, 'https://cdn.example.com/f.png');
+    assert.equal(s.texts.th.title, 'ชื่อใหม่');
+    assert.equal(s.texts.th.description, DEFAULT_SITE.texts.th.description);
+    assert.equal(s.texts.en.title, 'ชื่อใหม่', 'empty English falls back to Thai');
+    assert.equal(s.texts.en.description, DEFAULT_SITE.texts.en.description);
+    assert.equal(s.social.facebook, 'https://facebook.com/lullapos');
+    assert.equal(s.social.line, '');
+    assert.equal(s.contact.email, '');
+    assert.equal(s.robots.allow_ai, true);
+});
+
+function metaContent(html, attr, name) {
+    const m = new RegExp(`<meta ${attr}="${name.replace(/[.:]/g, '\\$&')}" content="([^"]*)"`).exec(html);
+    return m ? m[1] : null;
+}
+const jsonLd = html => JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)[1]);
+
+test('head has canonical, hreflang, OpenGraph, Twitter, icons and valid JSON-LD with absolute URLs', async () => {
+    await withServer('/', { siteUrl: 'https://lullapos.com' }, async base => {
+        const html = await (await fetch(`${base}/en`)).text();
+        assert.match(html, /<link rel="canonical" href="https:\/\/lullapos\.com\/en">/);
+        assert.match(html, /hreflang="th" href="https:\/\/lullapos\.com\/"/);
+        assert.match(html, /hreflang="x-default" href="https:\/\/lullapos\.com\/"/);
+        assert.equal(metaContent(html, 'property', 'og:url'), 'https://lullapos.com/en');
+        assert.equal(metaContent(html, 'property', 'og:image'), 'https://lullapos.com/assets/brand/og-en.png');
+        assert.equal(metaContent(html, 'property', 'og:locale'), 'en_US');
+        assert.equal(metaContent(html, 'name', 'twitter:card'), 'summary_large_image');
+        assert.match(metaContent(html, 'name', 'robots'), /^index, follow/);
+        assert.match(html, /<link rel="icon" href="\/assets\/brand\/icon\.svg" type="image\/svg\+xml">/);
+        assert.match(html, /<link rel="manifest" href="\/site\.webmanifest">/);
+        assert.ok(!html.includes('google-site-verification'), 'no empty verification tags');
+
+        const ld = jsonLd(html);
+        assert.deepEqual(ld['@graph'].map(n => n['@type']), ['Organization', 'WebSite', 'WebPage', 'SoftwareApplication']);
+        const software = ld['@graph'][3];
+        assert.ok(software.featureList.length >= 3);
+        assert.ok(!('aggregateRating' in software) && !('offers' in software), 'no invented ratings or prices');
+        assert.equal(ld['@graph'][0].logo.url, 'https://lullapos.com/assets/brand/logo.png');
+        assert.match(html, /What is Lullapos\?/);
+
+        for (const asset of ['/assets/brand/logo.png', '/assets/brand/icon.svg', '/assets/brand/icon-32.png', '/assets/brand/apple-touch-icon.png', '/assets/brand/og-th.png', '/assets/brand/og-en.png']) {
+            assert.equal((await fetch(base + asset)).status, 200, asset);
+        }
+    });
+});
+
+test('admin settings flow into the page: verification, socials, custom favicon, share image', async () => {
+    const loadSiteSettings = async () => ({
+        brand: { favicon_url: 'https://img.example.com/fav.png' },
+        share: { og_image_th: 'https://img.example.com/og.jpg' },
+        social: { x: 'https://x.com/lullapos', line: 'https://line.me/R/ti/p/@lullapos' },
+        verification: { google: 'abc123' }
+    });
+    await withServer('/v2', { siteUrl: 'https://lullapos.com', loadSiteSettings }, async base => {
+        const html = await (await fetch(`${base}/v2`)).text();
+        assert.equal(metaContent(html, 'name', 'google-site-verification'), 'abc123');
+        assert.equal(metaContent(html, 'name', 'twitter:site'), '@lullapos');
+        assert.equal(metaContent(html, 'property', 'og:image'), 'https://img.example.com/og.jpg');
+        assert.equal(metaContent(html, 'property', 'og:image:type'), 'image/jpeg');
+        assert.match(html, /<link rel="icon" href="https:\/\/img\.example\.com\/fav\.png" type="image\/png">/);
+        assert.ok(!html.includes('icon-32.png'), 'default 32px icon dropped when a custom favicon is set');
+        assert.match(html, /aria-label="LINE"/);
+        assert.equal(metaContent(html, 'name', 'robots'), 'noindex, nofollow');
+        assert.match(html, /<link rel="canonical" href="https:\/\/lullapos\.com\/v2">/);
+        assert.deepEqual(jsonLd(html)['@graph'][0].sameAs, ['https://line.me/R/ti/p/@lullapos', 'https://x.com/lullapos']);
+    });
+});
+
+test('robots.txt, sitemap.xml, llms.txt, manifest and favicon.ico', async () => {
+    await withServer('/', { siteUrl: 'https://lullapos.com' }, async base => {
+        const robots = await (await fetch(`${base}/robots.txt`)).text();
+        assert.match(robots, /User-agent: \*\nAllow: \//);
+        assert.match(robots, /Sitemap: https:\/\/lullapos\.com\/sitemap\.xml/);
+        assert.ok(!robots.includes('GPTBot'));
+
+        const sitemap = await (await fetch(`${base}/sitemap.xml`)).text();
+        assert.match(sitemap, /<loc>https:\/\/lullapos\.com\/<\/loc>/);
+        assert.match(sitemap, /<loc>https:\/\/lullapos\.com\/en<\/loc>/);
+        assert.match(sitemap, /hreflang="x-default"/);
+
+        const llms = await (await fetch(`${base}/llms.txt`)).text();
+        assert.match(llms, /^# Lullapos\n\n> /);
+        assert.match(llms, /## Features\n- \[/);
+        assert.match(llms, /\/doc\/stock\/lots-expiry/);
+
+        const manifest = await (await fetch(`${base}/site.webmanifest`)).json();
+        assert.equal(manifest.start_url, '/');
+        assert.equal(manifest.icons[0].src, '/assets/brand/icon-192.png');
+
+        const ico = await fetch(`${base}/favicon.ico`, { redirect: 'manual' });
+        assert.equal(ico.status, 301);
+        assert.equal(ico.headers.get('location'), '/assets/brand/icon-48.png');
+    });
+    await withServer('/', { loadSiteSettings: async () => ({ robots: { allow_ai: false } }) }, async base => {
+        const robots = await (await fetch(`${base}/robots.txt`)).text();
+        assert.match(robots, /User-agent: GPTBot\nDisallow: \//);
+        assert.match(robots, /User-agent: ClaudeBot\nDisallow: \//);
+    });
+    await withServer('/v2', {}, async base => {
+        assert.equal(await (await fetch(`${base}/v2/robots.txt`)).text(), 'User-agent: *\nDisallow: /\n');
+        const api = await (await fetch(`${base}/v2/api/site-settings.json`)).json();
+        assert.ok(api.fields.brand.some(f => f.key === 'favicon_url'));
+        assert.equal(api.defaults.robots.allow_ai, true);
     });
 });

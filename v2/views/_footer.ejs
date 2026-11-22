@@ -1,0 +1,27 @@
+<%
+    var SOCIAL_ICONS = { line: 'bi-line', facebook: 'bi-facebook', youtube: 'bi-youtube', tiktok: 'bi-tiktok', instagram: 'bi-instagram', x: 'bi-twitter-x' };
+    var SOCIAL_NAMES = { line: 'LINE', facebook: 'Facebook', youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram', x: 'X' };
+    var socials = Object.keys(SOCIAL_ICONS).filter(function (k) { return site.social[k]; });
+%>
+    <footer class="lp-footer">
+        <section class="lp-about" aria-labelledby="lp-about-title">
+            <h2 id="lp-about-title"><%= t('about.title').replace('{name}', texts.site_name) %></h2>
+            <p><%= texts.about %></p>
+        </section>
+        <div class="lp-footer-row">
+            <img src="<%= logo %>" alt="<%= texts.site_name %>" class="lp-footer-logo" loading="lazy">
+            <% if (socials.length) { %>
+            <ul class="lp-social">
+                <% socials.forEach(function (k) { %>
+                <li><a href="<%= site.social[k] %>" target="_blank" rel="noopener me" aria-label="<%= SOCIAL_NAMES[k] %>"><i class="bi <%= SOCIAL_ICONS[k] %>" aria-hidden="true"></i></a></li>
+                <% }) %>
+            </ul>
+            <% } %>
+        </div>
+        <div class="lp-footer-row lp-footer-meta">
+            <span>© <%= year %> <%= texts.site_name %></span>
+            <% if (site.contact.email) { %><a href="mailto:<%= site.contact.email %>"><i class="bi bi-envelope" aria-hidden="true"></i> <%= site.contact.email %></a><% } %>
+            <% if (site.contact.phone) { %><a href="tel:<%= site.contact.phone.replace(/[^0-9+]/g, '') %>"><i class="bi bi-telephone" aria-hidden="true"></i> <%= site.contact.phone %></a><% } %>
+            <a href="<%= appUrl %>/doc"><%= t('footer.manual') %></a>
+        </div>
+    </footer>
