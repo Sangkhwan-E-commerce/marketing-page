@@ -56,7 +56,7 @@
 
 | กลุ่ม | ช่อง |
 |---|---|
-| brand | โลโก้ ความสูงโลโก้ favicon (SVG/PNG ≥512) apple-touch-icon (180 พื้นทึบ) สีธีม |
+| brand | โลโก้ ความสูงโลโก้ favicon (SVG/PNG ≥512) apple-touch-icon (180 พื้นทึบ) สีธีม · สีพื้นหลังหน้าเว็บ `page_bg_color` (สีเข้ม = ตัวหนังสือนอกการ์ดเป็นสีอ่อน `lp-page-dark`) |
 | texts (th/en) | ชื่อเว็บ title description ย่อหน้า "Lullapos คืออะไร" ข้อความแทนรูปแชร์ — ภาษาอังกฤษว่าง = ใช้ไทย |
 | share | รูปแชร์ 1200×630 แยกไทย/อังกฤษ |
 | social / contact | LINE Facebook YouTube TikTok Instagram X · อีเมล โทร |

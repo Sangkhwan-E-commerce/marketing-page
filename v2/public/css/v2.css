@@ -199,3 +199,10 @@ a { color: inherit; }
 .lp-card-head.is-untitled { justify-content: flex-end; }
 .lp-tone-custom .lp-badge { background: rgba(15, 23, 42, 0.12); color: inherit; }
 .lp-tone-custom .lp-card-arrow { background: rgba(15, 23, 42, 0.1); }
+
+/* พื้นหลังหน้าเว็บสีเข้ม (ตั้งค่าเว็บไซต์ > สีพื้นหลังหน้าเว็บ) — เฉพาะตัวหนังสือนอกการ์ด การ์ดใช้สีของตัวเอง */
+.lp-page-dark .lp-title, .lp-page-dark .lp-cta h2 { color: #f8fafc; }
+.lp-page-dark .lp-subtitle, .lp-page-dark .lp-note, .lp-page-dark .lp-empty, .lp-page-dark .lp-footer-meta, .lp-page-dark .lp-link { color: rgba(248, 250, 252, 0.78); }
+.lp-page-dark .lp-link:hover, .lp-page-dark .lp-footer-meta a:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+.lp-page-dark .lp-btn-dark { background: #f8fafc; color: var(--lp-ink); }
+.lp-page-dark .lp-eyebrow { color: #93c5fd; }

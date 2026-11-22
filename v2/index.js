@@ -186,6 +186,9 @@ function createV2App({
                 altUrl: preview ? res.locals.previewLinks[locale === 'th' ? 'en' : 'th'] : (locale === 'th' ? enUrl : thUrl),
                 altLocale: locale === 'th' ? 'en' : 'th',
                 year: new Date().getFullYear(),
+                // สีพื้นหลังหน้าเว็บ (ตั้งค่าเว็บไซต์ > แบรนด์) — สีเข้ม = ตัวหนังสือนอกการ์ดเป็นสีอ่อน
+                pageBg: site.brand.page_bg_color,
+                pageDark: toneForBackground(site.brand.page_bg_color) === 'dark',
                 preview: !!preview
             });
         } catch (err) { next(err); }

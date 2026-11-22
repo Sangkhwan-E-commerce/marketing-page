@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="<%= base %>/assets/css/v2.css">
     <link rel="stylesheet" href="<%= base %>/assets/widgets.css">
 </head>
-<body class="lp-body">
+<body class="lp-body<%= pageDark ? ' lp-page-dark' : '' %>" style="--lp-bg: <%= pageBg %>">
     <% if (preview) { %><div class="lp-preview-bar" role="status"><i class="bi bi-eye" aria-hidden="true"></i> <%= t('preview.banner') %></div><% } %>
     <header class="lp-topbar">
         <a class="lp-brand" href="<%= selfUrl %>"><img src="<%= logo %>" alt="<%= texts.site_name %>" style="height: <%= site.brand.logo_height %>px"></a>

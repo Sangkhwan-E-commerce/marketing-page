@@ -14,7 +14,8 @@ const FIELDS = {
         { key: 'logo_height', type: 'number', min: 20, max: 80 },
         { key: 'favicon_url', type: 'image', hint: { th: 'สี่เหลี่ยมจัตุรัส อย่างน้อย 512×512 PNG หรือ SVG', en: 'Square, at least 512×512, PNG or SVG' } },
         { key: 'apple_touch_icon_url', type: 'image', hint: { th: '180×180 พื้นทึบ (iPhone ไม่รองรับพื้นใส)', en: '180×180, solid background' } },
-        { key: 'theme_color', type: 'color' }
+        { key: 'theme_color', type: 'color' },
+        { key: 'page_bg_color', type: 'color', hint: { th: 'สีพื้นหลังทั้งหน้า (นอกการ์ด) · สีเข้ม = ตัวหนังสือบนพื้นหลังเปลี่ยนเป็นสีอ่อนให้เอง · การ์ดใช้สีของตัวเอง', en: 'Background of the whole page (outside the cards) · dark colours switch the page text to light automatically · cards keep their own colours' } }
     ],
     texts: [
         { key: 'site_name', type: 'text', max: 60 },
@@ -49,7 +50,8 @@ const DEFAULT_SITE = {
         logo_height: 36,
         favicon_url: '/assets/brand/icon.svg',
         apple_touch_icon_url: '/assets/brand/apple-touch-icon.png',
-        theme_color: '#f8878f'
+        theme_color: '#f8878f',
+        page_bg_color: '#dfe6ef' // เท่ากับ --lp-bg ใน public/css/v2.css
     },
     texts: {
         th: {
