@@ -22,6 +22,7 @@ const { LOCALIZED_SITE_SETTING_KEYS, isLocalizedSiteSetting } = require('./i18n/
 const { runI18nMigrations } = require('./db/i18n-migrations');
 const { createV2App } = require('./v2');
 const { createDbSources } = require('./v2/db');
+const { createStatsSource } = require('./v2/stats');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,7 +41,9 @@ const getV2Pool = () => {
     if (!v2Pool) v2Pool = new Pool({ connectionString: process.env.V2_DATABASE_URL, max: 3, ssl: { rejectUnauthorized: false } }); // เหมือน pool เดิมด้านล่าง
     return v2Pool;
 };
-app.use('/v2', createV2App({ ...createDbSources({ getPool: getV2Pool }), siteCacheMs: 0 }));
+//    สถิติจริงของการ์ดข้อมูลจริง ดึงจาก pos-free-app (APP_BASE_URL ค่าตั้งต้น https://app.lullapos.com) แคช 10 นาที
+const v2Stats = createStatsSource({ appUrl: (process.env.APP_BASE_URL || 'https://app.lullapos.com').replace(/\/+$/, '') });
+app.use('/v2', createV2App({ ...createDbSources({ getPool: getV2Pool }), siteCacheMs: 0, loadStats: v2Stats }));
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 

@@ -1,12 +1,13 @@
 // 🌟 การจัดหน้า — รายการ Widget ที่แสดง เรียงตามลำดับ
-//    ตอนนี้ใช้ DEFAULT_LAYOUT ในโค้ด · ขั้นต่อไปหน้า Admin "Marketing web" ใน pos-free-app จะเขียนลงตาราง lp_*
-//    แล้วเว็บนี้อ่านอย่างเดียว (ส่ง loadPublished เข้า createLayoutSource) — ถ้าอ่านไม่ได้จะกลับมาใช้ค่าในโค้ด
+//    รายการที่เผยแพร่มาจากหน้า Admin "Marketing web" ใน pos-free-app (ตาราง lp_site อ่านผ่าน v2/db.js)
+//    ยังไม่เคยเผยแพร่ / ไม่มีการ์ด / อ่านไม่ได้ = ใช้ DEFAULT_LAYOUT ในโค้ด
 const { resolveSettings } = require('./registry');
 
 const DEFAULT_LAYOUT = [
     { widget: 'sales-today', size: '2x2', mobile: true },
     { widget: 'kitchen-orders', size: '1x2', mobile: true },
-    { widget: 'stock-expiry', size: '1x1', mobile: true }
+    { widget: 'stock-expiry', size: '1x1', mobile: true },
+    { widget: 'bills-total', size: '1x1', mobile: true }
 ];
 
 // ตัดรายการที่ใช้ไม่ได้ทิ้งเงียบๆ: Widget ที่ไม่มีในโค้ดแล้ว ขนาดที่ Widget ไม่รองรับ ข้อมูลจริงที่ Widget ยังไม่มี

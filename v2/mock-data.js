@@ -45,4 +45,7 @@ const EXPIRING_LOTS = [
     { product: { th: 'โยเกิร์ตรสธรรมชาติ', en: 'Plain yogurt' }, lot: 'L2611-07', daysLeft: 5, qty: 14, unit: { th: 'ถ้วย', en: 'cup' } }
 ];
 
-module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS };
+// ตัวเลขสมมุติของการ์ด "บิลที่ออกผ่าน Lullapos" ใช้ตอนยังไม่มีข้อมูลจริง (เจ้าของกำหนด 8.95k · 2026-11-22) — แสดงพร้อมป้าย "ตัวอย่าง" เสมอ
+const BILLS_TOTAL = 8950;
+
+module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL };

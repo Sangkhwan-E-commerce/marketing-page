@@ -1,0 +1,6 @@
+<div class="w-bills">
+    <div class="w-bills-num"><span data-countup="<%= data.value %>" data-format="<%= data.format %>"><%= data.display %></span> <small><%= text.unit %></small></div>
+    <p class="w-bills-caption"><%= text.caption %></p>
+    <p class="w-bills-channels"><%= text.channels %></p>
+    <% if (data.source === 'live') { %><p class="w-bills-updated"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <%= text.updated %></p><% } %>
+</div>

@@ -73,9 +73,17 @@
 - หน้า Admin อ่าน `/api/widgets.json` (+ `defaultLayout`) และ `/api/site-settings.json` ไปสร้างฟอร์ม — เพิ่ม Widget/ช่องตั้งค่าที่นี่ หน้า Admin เห็นเอง
 - วันย้ายมาที่ `/`: ฝั่ง pos-free-app ต้องเปลี่ยน `MARKETING_WEB_URL` เป็น `https://lullapos.com` ด้วย
 
+## การ์ดข้อมูลจริง
+
+- สถิติมาจาก pos-free-app `GET /api/public/marketing-web/stats` ผ่าน `v2/stats.js` (แคช 10 นาที ดึงพร้อมกันครั้งเดียว ดึงไม่ได้ = ค่าล่าสุด) · `APP_BASE_URL` ค่าตั้งต้น `https://app.lullapos.com`
+- Widget รับ `stats` ใน `getData` เฉพาะเมื่อการ์ดตั้งเป็น `live` · คืน `data.source` = `'live'`/`'mock'` เพื่อให้ป้ายบนการ์ดตรงกับตัวเลขที่แสดง · คืน `{ hidden: true }` = ซ่อนการ์ด
+- `feature: false` ในข้อมูลประจำตัว = เป็นสถิติ ไม่ใส่ใน featureList (JSON-LD) และ llms.txt
+- ตัวเลขสถิติใช้ `v2/format.js` (ปัดลงเสมอ) · ตัวเลขนับขึ้นใส่ `data-format` · สูตรฝั่งเบราว์เซอร์อยู่ใน `public/js/v2.js` มีเทสเทียบให้ตรงกัน
+- `bills-total`: บิลทุกระบบตั้งแต่เปิดระบบ · ตัวเลขสมมุติ 8,950 (`mock-data.js`) เมื่อไม่มีข้อมูล/ต่ำกว่าเกณฑ์ พร้อมป้าย "ตัวอย่าง"
+- ⚠️ ห้ามคูณ/แต่งตัวเลขจริง (เจ้าของตกลง 2026-11-22)
+
 ## ยังไม่ได้ทำ
 
-- Widget ข้อมูลจริงตัวแรก (`dataSources: ['live']`)
 - favicon สำรองจาก `site_settings.favicon_url` ของ pos-free-app
 - หน้าดูตัวอย่างฉบับร่างสำหรับฝังในหน้า Admin
 - Widget ข้อมูลจริงตัวแรก

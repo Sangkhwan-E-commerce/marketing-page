@@ -28,6 +28,7 @@ function createV2App({
     loadPublished = null,       // รายการการ์ดที่เผยแพร่ (จากหน้า Admin) — null = DEFAULT_LAYOUT
     loadSiteSettings = null,    // ตั้งค่าเว็บไซต์ที่เผยแพร่ — null = DEFAULT_SITE
     loadDraft = null,           // (token) => ฉบับร่าง { site, layout } สำหรับหน้าดูตัวอย่าง — null = ไม่มีหน้าดูตัวอย่าง
+    loadStats = null,           // () => สถิติจริง { bills_total } (v2/stats.js) — null = การ์ดข้อมูลจริงใช้ตัวอย่าง
     siteCacheMs = 60000,        // แคชตั้งค่าเว็บไซต์ · ตั้ง 0 เมื่อตัวอ่านแคชเองแล้ว (v2/db.js)
     appUrl = trimSlash(process.env.APP_BASE_URL || DEFAULT_APP_URL),
     siteUrl = trimSlash(process.env.SITE_URL || DEFAULT_SITE_URL),
@@ -48,7 +49,7 @@ function createV2App({
     const cacheHeader = `public, max-age=${production ? 3600 : 0}`;
 
     // ความสามารถของระบบจากทะเบียน Widget — ใช้ใน JSON-LD และ llms.txt
-    const features = list.map(w => ({
+    const features = list.filter(w => w.feature !== false).map(w => ({
         name: { th: w.text.th.name, en: w.text.en.name },
         description: { th: w.text.th.description || '', en: w.text.en.description || '' },
         docUrl: w.docPath ? `${appUrl}${w.docPath}` : null
@@ -96,7 +97,11 @@ function createV2App({
     async function renderCard(entry, locale) {
         const { widget } = entry;
         const text = widget.text[locale] || widget.text[DEFAULT_LOCALE];
-        const data = await widget.getData({ mock, locale, settings: entry.settings, source: entry.source, size: entry.size });
+        const stats = entry.source === 'live' && loadStats ? await loadStats() : null;
+        const data = await widget.getData({ mock, locale, settings: entry.settings, source: entry.source, size: entry.size, stats });
+        if (data && data.hidden) return null; // การ์ดขอซ่อนตัวเอง (เช่น ข้อมูลจริงยังไม่ถึงเกณฑ์)
+        // การ์ดข้อมูลจริงที่ต้องถอยไปใช้ตัวอย่าง บอกผ่าน data.source → ป้ายบนการ์ดตรงกับตัวเลขที่แสดงเสมอ
+        const source = data && (data.source === 'live' || data.source === 'mock') ? data.source : entry.source;
         const html = await ejs.renderFile(widget.viewPath, {
             data, text, locale, settings: entry.settings, size: entry.size,
             fmt: (value, options) => formatNumber(value, locale, options),
@@ -106,7 +111,7 @@ function createV2App({
             key: entry.key,
             id: widget.id,
             size: entry.size,
-            source: entry.source,
+            source,
             mobile: entry.mobile,
             header: widget.header !== false,
             tone: TONES.includes(entry.settings.tone) ? entry.settings.tone : (widget.tone || 'light'),
@@ -131,7 +136,8 @@ function createV2App({
             const cards = [];
             for (const entry of layout) {
                 try {
-                    cards.push(await renderCard(entry, locale));
+                    const card = await renderCard(entry, locale);
+                    if (card) cards.push(card);
                 } catch (err) {
                     // การ์ดใบเดียวพังต้องไม่ทำให้ทั้งหน้าพัง — ข้ามใบนั้นแล้วจดไว้
                     logger.error(`[v2] widget "${entry.widget.id}" failed:`, err.message);
