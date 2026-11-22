@@ -18,7 +18,8 @@ test('card body clips overflow instead of spilling over the header', () => {
 test('widgets do not bottom-align text with justify-content: flex-end', () => {
     const files = ['public/css/v2.css', ...fs.readdirSync(path.join(root, 'widgets')).map(w => `widgets/${w}/style.css`).filter(f => fs.existsSync(path.join(root, f)))];
     for (const f of files) {
-        for (const rule of read(f).split('}')) {
+        // ตัดคอมเมนต์ออกก่อน — คอมเมนต์อธิบายกติกานี้เองก็มีคำว่า flex-end
+        for (const rule of read(f).replace(/\/\*[\s\S]*?\*\//g, '').split('}')) {
             if (!/justify-content:\s*flex-end/.test(rule)) continue;
             const selector = rule.split('{')[0].trim();
             assert.ok(ALLOWED.some(a => selector.includes(a)), `${f}: "${selector}" uses justify-content: flex-end — use margin-top: auto on the first child`);
