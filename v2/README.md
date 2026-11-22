@@ -64,9 +64,18 @@
 
 ไฟล์ใน `public/brand/`: `logo.png` (โลโก้จริงจาก pos-free-app) · `icon.svg` + PNG 32/48/192/512 + `apple-touch-icon.png` (ไอคอนตัว L ชั่วคราว จนกว่าจะอัปโหลด favicon จริงในหน้า Admin) · `og-th.png` / `og-en.png`
 
+## ต่อกับหน้า Admin (pos-free-app เมนู "Marketing web")
+
+- pos-free-app สร้าง/เขียนตาราง `lp_site` (แถวเดียว: `draft`, `published` = `{ site, layout }`, `preview_token`, `preview_expires_at`) — เอกสาร `docs/knowledge/MARKETING_WEB.md` ใน repo นั้น
+- `v2/db.js` อ่านอย่างเดียว: แถว `published` แคช 60 วินาที ใช้ร่วมกันทั้งการ์ดและตั้งค่าเว็บไซต์ · อ่านพลาด/ยังไม่มีตาราง = ค่าที่อ่านได้ครั้งล่าสุด หรือค่าตั้งต้นในโค้ด
+- `V2_DATABASE_URL` = บัญชีฐานข้อมูลอ่านอย่างเดียว (แนะนำ) · ไม่ตั้ง = ใช้ pool เดิมของ `server.js`
+- หน้าดูตัวอย่างฉบับร่าง `/preview?token=` และ `/en/preview?token=` — รหัสจากหน้า Admin อายุ 2 ชั่วโมง · มีแถบ "ตัวอย่างฉบับร่าง" · `noindex` + `no-store` · รหัสผิด/หมดอายุ = 403
+- หน้า Admin อ่าน `/api/widgets.json` (+ `defaultLayout`) และ `/api/site-settings.json` ไปสร้างฟอร์ม — เพิ่ม Widget/ช่องตั้งค่าที่นี่ หน้า Admin เห็นเอง
+- วันย้ายมาที่ `/`: ฝั่ง pos-free-app ต้องเปลี่ยน `MARKETING_WEB_URL` เป็น `https://lullapos.com` ด้วย
+
 ## ยังไม่ได้ทำ
 
-- หน้า Admin "Marketing web" ใน pos-free-app + ตาราง `lp_*` (ตอนนี้ใช้ `DEFAULT_LAYOUT` และ `DEFAULT_SITE`) — ส่ง `loadPublished` / `loadSiteSettings` เข้า `createV2App`
-- favicon สำรองจาก `site_settings.favicon_url` ของ pos-free-app เมื่อต่อฐานข้อมูลแล้ว
+- Widget ข้อมูลจริงตัวแรก (`dataSources: ['live']`)
+- favicon สำรองจาก `site_settings.favicon_url` ของ pos-free-app
 - หน้าดูตัวอย่างฉบับร่างสำหรับฝังในหน้า Admin
 - Widget ข้อมูลจริงตัวแรก

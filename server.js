@@ -21,6 +21,7 @@ const { buildArticleLanguageLinks, buildPageLanguageLinks } = require('./i18n/pa
 const { LOCALIZED_SITE_SETTING_KEYS, isLocalizedSiteSetting } = require('./i18n/content-config');
 const { runI18nMigrations } = require('./db/i18n-migrations');
 const { createV2App } = require('./v2');
+const { createDbSources } = require('./v2/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,7 +33,14 @@ app.use(helmet({ contentSecurityPolicy: false }));
 
 // 🌟 เว็บหน้าแรกใหม่ (v2) — ต่อไว้ที่ /v2 ก่อน session และก่อน /:slug ของเว็บเก่า · เว็บเก่าที่ / ทำงานเหมือนเดิม
 //    ย้าย v2 มาเป็นหน้าแรกเฉพาะเมื่อเจ้าของบอกว่าพร้อมย้าย (ดู v2/README.md)
-app.use('/v2', createV2App());
+//    อ่านตาราง lp_site (เขียนโดยเมนู Super Admin "Marketing web" ใน pos-free-app) อย่างเดียว · V2_DATABASE_URL = บัญชีอ่านอย่างเดียว (ไม่ตั้ง = ใช้ pool เดิม)
+let v2Pool = null;
+const getV2Pool = () => {
+    if (!process.env.V2_DATABASE_URL) return pool;
+    if (!v2Pool) v2Pool = new Pool({ connectionString: process.env.V2_DATABASE_URL, max: 3, ssl: { rejectUnauthorized: false } }); // เหมือน pool เดิมด้านล่าง
+    return v2Pool;
+};
+app.use('/v2', createV2App({ ...createDbSources({ getPool: getV2Pool }), siteCacheMs: 0 }));
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 

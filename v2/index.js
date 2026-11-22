@@ -6,8 +6,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const ejs = require('ejs');
 const { loadWidgets, describeWidgets, SIZES } = require('./registry');
-const { createLayoutSource } = require('./layout');
-const { createSiteSource, FIELDS: SITE_FIELDS, DEFAULT_SITE } = require('./site-settings');
+const { createLayoutSource, normalizeLayout, DEFAULT_LAYOUT } = require('./layout');
+const { createSiteSource, normalizeSiteSettings, FIELDS: SITE_FIELDS, DEFAULT_SITE } = require('./site-settings');
 const { buildHead, buildRobotsTxt, buildSitemap, buildLlmsTxt, buildManifest, localAsset } = require('./seo');
 const { LOCALES, DEFAULT_LOCALE, createT, formatNumber } = require('./i18n');
 const mock = require('./mock-data');
@@ -27,6 +27,8 @@ function createV2App({
     widgets = loadWidgets(),
     loadPublished = null,       // รายการการ์ดที่เผยแพร่ (จากหน้า Admin) — null = DEFAULT_LAYOUT
     loadSiteSettings = null,    // ตั้งค่าเว็บไซต์ที่เผยแพร่ — null = DEFAULT_SITE
+    loadDraft = null,           // (token) => ฉบับร่าง { site, layout } สำหรับหน้าดูตัวอย่าง — null = ไม่มีหน้าดูตัวอย่าง
+    siteCacheMs = 60000,        // แคชตั้งค่าเว็บไซต์ · ตั้ง 0 เมื่อตัวอ่านแคชเองแล้ว (v2/db.js)
     appUrl = trimSlash(process.env.APP_BASE_URL || DEFAULT_APP_URL),
     siteUrl = trimSlash(process.env.SITE_URL || DEFAULT_SITE_URL),
     production = process.env.NODE_ENV === 'production',
@@ -38,7 +40,7 @@ function createV2App({
     if (production) app.enable('view cache');
 
     const getLayout = createLayoutSource({ widgets, loadPublished, logger });
-    const getSite = createSiteSource({ loadPublished: loadSiteSettings, logger });
+    const getSite = createSiteSource({ loadPublished: loadSiteSettings, cacheMs: siteCacheMs, logger });
     const list = [...widgets.values()];
     const widgetCss = bundle(list.map(w => w.stylePath));
     const widgetJs = bundle(list.map(w => w.scriptPath));
@@ -85,7 +87,7 @@ function createV2App({
 
     // สำหรับหน้า Admin "Marketing web" ใน pos-free-app — อ่านไปสร้างฟอร์มตั้งค่า
     app.get('/api/widgets.json', (req, res) => {
-        res.set('Cache-Control', 'no-store').json({ version: 1, sizes: SIZES, locales: LOCALES, widgets: describeWidgets(widgets) });
+        res.set('Cache-Control', 'no-store').json({ version: 1, sizes: SIZES, locales: LOCALES, widgets: describeWidgets(widgets), defaultLayout: DEFAULT_LAYOUT });
     });
     app.get('/api/site-settings.json', (req, res) => {
         res.set('Cache-Control', 'no-store').json({ version: 1, locales: LOCALES, fields: SITE_FIELDS, defaults: DEFAULT_SITE });
@@ -114,9 +116,18 @@ function createV2App({
         };
     }
 
-    async function renderHome(req, res, next, locale) {
+    // preview = ฉบับร่างจากหน้า Admin (ไม่ผ่านแคช ห้ามบอทเก็บ)
+    async function renderHome(req, res, next, locale, preview = null) {
         try {
-            const [layout, site] = await Promise.all([getLayout(), getSite()]);
+            let layout;
+            let site;
+            if (preview) {
+                layout = normalizeLayout(preview.layout, widgets);
+                if (!layout.length) layout = normalizeLayout(DEFAULT_LAYOUT, widgets);
+                site = normalizeSiteSettings(preview.site);
+            } else {
+                [layout, site] = await Promise.all([getLayout(), getSite()]);
+            }
             const cards = [];
             for (const entry of layout) {
                 try {
@@ -139,16 +150,33 @@ function createV2App({
                 texts: site.texts[locale],
                 head: buildHead(ctx, { site, locale, features: localFeatures }),
                 logo: localAsset(ctx, site.brand.logo_url),
-                selfUrl: locale === 'th' ? thUrl : enUrl,
-                altUrl: locale === 'th' ? enUrl : thUrl,
+                selfUrl: preview ? res.locals.previewLinks[locale] : (locale === 'th' ? thUrl : enUrl),
+                altUrl: preview ? res.locals.previewLinks[locale === 'th' ? 'en' : 'th'] : (locale === 'th' ? enUrl : thUrl),
                 altLocale: locale === 'th' ? 'en' : 'th',
-                year: new Date().getFullYear()
+                year: new Date().getFullYear(),
+                preview: !!preview
             });
         } catch (err) { next(err); }
     }
 
     app.get('/', (req, res, next) => renderHome(req, res, next, 'th'));
     app.get('/en', (req, res, next) => renderHome(req, res, next, 'en'));
+
+    // หน้าดูตัวอย่างฉบับร่าง — รหัสชั่วคราวจากหน้า Admin (pos-free-app) อายุ 2 ชั่วโมง
+    async function renderPreview(req, res, next, locale) {
+        try {
+            res.set('Cache-Control', 'no-store').set('X-Robots-Tag', 'noindex, nofollow');
+            const draft = loadDraft ? await loadDraft(req.query.token) : null;
+            if (!draft) return res.status(403).type('text/plain; charset=utf-8').send(createT(locale)('preview.expired'));
+            res.locals.ctx = { ...res.locals.ctx, noindex: true };
+            res.locals.noindex = true;
+            const q = '?token=' + encodeURIComponent(req.query.token);
+            res.locals.previewLinks = { th: res.locals.base + '/preview' + q, en: res.locals.base + '/en/preview' + q };
+            return renderHome(req, res, next, locale, draft);
+        } catch (err) { next(err); }
+    }
+    app.get('/preview', (req, res, next) => renderPreview(req, res, next, 'th'));
+    app.get('/en/preview', (req, res, next) => renderPreview(req, res, next, 'en'));
 
     return app;
 }

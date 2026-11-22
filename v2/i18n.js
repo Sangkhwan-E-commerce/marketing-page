@@ -16,7 +16,9 @@ const MESSAGES = {
         'footer.note': 'ตัวเลขในการ์ดที่มีป้าย "ตัวอย่าง" เป็นข้อมูลสมมุติของร้านตัวอย่าง',
         'footer.manual': 'คู่มือการใช้งาน',
         'about.title': '{name} คืออะไร',
-        'empty': 'ยังไม่มีการ์ดที่เปิดแสดง'
+        'empty': 'ยังไม่มีการ์ดที่เปิดแสดง',
+        'preview.banner': 'ตัวอย่างฉบับร่าง — คนทั่วไปยังไม่เห็น กด "เผยแพร่" ในหน้า Admin เพื่อให้หน้าเว็บจริงเปลี่ยน',
+        'preview.expired': 'ลิงก์ดูตัวอย่างหมดอายุหรือไม่ถูกต้อง กลับไปกด "ดูตัวอย่าง" ในหน้า Admin อีกครั้ง'
     },
     en: {
         'nav.lang': 'ภาษาไทย',
@@ -34,7 +36,9 @@ const MESSAGES = {
         'footer.note': 'Numbers on cards marked "Sample" come from a made-up sample store.',
         'footer.manual': 'User manual',
         'about.title': 'What is {name}?',
-        'empty': 'No cards are switched on yet'
+        'empty': 'No cards are switched on yet',
+        'preview.banner': 'Draft preview — not public yet. Press "Publish" in the admin to update the live site.',
+        'preview.expired': 'This preview link has expired or is invalid. Press "Preview" in the admin again.'
     }
 };
 
