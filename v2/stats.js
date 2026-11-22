@@ -13,7 +13,8 @@ function createStatsSource({ appUrl, fetchImpl = globalThis.fetch, cacheMs = 10 
             const body = await res.json();
             const data = body && body.data;
             if (!data || !Number.isFinite(Number(data.bills_total))) throw new Error('unexpected stats');
-            lastGood = { bills_total: Number(data.bills_total), updated_at: data.updated_at || null };
+            const daily = Array.isArray(data.daily) ? data.daily.filter(r => r && typeof r.d === 'string' && Number.isFinite(Number(r.n))).map(r => ({ d: r.d, n: Number(r.n) })) : [];
+            lastGood = { bills_total: Number(data.bills_total), daily, updated_at: data.updated_at || null };
         } catch (err) {
             logger.error('[v2] load stats failed:', err.message);
         }

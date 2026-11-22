@@ -1,6 +1,15 @@
-<div class="w-bills">
-    <div class="w-bills-num"><span data-countup="<%= data.value %>" data-format="<%= data.format %>"><%= data.display %></span> <small><%= text.unit %></small></div>
-    <% if (settings.show_caption) { %><p class="w-bills-caption"><%= settings['caption_' + locale] || text.caption %></p><% } %>
-    <% if (settings.show_channels) { %><p class="w-bills-channels"><%= text.channels %></p><% } %>
-    <% if (data.source === 'live' && settings.show_updated) { %><p class="w-bills-updated"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <%= text.updated %></p><% } %>
+<div class="w-bills pos-<%= data.position %>">
+    <div class="w-bills-body">
+        <div class="w-bills-num"><span data-countup="<%= data.value %>" data-format="<%= data.format %>"><%= data.display %></span> <small><%= text.unit %></small></div>
+        <% if (settings.show_caption) { %><p class="w-bills-caption"><%= settings['caption_' + locale] || text.caption %></p><% } %>
+        <p class="w-bills-period"><i class="bi bi-calendar3" aria-hidden="true"></i> <%= data.periodLabel %></p>
+        <% if (settings.show_channels) { %><p class="w-bills-channels"><%= text.channels %></p><% } %>
+        <% if (data.source === 'live' && settings.show_updated) { %><p class="w-bills-updated"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <%= text.updated %></p><% } %>
+    </div>
+    <% if (data.chart) { %>
+    <div class="w-bills-chart">
+        <div class="w-bills-plot"><%- data.chart %></div>
+        <% if (data.axis) { %><div class="w-bills-axis"><span><%= data.axis.first %></span><span><%= data.axis.last %></span></div><% } %>
+    </div>
+    <% } %>
 </div>

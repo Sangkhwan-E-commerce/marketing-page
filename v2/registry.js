@@ -4,9 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // ขนาดมาตรฐาน "กว้าง x สูง" นับเป็นช่องของตาราง 4 คอลัมน์ (จอคอม)
-const SIZES = ['1x1', '2x1', '1x2', '2x2', '4x1'];
+const SIZES = ['1x1', '2x1', '1x2', '2x2', '3x1', '4x1']; // 3x1 เพิ่ม 2026-11-22 (เจ้าของ: เผื่อการ์ดกว้างในอนาคต)
 const DATA_SOURCES = ['mock', 'live'];
-const SETTING_TYPES = ['text', 'select', 'boolean', 'number', 'color'];
+const SETTING_TYPES = ['text', 'select', 'boolean', 'number', 'color', 'date'];
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
 // ช่องตั้งค่าที่ทุกการ์ดมี (กรอบกลางจัดการให้ Widget ไม่ต้องทำเอง) — ต่อท้ายช่องของ Widget เสมอ (group: 'common')
@@ -111,6 +112,7 @@ function resolveSettings(widget, raw = {}) {
         if (setting.type === 'select' && setting.options.some(o => o.value === value)) next = value;
         if (setting.type === 'text' && typeof value === 'string') next = value.slice(0, setting.maxLength || 200);
         if (setting.type === 'color' && typeof value === 'string' && HEX_RE.test(value.trim())) next = value.trim().toLowerCase();
+        if (setting.type === 'date' && typeof value === 'string' && DATE_RE.test(value) && !Number.isNaN(Date.parse(value))) next = value;
         out[setting.key] = next;
     }
     return out;
@@ -134,6 +136,7 @@ function describeWidgets(widgets) {
             label: s.label || { th: s.key, en: s.key },
             group: s.group || 'widget',
             ...(s.localized ? { localized: true } : {}),
+            ...(s.showIf ? { showIf: s.showIf } : {}), // แสดงช่องนี้เฉพาะเมื่อช่อง showIf.key = showIf.value (หน้า Admin)
             ...(s.maxLength ? { maxLength: s.maxLength } : {}),
             ...(s.hint ? { hint: s.hint } : {}),
             ...(s.options ? { options: s.options } : {}),

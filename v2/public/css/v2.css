@@ -1,5 +1,5 @@
 /* 🌟 โครงหน้า v2 — แผงหลัก (grid) + กรอบการ์ดกลาง · ข้างในการ์ดแต่ละใบอยู่ใน widgets/<id>/style.css
-   ขนาดการ์ด "กว้าง x สูง": 1x1 2x1 1x2 2x2 4x1 · จอคอม 4 คอลัมน์ / แท็บเล็ต 2 / มือถือ 1 */
+   ขนาดการ์ด "กว้าง x สูง": 1x1 2x1 1x2 2x2 3x1 4x1 · จอคอม 4 คอลัมน์ / แท็บเล็ต 2 / มือถือ 1 */
 
 :root {
     --lp-bg: #dfe6ef;
@@ -111,12 +111,13 @@ a { color: inherit; }
     .lp-size-2x1 { grid-column: span 2; grid-row: span 1; }
     .lp-size-1x2 { grid-column: span 1; grid-row: span 2; }
     .lp-size-2x2 { grid-column: span 2; grid-row: span 2; }
-    .lp-size-4x1 { grid-column: span 2; grid-row: span 1; }
+    .lp-size-3x1, .lp-size-4x1 { grid-column: span 2; grid-row: span 1; }
 }
 
 /* จอคอม: 4 คอลัมน์ */
 @media (min-width: 1024px) {
     .lp-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .lp-size-3x1 { grid-column: span 3; }
     .lp-size-4x1 { grid-column: span 4; }
 }
 

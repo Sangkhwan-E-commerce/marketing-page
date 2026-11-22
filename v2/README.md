@@ -18,7 +18,7 @@
 
 สร้างโฟลเดอร์ `widgets/<id>/` (id แบบ kebab-case ตรงกับชื่อโฟลเดอร์):
 
-- `widget.js` — `id`, `category`, `sizes` (จาก `1x1 2x1 1x2 2x2 4x1`), `defaultSize`, `dataSources` (`mock` / `live`), `docPath` (บทความใน `/doc`), `tone` (`light dark blue green orange`), `settings` (ช่องตั้งค่าที่หน้า Admin จะสร้างฟอร์มให้: `text select boolean number`), `text.th` / `text.en` (ต้องมี `name`), `getData({ mock, locale, settings, source, size })`
+- `widget.js` — `id`, `category`, `sizes` (จาก `1x1 2x1 1x2 2x2 3x1 4x1`), `defaultSize`, `dataSources` (`mock` / `live`), `docPath` (บทความใน `/doc`), `tone` (`light dark blue green orange`), `settings` (ช่องตั้งค่าที่หน้า Admin จะสร้างฟอร์มให้: `text select boolean number`), `text.th` / `text.en` (ต้องมี `name`), `getData({ mock, locale, settings, source, size })`
 - `view.ejs` — หน้าตาข้างในการ์ด ได้ตัวแปร `data text locale settings size fmt pick`
 - `style.css` (ถ้ามี) — ขึ้นต้นคลาสด้วย `w-<ชื่อสั้น>-` กันชนกับการ์ดอื่น · ปรับตามขนาดด้วย `.lp-size-2x1 ...` และตามสีด้วย `.lp-tone-dark ...`
 - `script.js` (ถ้ามี) — `LP.widget('<id>', function (card, ctx) { ... })` เริ่มเมื่อการ์ดเลื่อนเข้าจอ · `ctx.reducedMotion` = ห้ามขยับ
@@ -40,7 +40,7 @@
 | จอ | คอลัมน์ | ความสูง |
 |---|---|---|
 | ≥ 1024px | 4 | แถวละ 190px |
-| 640–1023px | 2 (`4x1` กว้าง 2) | แถวละ 190px |
+| 640–1023px | 2 (`3x1` `4x1` กว้าง 2) | แถวละ 190px |
 | < 640px | 1 | ตามเนื้อหา · การ์ดที่ `mobile: false` ถูกซ่อน |
 
 ## กติกา
@@ -88,7 +88,11 @@
 - Widget รับ `stats` ใน `getData` เฉพาะเมื่อการ์ดตั้งเป็น `live` · คืน `data.source` = `'live'`/`'mock'` เพื่อให้ป้ายบนการ์ดตรงกับตัวเลขที่แสดง · คืน `{ hidden: true }` = ซ่อนการ์ด
 - `feature: false` ในข้อมูลประจำตัว = เป็นสถิติ ไม่ใส่ใน featureList (JSON-LD) และ llms.txt
 - ตัวเลขสถิติใช้ `v2/format.js` (ปัดลงเสมอ) · ตัวเลขนับขึ้นใส่ `data-format` · สูตรฝั่งเบราว์เซอร์อยู่ใน `public/js/v2.js` มีเทสเทียบให้ตรงกัน
-- `bills-total`: บิลทุกระบบตั้งแต่เปิดระบบ · ตัวเลขสมมุติ 8,950 (`mock-data.js`) เมื่อไม่มีข้อมูล/ต่ำกว่าเกณฑ์ พร้อมป้าย "ตัวอย่าง"
+- `bills-total`: บิลทุกระบบ · ตัวเลขสมมุติ 8,950 (`mock-data.js` `mockDaily()` รายวัน 800 วัน รวมได้ 8,950 พอดี) เมื่อไม่มีข้อมูล/ต่ำกว่าเกณฑ์ พร้อมป้าย "ตัวอย่าง"
+  - ช่วงเวลา (เจ้าของสั่ง 2026-11-22): ทั้งหมด / ปีนี้ / ปีที่แล้ว / กำหนดเอง (ช่องวันที่ `type: 'date'` + `showIf`) — คิดจากชุดรายวันตามเวลาไทย (`v2/series.js`) · บรรทัดบอกช่วงเวลาซ่อนไม่ได้
+  - กราฟ SVG วาดเอง (`v2/chart.js`): แท่ง / เส้น / พื้นที่ · ช่วง ≤ 62 วัน = รายวัน · ≤ ~3 ปี = รายเดือน · ยาวกว่า = รายปี
+  - ตำแหน่งกราฟ: อัตโนมัติ (1x1 = เฉพาะตัวเลข · 2x2/1x2 = ล่าง · การ์ดกว้าง = ขวา) / ซ้าย / ขวา / บน / ล่าง / เฉพาะตัวเลข / เฉพาะกราฟ · การ์ดสูง 1 แถวที่มีกราฟ เหลือตัวเลข + ช่วงเวลา · มือถือ กราฟซ้าย/ขวาย้ายลงล่าง
+- ชนิดช่องตั้งค่า: `text select boolean number color date` · `showIf: { key, value }` = แสดงช่องเฉพาะเมื่ออีกช่องเป็นค่านั้น (หน้า Admin)
 - ⚠️ ห้ามคูณ/แต่งตัวเลขจริง (เจ้าของตกลง 2026-11-22)
 
 ## ยังไม่ได้ทำ

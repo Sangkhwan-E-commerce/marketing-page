@@ -48,4 +48,27 @@ const EXPIRING_LOTS = [
 // ตัวเลขสมมุติของการ์ด "บิลที่ออกผ่าน Lullapos" ใช้ตอนยังไม่มีข้อมูลจริง (เจ้าของกำหนด 8.95k · 2026-11-22) — แสดงพร้อมป้าย "ตัวอย่าง" เสมอ
 const BILLS_TOTAL = 8950;
 
-module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL };
+// บิลรายวันสมมุติ 540 วันย้อนหลังถึงวันนี้ รวมได้ BILLS_TOTAL พอดี — ใช้วาดกราฟตอนยังไม่มีข้อมูลจริง
+//    ค่าแน่นอน (ไม่สุ่ม) หน้าเว็บจะได้ไม่เปลี่ยนทุกครั้งที่เปิด · มีแนวโน้มโตขึ้น + เสาร์อาทิตย์ขายดีกว่า
+function mockDaily(today, days = 800, total = BILLS_TOTAL) {
+    const end = Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, Number(today.slice(8, 10)));
+    const weights = [];
+    for (let i = 0; i < days; i++) {
+        const ms = end - (days - 1 - i) * 86400000;
+        const dow = new Date(ms).getUTCDay();
+        const growth = 0.25 + (i / days) * 1.5;
+        const weekend = dow === 0 || dow === 6 ? 1.35 : 1;
+        const wave = 1 + 0.18 * Math.sin(i / 9) + 0.08 * Math.sin(i / 2.3);
+        weights.push({ d: new Date(ms).toISOString().slice(0, 10), w: growth * weekend * wave });
+    }
+    const sum = weights.reduce((s, x) => s + x.w, 0);
+    const exact = weights.map(({ w }) => (w / sum) * total);
+    const out = weights.map(({ d }, i) => ({ d, n: Math.floor(exact[i]) }));
+    // เศษจากการปัดลง แจกให้วันที่มีเศษมากที่สุด (largest remainder) — รวมได้ total พอดี และไม่มีวันไหนพุ่งผิดปกติ
+    let left = total - out.reduce((s, r) => s + r.n, 0);
+    const order = exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+    for (let k = 0; left > 0; k++, left--) out[order[k % order.length][1]].n += 1;
+    return out;
+}
+
+module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL, mockDaily };
