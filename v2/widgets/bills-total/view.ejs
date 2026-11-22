@@ -1,6 +1,6 @@
 <div class="w-bills pos-<%= data.position %>">
     <div class="w-bills-body">
-        <div class="w-bills-num"><span data-countup="<%= data.value %>" data-format="<%= data.format %>"><%= data.display %></span> <small><%= text.unit %></small></div>
+        <div class="w-bills-num"><% if (text.prefix) { %><span class="w-bills-cur"><%= text.prefix %></span><% } %><span data-countup="<%= data.value %>" data-format="<%= data.format %>"><%= data.display %></span><% if (text.unit) { %> <small><%= text.unit %></small><% } %></div>
         <% if (settings.show_caption) { %><p class="w-bills-caption"><%= settings['caption_' + locale] || text.caption %></p><% } %>
         <p class="w-bills-period"><i class="bi bi-calendar3" aria-hidden="true"></i> <%= data.periodLabel %></p>
         <% if (settings.show_channels) { %><p class="w-bills-channels"><%= text.channels %></p><% } %>

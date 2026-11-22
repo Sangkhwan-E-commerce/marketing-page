@@ -47,6 +47,8 @@ const EXPIRING_LOTS = [
 
 // ตัวเลขสมมุติของการ์ด "บิลที่ออกผ่าน Lullapos" ใช้ตอนยังไม่มีข้อมูลจริง (เจ้าของกำหนด 8.95k · 2026-11-22) — แสดงพร้อมป้าย "ตัวอย่าง" เสมอ
 const BILLS_TOTAL = 8950;
+// ยอดขายรวมสมมุติ (บาท) ของการ์ด "ยอดขายรวมผ่าน Lullapos" ตอนยังไม่มีข้อมูลจริง — แสดงพร้อมป้าย "ตัวอย่าง" เสมอ
+const SALES_TOTAL = 1850000;
 
 // บิลรายวันสมมุติ 540 วันย้อนหลังถึงวันนี้ รวมได้ BILLS_TOTAL พอดี — ใช้วาดกราฟตอนยังไม่มีข้อมูลจริง
 //    ค่าแน่นอน (ไม่สุ่ม) หน้าเว็บจะได้ไม่เปลี่ยนทุกครั้งที่เปิด · มีแนวโน้มโตขึ้น + เสาร์อาทิตย์ขายดีกว่า
@@ -71,4 +73,4 @@ function mockDaily(today, days = 800, total = BILLS_TOTAL) {
     return out;
 }
 
-module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL, mockDaily };
+module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, mockDaily };

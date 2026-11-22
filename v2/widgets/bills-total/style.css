@@ -44,3 +44,4 @@
     .w-bills-plot { min-height: 90px; }
 }
 .lp-tone-light .w-bills-chart { color: var(--w-accent, var(--lp-primary)); }
+.w-bills-cur { font-size: 0.6em; margin-right: 2px; opacity: 0.75; }

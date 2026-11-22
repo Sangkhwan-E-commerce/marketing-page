@@ -7,7 +7,8 @@ const DEFAULT_LAYOUT = [
     { widget: 'sales-today', size: '2x2', mobile: true },
     { widget: 'kitchen-orders', size: '1x2', mobile: true },
     { widget: 'stock-expiry', size: '1x1', mobile: true },
-    { widget: 'bills-total', size: '1x1', mobile: true }
+    { widget: 'bills-total', size: '1x1', mobile: true },
+    { widget: 'sales-total', size: '4x1', mobile: true }
 ];
 
 // ตัดรายการที่ใช้ไม่ได้ทิ้งเงียบๆ: Widget ที่ไม่มีในโค้ดแล้ว ขนาดที่ Widget ไม่รองรับ ข้อมูลจริงที่ Widget ยังไม่มี

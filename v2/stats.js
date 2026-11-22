@@ -14,7 +14,10 @@ function createStatsSource({ appUrl, fetchImpl = globalThis.fetch, cacheMs = 10 
             const data = body && body.data;
             if (!data || !Number.isFinite(Number(data.bills_total))) throw new Error('unexpected stats');
             const daily = Array.isArray(data.daily) ? data.daily.filter(r => r && typeof r.d === 'string' && Number.isFinite(Number(r.n))).map(r => ({ d: r.d, n: Number(r.n) })) : [];
-            lastGood = { bills_total: Number(data.bills_total), daily, updated_at: data.updated_at || null };
+            // ยอดขาย (บาท) รายวันมาเป็น { d, v } → เก็บเป็น { d, n } รูปเดียวกับบิล ให้การ์ดสถิติใช้สูตรเดียวกัน
+            const salesDaily = Array.isArray(data.sales_daily) ? data.sales_daily.filter(r => r && typeof r.d === 'string' && Number.isFinite(Number(r.v))).map(r => ({ d: r.d, n: Number(r.v) })) : [];
+            const salesTotal = Number.isFinite(Number(data.sales_total)) ? Number(data.sales_total) : null;
+            lastGood = { bills_total: Number(data.bills_total), daily, sales_total: salesTotal, sales_daily: salesDaily, updated_at: data.updated_at || null };
         } catch (err) {
             logger.error('[v2] load stats failed:', err.message);
         }
