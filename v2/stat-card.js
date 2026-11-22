@@ -53,6 +53,8 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
             options: [opt('auto', 'อัตโนมัติตามขนาดการ์ด', 'Automatic for the card size'), opt('right', 'กราฟอยู่ขวา', 'Chart on the right'), opt('left', 'กราฟอยู่ซ้าย', 'Chart on the left'),
                 opt('top', 'กราฟอยู่บน', 'Chart on top'), opt('bottom', 'กราฟอยู่ล่าง', 'Chart below'), opt('none', 'แสดงเฉพาะตัวเลข', 'Number only'), opt('only', 'แสดงเฉพาะกราฟ', 'Chart only')],
             hint: { th: 'อัตโนมัติ: 1x1 = เฉพาะตัวเลข · 2x2/1x2 = กราฟล่าง · การ์ดกว้าง = กราฟขวา · การ์ด 1x1 พื้นที่น้อย แนะนำ "เฉพาะตัวเลข" หรือ "เฉพาะกราฟ"', en: 'Automatic: 1x1 = number only · 2x2/1x2 = below · wide cards = right · 1x1 is small: "Number only" or "Chart only" work best' } },
+        { key: 'chart_values', type: 'select', default: metric.defaultChartValues || 'per_period', label: { th: 'กราฟแสดง', en: 'Chart shows' },
+            options: [opt('per_period', 'เพิ่มใหม่ในแต่ละช่วง', 'New in each period'), opt('cumulative', 'ยอดสะสม', 'Running total')] },
         { key: 'show_axis', type: 'boolean', default: true, label: { th: 'แสดงช่วงวันที่ใต้กราฟ', en: 'Show dates under the chart' } },
         { key: 'min_live', type: 'number', default: 1, min: 1, max: 100000000000, label: metric.minLabel },
         { key: 'fallback', type: 'select', default: 'mock', label: { th: 'ถ้ายังไม่ถึงเกณฑ์หรือดึงข้อมูลไม่ได้', en: 'Below the minimum or no data' },
@@ -92,9 +94,14 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
             const chartType = CHART_TYPES.includes(s.chart_type) ? s.chart_type : 'bar';
             const label = periodLabel(period, sum, locale, t);
             const nf = new Intl.NumberFormat(NUMBER_LOCALE[locale] || 'th-TH', { maximumFractionDigits: 0 });
+            // กราฟ "ยอดสะสม" = ยอดรวมถึงแต่ละช่วง (เริ่มจากยอดก่อนวันแรกของช่วง) · "เพิ่มใหม่" = ยอดของแต่ละช่วง
+            const cumulative = (s.chart_values || metric.defaultChartValues) === 'cumulative';
+            let running = cumulative ? daily.reduce((acc, r) => (r && r.d < sum.from ? acc + r.n : acc), 0) : 0;
             const points = sum.points.map(p => {
                 const l = pointLabel(p.key, sum.bucket, locale);
-                return { label: l, value: Math.max(0, p.value), title: `${l}: ${t.prefix || ''}${nf.format(Math.floor(p.value))}${t.unit ? ` ${t.unit}` : ''}` };
+                running += p.value;
+                const v = cumulative ? running : p.value;
+                return { label: l, value: Math.max(0, v), title: `${l}: ${t.prefix || ''}${nf.format(Math.floor(v))}${t.unit ? ` ${t.unit}` : ''}` };
             });
             const showChart = position !== 'none' && points.length > 1;
             return {
@@ -103,6 +110,8 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
                 format,
                 display: formatStat(value, format, locale),
                 periodLabel: label,
+                // ข้อความใต้ตัวเลขตามช่วง: ช่วงย่อยใช้ caption_period ถ้า Widget มี (เช่น ร้านค้า "เปิดใหม่" ต่างจาก "ทั้งหมดที่เปิดใช้งาน")
+                caption: s[`caption_${locale}`] || (period !== 'all' && t.caption_period ? t.caption_period : t.caption),
                 position: showChart ? position : 'none',
                 chart: showChart ? renderChart(points, chartType, { ariaLabel: t.chart.replace('{period}', label) }) : '',
                 axis: showChart && s.show_axis ? { first: points[0].label, last: points[points.length - 1].label } : null

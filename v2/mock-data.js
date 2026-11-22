@@ -49,6 +49,8 @@ const EXPIRING_LOTS = [
 const BILLS_TOTAL = 8950;
 // ยอดขายรวมสมมุติ (บาท) ของการ์ด "ยอดขายรวมผ่าน Lullapos" ตอนยังไม่มีข้อมูลจริง — แสดงพร้อมป้าย "ตัวอย่าง" เสมอ
 const SALES_TOTAL = 1850000;
+// จำนวนร้านค้าสมมุติของการ์ด "ร้านค้าที่ใช้ Lullapos" ตอนยังไม่มีข้อมูลจริง — แสดงพร้อมป้าย "ตัวอย่าง" เสมอ
+const STORES_TOTAL = 128;
 
 // บิลรายวันสมมุติ 540 วันย้อนหลังถึงวันนี้ รวมได้ BILLS_TOTAL พอดี — ใช้วาดกราฟตอนยังไม่มีข้อมูลจริง
 //    ค่าแน่นอน (ไม่สุ่ม) หน้าเว็บจะได้ไม่เปลี่ยนทุกครั้งที่เปิด · มีแนวโน้มโตขึ้น + เสาร์อาทิตย์ขายดีกว่า
@@ -64,13 +66,17 @@ function mockDaily(today, days = 800, total = BILLS_TOTAL) {
         weights.push({ d: new Date(ms).toISOString().slice(0, 10), w: growth * weekend * wave });
     }
     const sum = weights.reduce((s, x) => s + x.w, 0);
-    const exact = weights.map(({ w }) => (w / sum) * total);
-    const out = weights.map(({ d }, i) => ({ d, n: Math.floor(exact[i]) }));
-    // เศษจากการปัดลง แจกให้วันที่มีเศษมากที่สุด (largest remainder) — รวมได้ total พอดี และไม่มีวันไหนพุ่งผิดปกติ
-    let left = total - out.reduce((s, r) => s + r.n, 0);
-    const order = exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
-    for (let k = 0; left > 0; k++, left--) out[order[k % order.length][1]].n += 1;
-    return out;
+    // ปัดที่ "ยอดสะสม" แล้วค่อยแตกเป็นรายวัน — รวมได้ total พอดี และกระจายตามเส้นการเติบโตแม้ยอดรวมน้อย (เช่น 128 ร้าน ใน 800 วัน)
+    //    (แบบแจกเศษให้วันที่เศษมากสุด จะกองไว้ช่วงท้ายจนกราฟยอดสะสมแบนแล้วพุ่ง — เจอ 2026-11-22)
+    let acc = 0;
+    let prev = 0;
+    return weights.map(({ d, w }, i) => {
+        acc += (w / sum) * total;
+        const cum = i === weights.length - 1 ? total : Math.floor(acc + 1e-9);
+        const n = cum - prev;
+        prev = cum;
+        return { d, n };
+    });
 }
 
-module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, mockDaily };
+module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, STORES_TOTAL, mockDaily };
