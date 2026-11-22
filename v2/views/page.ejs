@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= t('meta.title') %></title>
+    <meta name="description" content="<%= t('meta.description') %>">
+    <% if (noindex) { %><meta name="robots" content="noindex, nofollow"><% } %>
+    <link rel="alternate" hreflang="<%= altLocale %>" href="<%= altUrl %>">
+    <link rel="stylesheet" href="<%= base %>/assets/vendor/fonts/anuphan/font.css">
+    <link rel="stylesheet" href="<%= base %>/assets/vendor/bootstrap-icons/1.11.3/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="<%= base %>/assets/css/v2.css">
+    <link rel="stylesheet" href="<%= base %>/assets/widgets.css">
+</head>
+<body class="lp-body">
+    <header class="lp-topbar">
+        <a class="lp-brand" href="<%= selfUrl %>">Lullapos</a>
+        <nav class="lp-topbar-actions">
+            <a class="lp-link" href="<%= altUrl %>" hreflang="<%= altLocale %>"><i class="bi bi-translate" aria-hidden="true"></i> <%= t('nav.lang') %></a>
+            <a class="lp-btn lp-btn-dark" href="<%= appUrl %>"><%= t('nav.cta') %></a>
+        </nav>
+    </header>
+
+    <main class="lp-main">
+        <section class="lp-hero">
+            <p class="lp-eyebrow"><%= t('hero.eyebrow') %></p>
+            <h1 class="lp-title"><%= t('hero.title') %></h1>
+            <p class="lp-subtitle"><%= t('hero.subtitle') %></p>
+            <a class="lp-btn lp-btn-primary lp-btn-lg" href="<%= appUrl %>"><%= t('hero.cta') %> <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </section>
+
+        <% if (!cards.length) { %>
+            <p class="lp-empty"><%= t('empty') %></p>
+        <% } else { %>
+        <section class="lp-grid" aria-label="Lullapos">
+            <% cards.forEach(function (card) { %>
+            <article class="lp-card lp-tone-<%= card.tone %> lp-size-<%= card.size %><%= card.mobile ? '' : ' lp-hide-mobile' %>"
+                     data-widget="<%= card.id %>" data-key="<%= card.key %>" data-size="<%= card.size %>">
+                <% if (card.header) { %>
+                <header class="lp-card-head">
+                    <h2 class="lp-card-title"><%= card.name %></h2>
+                    <div class="lp-card-tools">
+                        <% if (card.source === 'live') { %>
+                            <span class="lp-badge lp-badge-live"><i class="bi bi-broadcast" aria-hidden="true"></i> <%= t('badge.live') %></span>
+                        <% } else { %>
+                            <span class="lp-badge" title="<%= t('badge.mock_title') %>"><%= t('badge.mock') %></span>
+                        <% } %>
+                        <% if (card.docUrl) { %>
+                            <a class="lp-card-arrow" href="<%= card.docUrl %>" target="_blank" rel="noopener" aria-label="<%= t('card.doc_link') %>: <%= card.name %>" title="<%= t('card.doc_link') %>"><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+                        <% } %>
+                    </div>
+                </header>
+                <% } %>
+                <div class="lp-card-body"><%- card.html %></div>
+            </article>
+            <% }) %>
+        </section>
+        <% } %>
+
+        <section class="lp-cta">
+            <h2><%= t('footer.cta_title') %></h2>
+            <a class="lp-btn lp-btn-primary lp-btn-lg" href="<%= appUrl %>"><%= t('footer.cta') %> <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            <p class="lp-note"><%= t('footer.note') %></p>
+        </section>
+    </main>
+
+    <script src="<%= base %>/assets/js/v2.js"></script>
+    <script src="<%= base %>/assets/widgets.js"></script>
+    <script>window.LP && window.LP.start({ locale: '<%= locale %>' });</script>
+</body>
+</html>

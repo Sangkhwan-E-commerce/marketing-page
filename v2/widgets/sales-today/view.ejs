@@ -1,0 +1,35 @@
+<div class="w-sales">
+    <div class="w-sales-head">
+    <div class="w-sales-top">
+        <div class="w-sales-total"><span class="w-sales-cur"><%= text.currency %></span><span data-countup="<%= data.total %>"><%= fmt(data.total) %></span></div>
+        <span class="w-sales-change <%= data.change >= 0 ? 'is-up' : 'is-down' %>">
+            <i class="bi <%= data.change >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' %>" aria-hidden="true"></i>
+            <%= fmt(Math.abs(data.change), { style: 'percent' }) %> <%= text.vs_yesterday %>
+        </span>
+    </div>
+    <p class="w-sales-meta"><%= fmt(data.bills) %> <%= text.bills %> · <%= text.currency %><%= fmt(data.avg) %> <%= text.avg %></p>
+    </div>
+
+    <div class="w-sales-chart" role="img" aria-label="<%= text.peak %> <%= String(data.peakHour).padStart(2, '0') %>:00">
+        <% data.bars.forEach(function (bar) { %>
+        <div class="w-sales-col<%= bar.peak ? ' is-peak' : '' %>" style="--h: <%= bar.pct %>%">
+            <% if (bar.peak) { %><span class="w-sales-tip"><%= text.peak %></span><% } %>
+            <span class="w-sales-bar"></span>
+            <span class="w-sales-hour"><%= bar.hour %></span>
+        </div>
+        <% }) %>
+    </div>
+
+    <% if (data.showPayments) { %>
+    <div class="w-sales-pay">
+        <div class="w-sales-paybar">
+            <% data.payments.forEach(function (p) { %><span class="w-pay-<%= p.key %>" style="width: <%= Math.round(p.share * 100) %>%"></span><% }) %>
+        </div>
+        <ul class="w-sales-legend">
+            <% data.payments.forEach(function (p) { %>
+            <li><i class="w-dot w-pay-<%= p.key %>"></i><%= text.payments[p.key] %> <b><%= fmt(p.share, { style: 'percent' }) %></b></li>
+            <% }) %>
+        </ul>
+    </div>
+    <% } %>
+</div>

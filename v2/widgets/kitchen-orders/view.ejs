@@ -1,0 +1,19 @@
+<div class="w-kds" data-animate="<%= data.animate ? '1' : '0' %>"
+     data-labels="<%= JSON.stringify({ status: text.status, minutes: text.minutes }) %>">
+    <p class="w-kds-summary"><b class="w-kds-waiting"><%= fmt(data.waiting) %></b> <%= text.waiting %></p>
+    <ol class="w-kds-list">
+        <% data.tickets.forEach(function (t) { %>
+        <li class="w-kds-ticket is-<%= t.status %>">
+            <div class="w-kds-row">
+                <span class="w-kds-no"><%= t.no %></span>
+                <span class="w-kds-table"><%= t.table %></span>
+                <span class="w-kds-status"><%= text.status[t.status] %></span>
+            </div>
+            <ul class="w-kds-items">
+                <% t.items.forEach(function (i) { %><li><b><%= i.qty %>×</b> <%= i.name %></li><% }) %>
+            </ul>
+            <span class="w-kds-time"><i class="bi bi-clock" aria-hidden="true"></i> <%= t.minutes %> <%= text.minutes %></span>
+        </li>
+        <% }) %>
+    </ol>
+</div>

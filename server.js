@@ -20,6 +20,7 @@ const {
 const { buildArticleLanguageLinks, buildPageLanguageLinks } = require('./i18n/page-localization');
 const { LOCALIZED_SITE_SETTING_KEYS, isLocalizedSiteSetting } = require('./i18n/content-config');
 const { runI18nMigrations } = require('./db/i18n-migrations');
+const { createV2App } = require('./v2');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +29,10 @@ const SITE_URL = (process.env.SITE_URL || 'https://lullapos.com').replace(/\/+$/
 app.set('trust proxy', 1);
 
 app.use(helmet({ contentSecurityPolicy: false }));
+
+// 🌟 เว็บหน้าแรกใหม่ (v2) — ต่อไว้ที่ /v2 ก่อน session และก่อน /:slug ของเว็บเก่า · เว็บเก่าที่ / ทำงานเหมือนเดิม
+//    ย้าย v2 มาเป็นหน้าแรกเฉพาะเมื่อเจ้าของบอกว่าพร้อมย้าย (ดู v2/README.md)
+app.use('/v2', createV2App());
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
@@ -106,7 +111,7 @@ const isPageKey = (key) => PAGE_SETTING_KEYS.includes(key);
 // slug ที่ชนกับ route อื่นของระบบ ห้ามใช้เป็นชื่อหน้า
 const RESERVED_SLUGS = [
     'admin', 'api', 'article', 'articles', 'assets', 'static', 'public',
-    'robots.txt', 'sitemap.xml', 'wakeup', 'favicon.ico', 'home', 'en'
+    'robots.txt', 'sitemap.xml', 'wakeup', 'favicon.ico', 'home', 'en', 'v2'
 ];
 
 // อนุญาต a-z 0-9 ยัติภังค์ และอักษรไทย
