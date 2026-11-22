@@ -1,4 +1,4 @@
-<div class="w-bills pos-<%= data.position %>">
+<div class="w-bills pos-<%= data.position %><%= data.bleed ? ' bleed' : '' %>">
     <div class="w-bills-body">
         <div class="w-bills-num"><% if (text.prefix) { %><span class="w-bills-cur"><%= text.prefix %></span><% } %><span data-countup="<%= data.value %>" data-format="<%= data.format %>"><%= data.display %></span><% if (text.unit) { %> <small><%= text.unit %></small><% } %></div>
         <% if (settings.show_caption) { %><p class="w-bills-caption"><%= data.caption %></p><% } %>

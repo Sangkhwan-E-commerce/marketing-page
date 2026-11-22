@@ -55,6 +55,8 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
             hint: { th: 'อัตโนมัติ: 1x1 = เฉพาะตัวเลข · 2x2/1x2 = กราฟล่าง · การ์ดกว้าง = กราฟขวา · การ์ด 1x1 พื้นที่น้อย แนะนำ "เฉพาะตัวเลข" หรือ "เฉพาะกราฟ"', en: 'Automatic: 1x1 = number only · 2x2/1x2 = below · wide cards = right · 1x1 is small: "Number only" or "Chart only" work best' } },
         { key: 'chart_values', type: 'select', default: metric.defaultChartValues || 'per_period', label: { th: 'กราฟแสดง', en: 'Chart shows' },
             options: [opt('per_period', 'เพิ่มใหม่ในแต่ละช่วง', 'New in each period'), opt('cumulative', 'ยอดสะสม', 'Running total')] },
+        { key: 'chart_bleed', type: 'boolean', default: false, label: { th: 'กราฟเต็มขอบการ์ด (ไม่มีระยะขอบ)', en: 'Chart to the card edges (no padding)' },
+            hint: { th: 'กราฟชนขอบการ์ดด้านที่กราฟอยู่ · เหมาะกับกราฟพื้นที่/เส้น ตำแหน่งล่างหรือเฉพาะกราฟ', en: 'The chart touches the card edges on its side · best with area/line charts below or chart only' } },
         { key: 'show_axis', type: 'boolean', default: true, label: { th: 'แสดงช่วงวันที่ใต้กราฟ', en: 'Show dates under the chart' } },
         { key: 'min_live', type: 'number', default: 1, min: 1, max: 100000000000, label: metric.minLabel },
         { key: 'fallback', type: 'select', default: 'mock', label: { th: 'ถ้ายังไม่ถึงเกณฑ์หรือดึงข้อมูลไม่ได้', en: 'Below the minimum or no data' },
@@ -104,6 +106,7 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
                 return { label: l, value: Math.max(0, v), title: `${l}: ${t.prefix || ''}${nf.format(Math.floor(v))}${t.unit ? ` ${t.unit}` : ''}` };
             });
             const showChart = position !== 'none' && points.length > 1;
+            const bleed = showChart && s.chart_bleed === true;
             return {
                 source: live ? 'live' : 'mock',
                 value,
@@ -113,7 +116,9 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
                 // ข้อความใต้ตัวเลขตามช่วง: ช่วงย่อยใช้ caption_period ถ้า Widget มี (เช่น ร้านค้า "เปิดใหม่" ต่างจาก "ทั้งหมดที่เปิดใช้งาน")
                 caption: s[`caption_${locale}`] || (period !== 'all' && t.caption_period ? t.caption_period : t.caption),
                 position: showChart ? position : 'none',
-                chart: showChart ? renderChart(points, chartType, { ariaLabel: t.chart.replace('{period}', label) }) : '',
+                chart: showChart ? renderChart(points, chartType, { ariaLabel: t.chart.replace('{period}', label), edge: bleed }) : '',
+                bleed,
+                cardClass: bleed ? 'lp-card-bleed' : '',
                 axis: showChart && s.show_axis ? { first: points[0].label, last: points[points.length - 1].label } : null
             };
         }

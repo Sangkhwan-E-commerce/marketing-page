@@ -7,7 +7,8 @@ const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;
 const r2 = (n) => Math.round(n * 100) / 100;
 
 // points = [{ label, value, title }] · label = ข้อความใต้กราฟ · title = ข้อความตอนชี้ (แสดงเป็น <title>)
-function renderChart(points, type = 'bar', { ariaLabel = '' } = {}) {
+// edge = เส้น/พื้นที่ลากจากขอบซ้ายถึงขอบขวาพอดี (กราฟเต็มขอบการ์ด) · ปกติจุดอยู่กลางช่องของแต่ละช่วง
+function renderChart(points, type = 'bar', { ariaLabel = '', edge = false } = {}) {
     const W = 100;
     const H = 40;
     const list = Array.isArray(points) ? points : [];
@@ -17,7 +18,8 @@ function renderChart(points, type = 'bar', { ariaLabel = '' } = {}) {
     const y = (v) => r2(H - (v / max) * (H - 2));
     let body;
     if (type === 'line' || type === 'area') {
-        const xy = list.map((p, i) => [r2(step * i + step / 2), y(p.value)]);
+        const xAt = (i) => (edge && list.length > 1 ? r2((W * i) / (list.length - 1)) : r2(step * i + step / 2));
+        const xy = list.map((p, i) => [xAt(i), y(p.value)]);
         const line = xy.map(([px, py]) => `${px},${py}`).join(' ');
         const area = type === 'area'
             ? `<path class="w-chart-area" d="M${xy[0][0]},${H} L${line.replace(/ /g, ' L')} L${xy[xy.length - 1][0]},${H} Z" fill="currentColor" fill-opacity="0.22"/>`

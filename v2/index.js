@@ -140,6 +140,8 @@ function createV2App({
             showTitle: s.show_title !== false,
             tone: bg ? toneForBackground(bg) : (TONES.includes(s.tone) ? s.tone : (widget.tone || 'light')),
             style,
+            // คลาสเพิ่มของกรอบการ์ดที่ Widget ขอ (เช่น lp-card-bleed = กราฟเต็มขอบการ์ด) — รับเฉพาะชื่อคลาสที่ขึ้นต้น lp-card-
+            cardClass: data && typeof data.cardClass === 'string' && /^lp-card-[a-z-]+$/.test(data.cardClass) ? data.cardClass : '',
             // ชื่อที่ตั้งเองของภาษานั้น → ชื่อเดิมของการ์ดในภาษานั้น
             name: s[`title_${locale}`] || text.name,
             docUrl: widget.docPath && s.show_doc_link !== false ? `${appUrl}${widget.docPath}` : null,

@@ -30,7 +30,7 @@
         <% } else { %>
         <section class="lp-grid" aria-label="Lullapos">
             <% cards.forEach(function (card) { %>
-            <article class="lp-card lp-tone-<%= card.tone %> lp-size-<%= card.size %><%= card.mobile ? '' : ' lp-hide-mobile' %>"
+            <article class="lp-card lp-tone-<%= card.tone %> lp-size-<%= card.size %><%= card.mobile ? '' : ' lp-hide-mobile' %><%= card.cardClass ? ' ' + card.cardClass : '' %>"
                      data-widget="<%= card.id %>" data-key="<%= card.key %>" data-size="<%= card.size %>"<% if (card.style) { %> style="<%= card.style %>"<% } %>>
                 <% if (card.header) { %>
                 <header class="lp-card-head<%= card.showTitle ? "" : " is-untitled" %>">

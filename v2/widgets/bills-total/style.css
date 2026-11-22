@@ -61,3 +61,21 @@
     .lp-size-1x1 .w-bills:not(.pos-none):not(.pos-only) .w-bills-axis { display: none; }
     .lp-size-1x1 .w-bills-plot { min-height: 28px; }
 }
+
+/* ---------- กราฟเต็มขอบการ์ด (chart_bleed) ----------
+   กล่องเนื้อหาของการ์ดปกติตัดส่วนที่ล้น — การ์ดที่ขอเต็มขอบ (lp-card-bleed) ให้ล้นได้ แล้วให้ตัวการ์ด (มุมโค้ง overflow hidden) ตัดแทน
+   ขอบที่ชน: ล่าง/เฉพาะกราฟ = ซ้าย ขวา ล่าง · บน = ซ้าย ขวา · ขวา = ขวา ล่าง · ซ้าย = ซ้าย ล่าง */
+.lp-card-bleed .lp-card-body { overflow: visible; }
+.w-bills.bleed .w-bills-chart { position: relative; }
+.w-bills.bleed.pos-bottom .w-bills-chart,
+.w-bills.bleed.pos-only .w-bills-chart { margin: 0 calc(-1 * var(--lp-pad)) calc(-1 * var(--lp-pad)); }
+.w-bills.bleed.pos-top .w-bills-chart { margin: 0 calc(-1 * var(--lp-pad)); }
+.w-bills.bleed.pos-right .w-bills-chart { margin: 0 calc(-1 * var(--lp-pad)) calc(-1 * var(--lp-pad)) 0; }
+.w-bills.bleed.pos-left .w-bills-chart { margin: 0 0 calc(-1 * var(--lp-pad)) calc(-1 * var(--lp-pad)); }
+.w-bills.bleed .w-bills-plot { min-height: 56px; }
+/* วันที่ใต้กราฟลอยอยู่ในกราฟ ไม่ดันกราฟออกจากขอบ */
+.w-bills.bleed .w-bills-axis { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 0 var(--lp-pad) 8px; pointer-events: none; }
+.w-bills.bleed.pos-top .w-bills-axis { bottom: auto; top: 0; padding-top: 6px; }
+@media (max-width: 639.98px) {
+    .w-bills.bleed.pos-right .w-bills-chart, .w-bills.bleed.pos-left .w-bills-chart { margin: 0 calc(-1 * var(--lp-pad)) calc(-1 * var(--lp-pad)); }
+}
