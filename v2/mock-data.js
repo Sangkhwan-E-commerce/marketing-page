@@ -47,6 +47,16 @@ const QR_ORDER = {
     ]
 };
 
+// ออเดอร์จากตู้ Kiosk (นำกลับบ้าน ได้เลขคิว) ใช้เล่าขั้นตอนในการ์ด kiosk-flow
+const KIOSK_ORDER = {
+    queue: 119,
+    items: [
+        { th: 'ข้าวกะเพราไก่', en: 'Basil chicken rice', qty: 1, price: 75, icon: 'bi-egg-fried' },
+        { th: 'ชาไทยเย็น', en: 'Thai iced tea', qty: 2, price: 45, icon: 'bi-cup-straw' },
+        { th: 'ครัวซองต์', en: 'Croissant', qty: 1, price: 55, icon: 'bi-basket' }
+    ]
+};
+
 // ล็อตสินค้าที่ใกล้หมดอายุ — ระบบตัดล็อตที่หมดอายุก่อนออกก่อน (FEFO)
 const EXPIRING_LOTS = [
     { product: { th: 'นมสดพาสเจอร์ไรส์ 2 ลิตร', en: 'Fresh milk 2 L' }, lot: 'L2611-03', daysLeft: 2, qty: 6, unit: { th: 'ขวด', en: 'btl' } },
@@ -88,4 +98,4 @@ function mockDaily(today, days = 800, total = BILLS_TOTAL) {
     });
 }
 
-module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, QR_ORDER, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, STORES_TOTAL, mockDaily };
+module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, QR_ORDER, KIOSK_ORDER, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, STORES_TOTAL, mockDaily };

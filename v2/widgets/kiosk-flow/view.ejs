@@ -1,0 +1,58 @@
+<%
+    var sc = data.scene;
+    var money = function (v) { return sc.baht + fmt(v); };
+%>
+<ol class="w-ksk w-ksk-<%= settings.palette === 'accent' ? 'accent' : 'colorful' %><%= data.scenes ? ' has-scenes' : '' %><%= settings.show_desc ? '' : ' no-desc' %><%= settings.show_numbers ? '' : ' no-numbers' %>"
+    data-animate="<%= data.animate ? '1' : '0' %>" data-interval="<%= data.interval %>">
+    <% data.steps.forEach(function (st) { %>
+    <li class="w-ksk-step is-<%= st.key %>">
+        <div class="w-ksk-band">
+            <span class="w-ksk-no" aria-hidden="true"><%= st.no %></span>
+            <span class="w-ksk-label"><span class="lp-sr-only"><%= data.stepWord %> <%= st.no %>: </span><%= st.label %></span>
+        </div>
+        <% if (data.scenes) { %>
+        <div class="w-ksk-scene" aria-hidden="true">
+            <% if (st.key === 'order') { %>
+            <div class="w-ksk-kiosk">
+                <div class="w-ksk-kiosk-top"><%= sc.menu %></div>
+                <div class="w-ksk-tiles">
+                    <% data.items.forEach(function (i, n) { %>
+                    <div class="w-ksk-tile<%= n === 0 ? ' is-tap' : '' %>" title="<%= i.name %>"><i class="bi <%= i.icon %>"></i></div>
+                    <% }) %>
+                </div>
+                <div class="w-ksk-kiosk-btn"><%= sc.checkout %> (<%= data.count %>)</div>
+                <i class="bi bi-hand-index-thumb-fill w-ksk-finger"></i>
+            </div>
+            <div class="w-ksk-stand"></div>
+            <% } else if (st.key === 'pay') { %>
+            <div class="w-ksk-kiosk">
+                <div class="w-ksk-kiosk-top"><%= sc.pay %> <%= money(data.total) %></div>
+                <div class="w-ksk-qr"><i class="bi bi-qr-code"></i><span><%= sc.promptpay %></span></div>
+                <% if (data.cash) { %><div class="w-ksk-cash"><i class="bi bi-cash-coin"></i> <span class="w-ksk-ellipsis"><%= sc.cash %></span></div><% } %>
+                <div class="w-ksk-paid"><i class="bi bi-check-circle-fill"></i> <%= sc.queue %> <%= data.queue %></div>
+            </div>
+            <i class="bi bi-phone-fill w-ksk-phone"></i>
+            <% } else if (st.key === 'kitchen') { %>
+            <div class="w-ksk-kds">
+                <div class="w-ksk-kds-head"><span><%= sc.queue %> <%= data.queue %></span><span class="w-ksk-chip"><span class="w-ksk-chip-a"><%= sc.pending %></span><span class="w-ksk-chip-b"><%= sc.cooking %></span></span></div>
+                <% data.items.forEach(function (i) { %><div class="w-ksk-line"><b><%= i.qty %>×</b> <span class="w-ksk-ellipsis"><%= i.name %></span></div><% }) %>
+                <div class="w-ksk-kds-done"><i class="bi bi-check2-circle"></i> <%= sc.done %></div>
+            </div>
+            <% } else { %>
+            <div class="w-ksk-pickup">
+                <div class="w-ksk-board">
+                    <div class="w-ksk-board-head"><span class="w-ksk-ellipsis"><%= sc.now_serving %></span><% if (data.voice) { %><i class="bi bi-volume-up-fill w-ksk-voice"></i><% } %></div>
+                    <div class="w-ksk-board-no"><%= data.queue %></div>
+                </div>
+                <div class="w-ksk-bag"><i class="bi bi-bag-check-fill"></i></div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+        <div class="w-ksk-text">
+            <h3 class="w-ksk-title"><%= st.title %></h3>
+            <p class="w-ksk-desc"><%= st.desc %></p>
+        </div>
+    </li>
+    <% }) %>
+</ol>
