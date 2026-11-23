@@ -39,8 +39,8 @@ test('browser formatter matches the server formatter', () => {
     }
 });
 
-test('stats source caches 10 minutes, dedupes, and keeps the last good value', async () => {
-    let t = 0;
+test('stats source: once per Thai day, dedupes, clear() on publish, retries failures every 15 min with the last good value', async () => {
+    let t = Date.parse('2026-11-22T01:00:00Z'); // 08:00 เวลาไทย
     let calls = 0;
     let fail = false;
     const fetchImpl = async () => { calls++; if (fail) throw new Error('down'); return { ok: true, json: async () => ({ data: { bills_total: 6580 } }) }; };
@@ -48,11 +48,18 @@ test('stats source caches 10 minutes, dedupes, and keeps the last good value', a
     const [a, b] = await Promise.all([get(), get()]);
     assert.equal(a.bills_total, 6580);
     assert.equal(b.bills_total, 6580);
-    assert.equal(calls, 1);
-    t = 5 * 60 * 1000; await get();
-    assert.equal(calls, 1, 'still cached');
-    t = 11 * 60 * 1000; fail = true;
+    assert.equal(calls, 1, 'concurrent requests share one fetch');
+    t += 15 * 3600 * 1000; await get(); // 23:00 วันเดิม
+    assert.equal(calls, 1, 'same Thai day = no refetch');
+    get.clear(); await get();
+    assert.equal(calls, 2, 'clear() (publish) refetches');
+    t += 2 * 3600 * 1000; fail = true; // 01:00 วันถัดไป ต่อไม่ได้
     assert.equal((await get()).bills_total, 6580, 'last good value on failure');
+    assert.equal(calls, 3);
+    t += 5 * 60 * 1000; await get();
+    assert.equal(calls, 3, 'failed fetch is not retried on every request');
+    t += 11 * 60 * 1000; await get();
+    assert.equal(calls, 4, 'retried after 15 minutes');
     const none = createStatsSource({ appUrl: 'x', fetchImpl: async () => { throw new Error('no'); }, logger: silent });
     assert.equal(await none(), null);
 });
@@ -103,4 +110,12 @@ test('the stat card is not listed as a product feature in JSON-LD or llms.txt', 
     const features = ld['@graph'][3].featureList.join(' ');
     assert.ok(!features.includes('บิลที่ออกผ่าน'));
     assert.ok(features.includes('ยอดขายวันนี้'));
+});
+
+test('live card shows "data as of" the date the stats were computed (Thai time)', async () => {
+    // 2026-11-22T18:00Z = 23 พ.ย. 01:00 เวลาไทย
+    const card = cardHtml(await render([{ widget: 'bills-total', size: '2x2' }], { bills_total: 6580, daily: [{ d: '2026-11-22', n: 6580 }], updated_at: '2026-11-22T18:00:00Z' }));
+    assert.match(card, /<p class="w-bills-updated">[^<]*<i[^>]*><\/i> ข้อมูล ณ 23 พ\.ย\. 2569<\/p>/);
+    const sample = cardHtml(await render([{ widget: 'bills-total', size: '2x2' }], null));
+    assert.ok(!sample.includes('w-bills-updated'), 'no date on sample numbers');
 });

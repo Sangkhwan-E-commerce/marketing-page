@@ -22,7 +22,7 @@ module.exports = createStatWidget({
             period_all: 'ตั้งแต่เปิดใช้งาน',
             period_year: 'ปี {year}',
             channels: 'ขายหน้าร้าน · บริการ · คลินิก · ขายส่ง · อื่นๆ',
-            updated: 'อัปเดตทุก 10 นาที',
+            updated: 'ข้อมูล ณ {date}',
             chart: 'กราฟจำนวนบิล {period}'
         },
         en: {
@@ -34,7 +34,7 @@ module.exports = createStatWidget({
             period_all: 'since launch',
             period_year: '{year}',
             channels: 'POS · services · clinics · wholesale · more',
-            updated: 'Updated every 10 minutes',
+            updated: 'Data as of {date}',
             chart: 'Bills chart, {period}'
         }
     }

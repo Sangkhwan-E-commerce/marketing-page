@@ -4,7 +4,7 @@
         <% if (settings.show_caption) { %><p class="w-bills-caption"><%= data.caption %></p><% } %>
         <p class="w-bills-period"><i class="bi bi-calendar3" aria-hidden="true"></i> <%= data.periodLabel %></p>
         <% if (settings.show_channels) { %><p class="w-bills-channels"><%= text.channels %></p><% } %>
-        <% if (data.source === 'live' && settings.show_updated) { %><p class="w-bills-updated"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <%= text.updated %></p><% } %>
+        <% if (data.updatedLabel && settings.show_updated) { %><p class="w-bills-updated"><i class="bi bi-clock-history" aria-hidden="true"></i> <%= data.updatedLabel %></p><% } %>
     </div>
     <% if (data.chart) { %>
     <div class="w-bills-chart">

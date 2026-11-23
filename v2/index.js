@@ -45,6 +45,7 @@ function createV2App({
     loadSiteSettings = null,    // ตั้งค่าเว็บไซต์ที่เผยแพร่ — null = DEFAULT_SITE
     loadDraft = null,           // (token) => ฉบับร่าง { site, layout } สำหรับหน้าดูตัวอย่าง — null = ไม่มีหน้าดูตัวอย่าง
     loadStats = null,           // () => สถิติจริง { bills_total } (v2/stats.js) — null = การ์ดข้อมูลจริงใช้ตัวอย่าง
+    revalidate = null,          // (nonce) => true/false — ล้างแคชตอน Admin กดเผยแพร่ (v2/db.js) · null = ไม่มี /api/revalidate
     siteCacheMs = 60000,        // แคชตั้งค่าเว็บไซต์ · ตั้ง 0 เมื่อตัวอ่านแคชเองแล้ว (v2/db.js)
     appUrl = trimSlash(process.env.APP_BASE_URL || DEFAULT_APP_URL),
     siteUrl = trimSlash(process.env.SITE_URL || DEFAULT_SITE_URL),
@@ -106,6 +107,22 @@ function createV2App({
     app.get('/api/widgets.json', (req, res) => {
         res.set('Cache-Control', 'no-store').json({ version: 1, sizes: SIZES, locales: LOCALES, widgets: describeWidgets(widgets), defaultLayout: DEFAULT_LAYOUT });
     });
+    // 🌟 Admin กดเผยแพร่ → pos-free-app แจ้งให้ล้างแคช (ตั้งค่า/การ์ด + สถิติ) ทันที
+    //    รหัสใช้ครั้งเดียวตรวจกับ lp_site ที่ v2/db.js · รหัสผิด = 403 ไม่ล้างอะไร · จำกัดไม่เกิน 1 ครั้งต่อ 2 วินาที (กันยิงถี่)
+    let lastRevalidate = 0;
+    app.post('/api/revalidate', express.json({ limit: '1kb' }), async (req, res, next) => {
+        try {
+            res.set('Cache-Control', 'no-store');
+            if (!revalidate) return res.status(404).json({ status: 'error' });
+            if (Date.now() - lastRevalidate < 2000) return res.status(429).json({ status: 'error' });
+            lastRevalidate = Date.now();
+            const ok = await revalidate(req.body && req.body.nonce);
+            if (!ok) return res.status(403).json({ status: 'error' });
+            if (loadStats && typeof loadStats.clear === 'function') loadStats.clear();
+            res.json({ status: 'success' });
+        } catch (err) { next(err); }
+    });
+
     app.get('/api/site-settings.json', (req, res) => {
         res.set('Cache-Control', 'no-store').json({ version: 1, locales: LOCALES, fields: SITE_FIELDS, defaults: DEFAULT_SITE });
     });

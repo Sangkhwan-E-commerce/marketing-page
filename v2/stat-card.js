@@ -65,7 +65,7 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
             hint: { th: `เว้นว่าง = "${text.th.caption}" · บรรทัดบอกช่วงเวลาแสดงเสมอ`, en: `Empty = "${text.en.caption}" · the period line always shows` } },
         { key: 'show_caption', type: 'boolean', default: true, label: { th: 'แสดงข้อความใต้ตัวเลข', en: 'Show the line under the number' } },
         { key: 'show_channels', type: 'boolean', default: true, label: { th: 'แสดงรายชื่อระบบ', en: 'Show the module list' } },
-        { key: 'show_updated', type: 'boolean', default: true, label: { th: 'แสดง "อัปเดตทุก 10 นาที" (ข้อมูลจริง)', en: 'Show "Updated every 10 minutes" (live)' } }
+        { key: 'show_updated', type: 'boolean', default: true, label: { th: 'แสดง "ข้อมูล ณ วันที่" (ข้อมูลจริง)', en: 'Show "Data as of" date (live)' } }
     ];
 
     return {
@@ -118,6 +118,8 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
                 position: showChart ? position : 'none',
                 chart: showChart ? renderChart(points, chartType, { ariaLabel: t.chart.replace('{period}', label), edge: bleed }) : '',
                 bleed,
+                // "ข้อมูล ณ วันที่" — วันที่ pos-free-app คำนวณสถิติชุดนี้ (แคชวันละครั้ง + ทุกครั้งที่เผยแพร่)
+                updatedLabel: live && stats.updated_at ? t.updated.replace('{date}', new Intl.DateTimeFormat(NUMBER_LOCALE[locale] || 'th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(stats.updated_at))) : '',
                 cardClass: bleed ? 'lp-card-bleed' : '',
                 axis: showChart && s.show_axis ? { first: points[0].label, last: points[points.length - 1].label } : null
             };

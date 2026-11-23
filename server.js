@@ -43,7 +43,9 @@ const getV2Pool = () => {
 };
 //    สถิติจริงของการ์ดข้อมูลจริง ดึงจาก pos-free-app (APP_BASE_URL ค่าตั้งต้น https://app.lullapos.com) แคช 10 นาที
 const v2Stats = createStatsSource({ appUrl: (process.env.APP_BASE_URL || 'https://app.lullapos.com').replace(/\/+$/, '') });
-app.use('/v2', createV2App({ ...createDbSources({ getPool: getV2Pool }), siteCacheMs: 0, loadStats: v2Stats }));
+//    แคช: ตั้งค่า/การ์ด/สถิติ อ่านใหม่วันละครั้ง หรือทันทีที่ Admin กดเผยแพร่ (POST /v2/api/revalidate)
+const v2Db = createDbSources({ getPool: getV2Pool });
+app.use('/v2', createV2App({ ...v2Db, siteCacheMs: 0, loadStats: v2Stats }));
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 

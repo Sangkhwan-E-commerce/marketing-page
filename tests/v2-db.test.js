@@ -16,6 +16,7 @@ function fakePool(row, { fail = false } = {}) {
         query: async (sql, params = []) => {
             calls.push(sql);
             if (fail) throw new Error('relation "lp_site" does not exist');
+            if (sql.includes('revalidate_nonce')) return { rows: row.revalidate_nonce === params[0] ? [{ '?column?': 1 }] : [] };
             if (sql.includes('preview_token')) {
                 const ok = row.preview_token === params[0] && row.preview_expires_at > Date.now();
                 return { rows: ok ? [{ draft: row.draft, published: row.published }] : [] };
@@ -32,16 +33,52 @@ async function withServer(options, run) {
     try { await run(`http://127.0.0.1:${server.address().port}`); } finally { await new Promise(r => server.close(r)); }
 }
 
-test('published row is cached and shared by layout and site loaders', async () => {
-    let t = 0;
-    const pool = fakePool({ published: { layout: [{ widget: 'stock-expiry' }], site: { brand: { theme_color: '#123456' } } } });
+test('published row is read once and kept all day; re-read only after publish (revalidate) or the next Thai day', async () => {
+    // 2026-11-22 10:00 เวลาไทย = 03:00 UTC
+    let t = Date.parse('2026-11-22T03:00:00Z');
+    const row = { published: { layout: [{ widget: 'stock-expiry' }], site: { brand: { theme_color: '#123456' } } }, revalidate_nonce: 'f'.repeat(48) };
+    const pool = fakePool(row);
     const db = createDbSources({ getPool: () => pool, now: () => t, logger: silent });
     assert.deepEqual(await db.loadPublished(), [{ widget: 'stock-expiry' }]);
     assert.deepEqual(await db.loadSiteSettings(), { brand: { theme_color: '#123456' } });
     assert.equal(pool.calls.length, 1, 'second loader hits the cache');
-    t = 61000;
+    t += 13 * 3600 * 1000; // 23:00 เวลาไทย วันเดิม
     await db.loadPublished();
-    assert.equal(pool.calls.length, 2, 'cache expires after 60s');
+    assert.equal(pool.calls.length, 1, 'no re-read during the same day');
+
+    // กดเผยแพร่: รหัสผิด = ไม่ล้าง · รหัสถูก = อ่านใหม่ครั้งถัดไป
+    assert.equal(await db.revalidate('0'.repeat(48)), false);
+    assert.equal(await db.revalidate("' OR 1=1"), false, 'bad format never reaches the database');
+    await db.loadPublished();
+    assert.equal(pool.calls.filter(s => s.startsWith('SELECT published')).length, 1);
+    assert.equal(await db.revalidate('f'.repeat(48)), true);
+    await db.loadPublished();
+    assert.equal(pool.calls.filter(s => s.startsWith('SELECT published')).length, 2, 'fresh read after publish');
+
+    t += 2 * 3600 * 1000; // 01:00 วันถัดไป เวลาไทย
+    await db.loadPublished();
+    assert.equal(pool.calls.filter(s => s.startsWith('SELECT published')).length, 3, 'daily safety re-read');
+});
+
+test('POST /api/revalidate clears settings and stats; wrong code is refused; rapid calls are limited', async () => {
+    let reads = 0;
+    let statsCleared = 0;
+    const loadStats = async () => ({ bills_total: 1, daily: [] });
+    loadStats.clear = () => { statsCleared++; };
+    const opts = {
+        loadPublished: async () => { reads++; return null; },
+        revalidate: async (nonce) => nonce === 'a'.repeat(48),
+        loadStats
+    };
+    await withServer(opts, async base => {
+        const post = (nonce) => fetch(`${base}/v2/api/revalidate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nonce }) });
+        assert.equal((await post('b'.repeat(48))).status, 403);
+        assert.equal(statsCleared, 0);
+        await new Promise(r => setTimeout(r, 2100));
+        assert.equal((await post('a'.repeat(48))).status, 200);
+        assert.equal(statsCleared, 1);
+        assert.equal((await post('a'.repeat(48))).status, 429, 'second call within 2 seconds is limited');
+    });
 });
 
 test('never published / missing table → null (site uses defaults), keeps last good value on failure', async () => {
