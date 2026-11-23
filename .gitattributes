@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# ไลบรารีที่คัดลอกมาเก็บเอง ห้ามแปลงบรรทัด (เหมือน pos-free-app vendor/** -text)
+v2/public/vendor/** -text
