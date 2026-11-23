@@ -13,8 +13,8 @@ const DAILY = [{ d: '2025-03-01', n: 4 }, { d: '2026-02-10', n: 3 }, { d: '2026-
 const defaultsOf = (w) => Object.fromEntries(w.settings.filter(s => !s.localized).map(s => [s.key, s.default]));
 const run = (w, settings, stats = { stores_total: 15, stores_daily: DAILY }, size = '2x1') =>
     w.getData({ mock, locale: 'th', settings: { ...defaultsOf(w), ...settings }, source: 'live', size, stats, today: TODAY });
-// ค่าของแท่ง/จุดในกราฟ อ่านจาก <title> ("ป้าย: n ร้าน")
-const values = (svg) => [...svg.matchAll(/<title>[^<]*: ([\d,]+)/g)].map(m => Number(m[1].replace(/,/g, '')));
+// ค่าของแท่ง/จุดในกราฟ = สเปกที่ส่งให้ Chart.js
+const values = (spec) => spec.values;
 
 test('stores card: live total, period caption switches to "new stores", unit ร้าน', () => {
     assert.ok(stores && stores.feature === false);

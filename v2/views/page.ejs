@@ -62,6 +62,7 @@
 
 <%- include('_footer') %>
 
+    <% if (needsChartJs) { %><script src="<%= base %>/assets/vendor/chartjs/4.5.1/chart.umd.min.js"></script><% } %>
     <script src="<%= base %>/assets/js/v2.js"></script>
     <script src="<%= base %>/assets/widgets.js"></script>
     <script>window.LP && window.LP.start({ locale: '<%= locale %>' });</script>

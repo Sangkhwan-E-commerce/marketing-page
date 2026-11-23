@@ -8,7 +8,7 @@
     </div>
     <% if (data.chart) { %>
     <div class="w-bills-chart">
-        <div class="w-bills-plot"><%- data.chart %></div>
+        <div class="w-bills-plot" data-chart="<%= JSON.stringify(data.chart) %>"><canvas role="img" aria-label="<%= data.chart.ariaLabel %>"></canvas></div>
         <% if (data.axis) { %><div class="w-bills-axis"><span><%= data.axis.first %></span><span><%= data.axis.last %></span></div><% } %>
     </div>
     <% } %>

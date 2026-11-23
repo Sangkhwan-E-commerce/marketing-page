@@ -7,7 +7,7 @@
 //    หน้าตาใช้ widgets/bills-total/view.ejs + style.css ร่วมกัน (คลาส w-bills-*)
 const { FORMATS, formatStat } = require('./format');
 const { PERIODS, summarize, todayIn } = require('./series');
-const { CHART_TYPES, renderChart } = require('./chart');
+const { CHART_TYPES, buildChartSpec } = require('./chart');
 
 const POSITIONS = ['auto', 'right', 'left', 'top', 'bottom', 'none', 'only'];
 const NUMBER_LOCALE = { th: 'th-TH', en: 'en-GB' };
@@ -103,7 +103,7 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
                 const l = pointLabel(p.key, sum.bucket, locale);
                 running += p.value;
                 const v = cumulative ? running : p.value;
-                return { label: l, value: Math.max(0, v), title: `${l}: ${t.prefix || ''}${nf.format(Math.floor(v))}${t.unit ? ` ${t.unit}` : ''}` };
+                return { label: l, value: Math.max(0, v), tooltip: `${t.prefix || ''}${nf.format(Math.floor(v))}${t.unit ? ` ${t.unit}` : ''}` };
             });
             const showChart = position !== 'none' && points.length > 1;
             const bleed = showChart && s.chart_bleed === true;
@@ -116,7 +116,8 @@ function createStatWidget({ id, tone = 'blue', metric, text, defaultSize = '1x1'
                 // ข้อความใต้ตัวเลขตามช่วง: ช่วงย่อยใช้ caption_period ถ้า Widget มี (เช่น ร้านค้า "เปิดใหม่" ต่างจาก "ทั้งหมดที่เปิดใช้งาน")
                 caption: s[`caption_${locale}`] || (period !== 'all' && t.caption_period ? t.caption_period : t.caption),
                 position: showChart ? position : 'none',
-                chart: showChart ? renderChart(points, chartType, { ariaLabel: t.chart.replace('{period}', label), edge: bleed }) : '',
+                // สเปกให้ Chart.js วาดฝั่งเบราว์เซอร์ (widgets/bills-total/script.js) · null = ไม่มีกราฟ
+                chart: showChart ? buildChartSpec(points, chartType, { ariaLabel: t.chart.replace('{period}', label), edge: bleed }) : null,
                 bleed,
                 // "ข้อมูล ณ วันที่" — วันที่ pos-free-app คำนวณสถิติชุดนี้ (แคชวันละครั้ง + ทุกครั้งที่เผยแพร่)
                 updatedLabel: live && stats.updated_at ? t.updated.replace('{date}', new Intl.DateTimeFormat(NUMBER_LOCALE[locale] || 'th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(stats.updated_at))) : '',

@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 const express = require('express');
 
 const { summarize, periodRange, todayIn } = require('../v2/series');
-const { renderChart } = require('../v2/chart');
+const { buildChartSpec } = require('../v2/chart');
+const { specOf } = require('./v2-chart-bleed.test.js');
 const mock = require('../v2/mock-data');
 const { loadWidgets, SIZES } = require('../v2/registry');
 const { createV2App } = require('../v2');
@@ -55,14 +56,13 @@ test('sample series totals exactly the 8,950 sample number', () => {
     assert.deepEqual(mock.mockDaily(TODAY), daily, 'same numbers every time');
 });
 
-test('renderChart draws bars / line / area as plain SVG with tooltips', () => {
-    const pts = [{ label: 'a', value: 1, title: 'A: 1' }, { label: 'b', value: 3, title: 'B <3>' }];
-    const bar = renderChart(pts, 'bar', { ariaLabel: 'x' });
-    assert.equal((bar.match(/<rect /g) || []).length, 2);
-    assert.match(bar, /<title>B &lt;3&gt;<\/title>/);
-    assert.match(renderChart(pts, 'line'), /<polyline /);
-    assert.match(renderChart(pts, 'area'), /<path class="w-chart-area"/);
-    assert.equal(renderChart([], 'bar'), '');
+test('buildChartSpec hands Chart.js labels, non-negative values and tooltips', () => {
+    const pts = [{ label: 'a', value: 1, tooltip: '1 บิล' }, { label: 'b', value: -3, tooltip: '฿<3>' }];
+    const spec = buildChartSpec(pts, 'bar', { ariaLabel: 'x' });
+    assert.deepEqual(spec, { type: 'bar', labels: ['a', 'b'], values: [1, 0], tooltips: ['1 บิล', '฿<3>'], edge: false, ariaLabel: 'x' });
+    assert.equal(buildChartSpec(pts, 'pie').type, 'bar', 'unknown type → bar');
+    assert.equal(buildChartSpec(pts, 'area').type, 'area');
+    assert.equal(buildChartSpec([], 'bar'), null);
 });
 
 test('widget: period label always shown, chart position follows settings and size', () => {
@@ -74,7 +74,7 @@ test('widget: period label always shown, chart position follows settings and siz
     assert.equal(run({}, '3x1').position, 'right');
     assert.equal(run({ chart_position: 'left' }).position, 'left');
     assert.equal(run({ chart_position: 'only' }).position, 'only');
-    assert.match(run({ chart_type: 'line' }).chart, /<polyline /);
+    assert.equal(run({ chart_type: 'line' }).chart.type, 'line');
     assert.equal(run({}).periodLabel, 'ตั้งแต่เปิดใช้งาน');
     assert.equal(run({ period: 'this_year' }).periodLabel, 'ปี พ.ศ. 2569', 'Thai page uses the Buddhist year');
     assert.match(run({ period: 'custom', from: '2026-01-01', to: '2026-03-31' }).periodLabel, /1 ม\.ค\. 2569 – 31 มี\.ค\. 2569/);
@@ -100,7 +100,9 @@ test('page: wide card with chart on the left and live this-year number', async (
         const card = /<article[^>]*data-widget="bills-total"[\s\S]*?<\/article>/.exec(html)[0];
         assert.match(card, /lp-size-3x1/);
         assert.match(card, /class="w-bills pos-left"/);
-        assert.match(card, /<path class="w-chart-area"/);
+        assert.equal(specOf(card).type, 'area');
+        assert.match(card, /<canvas role="img" aria-label="[^"]+"><\/canvas>/);
+        assert.match(html, /<script src="\/v2\/assets\/vendor\/chartjs\/4\.5\.1\/chart\.umd\.min\.js"><\/script>/, 'Chart.js loaded from our own files');
         assert.match(card, /w-bills-period/);
         assert.match(card, /lp-badge-live/);
     } finally { await new Promise(r => server.close(r)); }

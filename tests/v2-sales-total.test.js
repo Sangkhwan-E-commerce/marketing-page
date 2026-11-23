@@ -33,7 +33,8 @@ test('live sales: baht from sales_daily, period sums, satang floored, refunds su
     const year = run({ period: 'this_year', format: 'compact' }, stats);
     assert.equal(year.value, 134700);
     assert.equal(year.display, '134.7k');
-    assert.ok(!/-/.test(year.chart.replace(/viewBox="[^"]*"/, '').match(/height="[^"]*"/g).join('')), 'negative refund days drawn as 0-height bars, not upside down');
+    assert.ok(year.chart.values.every(v => v >= 0), 'negative refund days drawn as 0, not upside down');
+    assert.ok(year.chart.tooltips.every(t => t.startsWith('฿')), 'tooltips in baht');
 });
 
 test('no data / below minimum → sample ฿1.85M with the sample badge; hide on request', () => {
@@ -64,7 +65,7 @@ test('page: default layout includes the 4x1 sales card with ฿ prefix and a cha
         assert.match(card, /lp-size-4x1/);
         assert.match(card, /<span class="w-bills-cur">฿<\/span><span data-countup="1850000" data-format="compact">1\.85M<\/span><\/div>/);
         assert.match(card, /class="w-bills pos-right"/);
-        assert.match(card, /<svg class="w-chart w-chart-bar"/);
+        assert.match(card, /data-chart="[^"]+"><canvas /);
         assert.match(card, /ยอดขายสุทธิ ทุกระบบ/);
         assert.match(card, /class="lp-badge"/, 'sample badge');
     } finally { await new Promise(r => server.close(r)); }

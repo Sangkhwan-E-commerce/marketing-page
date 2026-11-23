@@ -81,6 +81,8 @@ function createV2App({
         next();
     });
 
+    // ไลบรารีใน vendor/ ตั้งชื่อโฟลเดอร์ตามเวอร์ชัน (ไฟล์ไม่เปลี่ยน) → แคชได้ยาว 1 ปี · ไฟล์อื่นของเว็บแคชสั้นตามเดิม
+    app.use('/assets/vendor', express.static(path.join(__dirname, 'public', 'vendor'), { maxAge: production ? '365d' : 0, immutable: production, index: false }));
     app.use('/assets', express.static(path.join(__dirname, 'public'), { maxAge: assetMaxAge, index: false }));
     app.get('/assets/widgets.css', (req, res) => res.type('text/css').set('Cache-Control', cacheHeader).send(widgetCss));
     app.get('/assets/widgets.js', (req, res) => res.type('application/javascript').set('Cache-Control', cacheHeader).send(widgetJs));
@@ -193,6 +195,8 @@ function createV2App({
             const enUrl = `${base}/en`;
             const localFeatures = features.map(f => ({ name: f.name[locale], description: f.description[locale] }));
             res.render('page', {
+                // โหลด Chart.js (~200 KB) เฉพาะหน้าที่มีการ์ดกราฟ
+                needsChartJs: cards.some(c => c.html.includes('data-chart=')),
                 locale,
                 t: createT(locale),
                 cards,
