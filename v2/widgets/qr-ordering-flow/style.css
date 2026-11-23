@@ -2,6 +2,9 @@
    ขนาด: 4x2 = 4 คอลัมน์มีภาพ · 2x2 (และ 4x2 บนแท็บเล็ต) = 2x2 มีภาพ ไม่มีคำอธิบาย · 4x1 = 4 คอลัมน์ หัวข้อเท่านั้น · 1x2 = รายการแนวตั้ง
    มือถือ: ความสูงตามเนื้อหา · มีภาพ = 2 คอลัมน์ · ไม่มีภาพ = รายการ
    ⚠️ ไม่ใช้ color-mix() — สีอ่อนของแต่ละขั้นเขียนเป็น rgba ตรงๆ */
+/* เผื่อที่ให้ขั้นที่ไฮไลต์ลอยขึ้น + กรอบ + เงา ไม่โดน overflow: hidden ของ .lp-card-body ตัดขอบ
+   (ขยายเข้าไปใน padding 24px ของการ์ด แล้วคืนเป็น padding → เนื้อหายังตรงแนวหัวการ์ดเหมือนเดิม) */
+.lp-card[data-widget="qr-ordering-flow"] .lp-card-body { margin: -8px -12px -14px; padding: 8px 12px 14px; }
 .w-qrf { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); min-height: 0; }
 .w-qrf.has-scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
@@ -94,7 +97,7 @@
 
 /* ---------- ไฮไลต์ทีละขั้น (script.js ใส่ is-playing / is-active · ไม่มี JS หรือผู้ชมลดการเคลื่อนไหว = ภาพนิ่งครบทุกขั้น) ---------- */
 .w-qrf.is-playing .w-qrf-step { opacity: 0.86; }
-.w-qrf.is-playing .w-qrf-step.is-active { opacity: 1; transform: translateY(-3px); box-shadow: 0 0 0 2px var(--s), 0 10px 22px rgba(15, 23, 42, 0.12); }
+.w-qrf.is-playing .w-qrf-step.is-active { opacity: 1; transform: translateY(-3px); box-shadow: 0 0 0 2px var(--s), 0 6px 14px rgba(15, 23, 42, 0.12); }
 .w-qrf.is-playing .is-active .w-qrf-plus { animation: w-qrf-pulse 0.9s ease-in-out 2; }
 .w-qrf.is-playing .is-active .w-qrf-scan-icon { animation: w-qrf-blink 1s ease-in-out 2; }
 .w-qrf.is-playing .is-active .w-qrf-popup { animation: w-qrf-pop 0.5s ease-out both; }
