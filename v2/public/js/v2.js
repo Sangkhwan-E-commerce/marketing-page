@@ -84,5 +84,127 @@
         for (var j = 0; j < cards.length; j++) io.observe(cards[j]);
     }
 
-    window.LP = { widget: widget, start: start, format: format, countUp: countUp };
+    // ---------- กราฟกลางของทุกการ์ด (Chart.js 4.5.1 — เจ้าของ 2026-11-23: ใช้ Chart.js ทั้งหน้า) ----------
+    //    การ์ดใส่ <div data-chart="สเปก"><canvas></canvas></div> (สเปกจาก v2/chart.js) แล้วเรียก LP.drawChart(กล่อง, ctx)
+    //    สี = สีตัวอักษรของกล่อง (CSS ของการ์ดตั้งเป็นสีเน้น) · ไม่คำนวณตัวเลขที่นี่ — เซิร์ฟเวอร์คิดมาให้แล้ว
+    function withAlpha(color, a) {
+        var m = /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(color || '');
+        return m ? 'rgba(' + m[1] + ', ' + m[2] + ', ' + m[3] + ', ' + a + ')' : color;
+    }
+    // ป้ายเหนือแท่งที่เน้น (เช่น "ขายดีสุด")
+    var highlightLabelPlugin = {
+        id: 'lpHighlightLabel',
+        afterDatasetsDraw: function (chart, args, opts) {
+            if (!opts || !opts.text || opts.index == null) return;
+            var meta = chart.getDatasetMeta(0);
+            var bar = meta && meta.data[opts.index];
+            if (!bar) return;
+            var c = chart.ctx;
+            c.save();
+            c.font = '700 11px ' + opts.font;
+            var w = c.measureText(opts.text).width + 14;
+            var x = bar.x - w / 2;
+            var y = bar.y - 24;
+            c.fillStyle = opts.bg;
+            if (c.roundRect) { c.beginPath(); c.roundRect(x, y, w, 18, 9); c.fill(); } else { c.fillRect(x, y, w, 18); }
+            c.fillStyle = opts.ink;
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(opts.text, bar.x, y + 9);
+            c.restore();
+        }
+    };
+
+    function drawChart(box, ctx, card) {
+        if (!box || !window.Chart || box.getAttribute('data-drawn')) return null;
+        var spec;
+        try { spec = JSON.parse(box.getAttribute('data-chart')); } catch (e) { return null; }
+        var canvas = box.querySelector('canvas');
+        if (!spec || !canvas) return null;
+        box.setAttribute('data-drawn', '1');
+        var color = window.getComputedStyle(box).color;
+        var font = window.getComputedStyle(document.body).fontFamily;
+        var animation = ctx && ctx.reducedMotion ? false : { duration: 800, easing: 'easeOutCubic' };
+        var tooltip = {
+            displayColors: spec.type === 'share',
+            titleFont: { family: font },
+            bodyFont: { family: font, weight: '700' },
+            callbacks: {
+                title: function (items) { return items.length && spec.type !== 'share' ? spec.labels[items[0].dataIndex] : ''; },
+                label: function (item) { return spec.tooltips[spec.type === 'share' ? item.datasetIndex : item.dataIndex] || ''; }
+            }
+        };
+
+        // สัดส่วน (เช่น ช่องทางชำระ): แถบแนวนอนแท่งเดียวแบ่งเป็นช่วง · สีของแต่ละช่วงอ่านจากจุดสีใน legend ของการ์ด
+        if (spec.type === 'share') {
+            var datasets = spec.values.map(function (v, i) {
+                var dot = card && spec.colorFrom && spec.colorFrom[i] ? card.querySelector(spec.colorFrom[i]) : null;
+                var c = dot ? window.getComputedStyle(dot).backgroundColor : withAlpha(color, 1 - i * 0.25);
+                return { data: [v], backgroundColor: c, borderWidth: 0, borderRadius: 6, borderSkipped: false, barPercentage: 1, categoryPercentage: 1 };
+            });
+            return new window.Chart(canvas, {
+                type: 'bar',
+                data: { labels: [''], datasets: datasets },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: animation,
+                    plugins: { legend: { display: false }, tooltip: tooltip },
+                    scales: { x: { display: false, stacked: true, max: spec.values.reduce(function (a, b) { return a + b; }, 0) || 1 }, y: { display: false, stacked: true } }
+                }
+            });
+        }
+
+        var isBar = spec.type === 'bar';
+        var hi = typeof spec.highlight === 'number' ? spec.highlight : -1;
+        var barColors = isBar && hi >= 0 ? spec.values.map(function (v, i) { return i === hi ? color : withAlpha(color, 0.28); }) : null;
+        var tickColor = withAlpha(window.getComputedStyle(card || box).color, 0.6);
+        return new window.Chart(canvas, {
+            type: isBar ? 'bar' : 'line',
+            data: {
+                labels: spec.labels,
+                datasets: [{
+                    data: spec.values,
+                    borderColor: color,
+                    backgroundColor: barColors || (isBar ? withAlpha(color, 0.85) : withAlpha(color, 0.22)),
+                    hoverBackgroundColor: isBar ? (barColors ? barColors.map(function (c, i) { return i === hi ? color : withAlpha(color, 0.45); }) : color) : undefined,
+                    fill: spec.type === 'area' ? 'origin' : false,
+                    borderWidth: isBar ? 0 : 2,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHitRadius: 14,
+                    pointBackgroundColor: color,
+                    borderRadius: 6,
+                    maxBarThickness: 48,
+                    categoryPercentage: 0.8,
+                    barPercentage: 0.9
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: animation,
+                layout: { padding: spec.edge ? 0 : { top: spec.highlightLabel ? 26 : 4 } },
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: tooltip,
+                    lpHighlightLabel: hi >= 0 && spec.highlightLabel
+                        ? { index: hi, text: spec.highlightLabel, font: font, bg: color, ink: window.getComputedStyle(card || box).backgroundColor || '#fff' }
+                        : null
+                },
+                scales: {
+                    // กราฟเต็มขอบ: เส้น/พื้นที่ชนขอบซ้าย-ขวาพอดี · แท่งยังเว้นครึ่งช่องที่ขอบ
+                    x: {
+                        display: spec.xLabels === true, offset: isBar || !spec.edge,
+                        grid: { display: false }, border: { display: false },
+                        ticks: { color: tickColor, font: { family: font, size: 11 }, maxRotation: 0, autoSkip: true, autoSkipPadding: 6 }
+                    },
+                    y: { display: false, beginAtZero: true, grace: '8%' }
+                }
+            },
+            plugins: [highlightLabelPlugin]
+        });
+    }
+
+    window.LP = { widget: widget, start: start, format: format, countUp: countUp, drawChart: drawChart };
 })();
