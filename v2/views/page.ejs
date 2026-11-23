@@ -4,8 +4,8 @@
 <%- include('_head', { head: head }) %>
     <link rel="stylesheet" href="<%= base %>/assets/vendor/fonts/anuphan/font.css">
     <link rel="stylesheet" href="<%= base %>/assets/vendor/bootstrap-icons/1.11.3/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="<%= base %>/assets/css/v2.css">
-    <link rel="stylesheet" href="<%= base %>/assets/widgets.css">
+    <link rel="stylesheet" href="<%= base %>/assets/css/v2.css?v=<%= assetVer.css %>">
+    <link rel="stylesheet" href="<%= base %>/assets/widgets.css?v=<%= assetVer.widgetCss %>">
 </head>
 <%# ส่วนบน/ส่วนท้าย/Footer แก้ได้ที่ Admin > Marketing web > ตั้งค่าเว็บไซต์ (กลุ่ม hero / cta / footer) — ค่าตั้งต้นอยู่ที่ v2/site-settings.js %>
 <% var hero = sections.hero, cta = sections.cta; %>
@@ -67,8 +67,8 @@
 <%- include('_footer') %>
 
     <% if (needsChartJs) { %><script src="<%= base %>/assets/vendor/chartjs/4.5.1/chart.umd.min.js"></script><% } %>
-    <script src="<%= base %>/assets/js/v2.js"></script>
-    <script src="<%= base %>/assets/widgets.js"></script>
+    <script src="<%= base %>/assets/js/v2.js?v=<%= assetVer.js %>"></script>
+    <script src="<%= base %>/assets/widgets.js?v=<%= assetVer.widgetJs %>"></script>
     <script>window.LP && window.LP.start({ locale: '<%= locale %>' });</script>
 </body>
 </html>

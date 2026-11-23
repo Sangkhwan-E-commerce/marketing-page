@@ -117,7 +117,11 @@ test('/v2 renders Thai and English pages, noindex, sample badges, no external as
         assert.match(html, /name="robots" content="noindex/);
         assert.match(html, /data-widget="sales-today"/);
         assert.match(html, /ตัวอย่าง/);
-        assert.match(html, /href="\/v2\/assets\/css\/v2\.css"/);
+        // ลิงก์ CSS/JS มีเลขเวอร์ชันตามเนื้อหา → deploy ใหม่แล้วเบราว์เซอร์ไม่ใช้ไฟล์เก่าที่จำไว้ (การ์ดใหม่ไม่มีสไตล์)
+        assert.match(html, /href="\/v2\/assets\/css\/v2\.css\?v=[0-9a-f]{10}"/);
+        assert.match(html, /href="\/v2\/assets\/widgets\.css\?v=[0-9a-f]{10}"/);
+        assert.match(html, /src="\/v2\/assets\/js\/v2\.js\?v=[0-9a-f]{10}"/);
+        assert.match(html, /src="\/v2\/assets\/widgets\.js\?v=[0-9a-f]{10}"/);
         assert.match(html, /href="\/v2\/en"/);
         // ห้ามโหลดสคริปต์/สไตล์จากเว็บภายนอก
         // (ลิงก์ canonical/hreflang เป็น URL เต็มได้ — ไม่ใช่การโหลดไฟล์)
@@ -146,7 +150,7 @@ test('mounted at / (after the switch) links have no /v2 and pages are indexable'
         const html = await res.text();
         assert.ok(!/"\/v2[/"]/.test(html), 'no link may point under /v2');
         assert.ok(!html.includes('noindex'));
-        assert.match(html, /href="\/assets\/css\/v2\.css"/);
+        assert.match(html, /href="\/assets\/css\/v2\.css\?v=[0-9a-f]{10}"/);
         assert.match(html, /href="\/en"/);
     });
 });

@@ -3,6 +3,7 @@
 //    ⚠️ ย้าย /v2 → / เฉพาะเมื่อเจ้าของบอกว่า v2 เสร็จและพร้อมย้ายเท่านั้น
 const express = require('express');
 const fs = require('node:fs');
+const crypto = require('node:crypto');
 const path = require('node:path');
 const ejs = require('ejs');
 const { loadWidgets, describeWidgets, SIZES, HEX_RE } = require('./registry');
@@ -47,6 +48,12 @@ function toneForBackground(hex) {
     return whiteText >= inkText ? 'dark' : 'custom';
 }
 
+// เลขเวอร์ชันตามเนื้อหาไฟล์ — ต่อท้ายลิงก์ CSS/JS (?v=...) ให้เบราว์เซอร์โหลดใหม่ทันทีหลัง deploy
+//    (ไม่งั้นเบราว์เซอร์ใช้ไฟล์เก่าที่จำไว้ได้ถึง 1 ชั่วโมง ขณะที่ HTML เป็นของใหม่ → การ์ดใหม่ไม่มีสไตล์)
+function contentVersion(text) {
+    return crypto.createHash('sha1').update(text).digest('hex').slice(0, 10);
+}
+
 function bundle(files) {
     return files.filter(Boolean).map(file => `/* ${path.basename(path.dirname(file))} */\n${fs.readFileSync(file, 'utf8')}`).join('\n');
 }
@@ -74,6 +81,13 @@ function createV2App({
     const list = [...widgets.values()];
     const widgetCss = bundle(list.map(w => w.stylePath));
     const widgetJs = bundle(list.map(w => w.scriptPath));
+    const readPublic = (rel) => fs.readFileSync(path.join(__dirname, 'public', rel), 'utf8');
+    const assetVer = {
+        css: contentVersion(readPublic('css/v2.css')),
+        js: contentVersion(readPublic('js/v2.js')),
+        widgetCss: contentVersion(widgetCss),
+        widgetJs: contentVersion(widgetJs)
+    };
     const assetMaxAge = production ? '1h' : 0;
     const cacheHeader = `public, max-age=${production ? 3600 : 0}`;
 
@@ -87,6 +101,7 @@ function createV2App({
     // ระหว่างพัฒนาที่ /v2 ห้าม Google เก็บหน้า — อันดับของเว็บเก่าที่ / จะได้ไม่กระทบ
     app.use((req, res, next) => {
         res.locals.base = req.baseUrl;
+        res.locals.assetVer = assetVer;
         res.locals.noindex = req.baseUrl !== '';
         res.locals.ctx = { base: req.baseUrl, siteUrl, appUrl, noindex: res.locals.noindex };
         if (res.locals.noindex) res.set('X-Robots-Tag', 'noindex, nofollow');
