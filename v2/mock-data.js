@@ -38,6 +38,15 @@ const KITCHEN_TICKETS = [
         items: [{ th: 'สลัดอกไก่', en: 'Chicken salad', qty: 1 }] }
 ];
 
+// ออเดอร์ QR ของโต๊ะเดียว ใช้เล่าขั้นตอนในการ์ด qr-ordering-flow (รายการเดียวกับใบแรกบนจอครัว)
+const QR_ORDER = {
+    table: { th: 'โต๊ะ 4', en: 'Table 4' },
+    items: [
+        { th: 'ลาเต้เย็น 16 ออนซ์', en: 'Iced latte 16 oz', qty: 2, price: 65 },
+        { th: 'ครัวซองต์เนยสด', en: 'Butter croissant', qty: 1, price: 55 }
+    ]
+};
+
 // ล็อตสินค้าที่ใกล้หมดอายุ — ระบบตัดล็อตที่หมดอายุก่อนออกก่อน (FEFO)
 const EXPIRING_LOTS = [
     { product: { th: 'นมสดพาสเจอร์ไรส์ 2 ลิตร', en: 'Fresh milk 2 L' }, lot: 'L2611-03', daysLeft: 2, qty: 6, unit: { th: 'ขวด', en: 'btl' } },
@@ -79,4 +88,4 @@ function mockDaily(today, days = 800, total = BILLS_TOTAL) {
     });
 }
 
-module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, STORES_TOTAL, mockDaily };
+module.exports = { STORE, SALES_TODAY, KITCHEN_TICKETS, QR_ORDER, EXPIRING_LOTS, BILLS_TOTAL, SALES_TOTAL, STORES_TOTAL, mockDaily };

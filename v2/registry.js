@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // ขนาดมาตรฐาน "กว้าง x สูง" นับเป็นช่องของตาราง 4 คอลัมน์ (จอคอม)
-const SIZES = ['1x1', '2x1', '1x2', '2x2', '3x1', '4x1']; // 3x1 เพิ่ม 2026-11-22 (เจ้าของ: เผื่อการ์ดกว้างในอนาคต)
+const SIZES = ['1x1', '2x1', '1x2', '2x2', '3x1', '4x1', '4x2']; // 3x1 เพิ่ม 2026-11-22 (เจ้าของ: เผื่อการ์ดกว้างในอนาคต) · 4x2 เพิ่ม 2026-11-23 (การ์ดขั้นตอน QR Ordering มีภาพประกอบ)
 const DATA_SOURCES = ['mock', 'live'];
 const SETTING_TYPES = ['text', 'select', 'boolean', 'number', 'color', 'date'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;

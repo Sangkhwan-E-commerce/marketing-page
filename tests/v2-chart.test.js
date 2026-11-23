@@ -20,7 +20,7 @@ const DAILY = [
 const TODAY = '2026-11-22';
 
 test('3x1 is a standard size; bills-total offers the wide sizes', () => {
-    assert.deepEqual(SIZES, ['1x1', '2x1', '1x2', '2x2', '3x1', '4x1']);
+    assert.deepEqual(SIZES, ['1x1', '2x1', '1x2', '2x2', '3x1', '4x1', '4x2']);
     for (const s of ['3x1', '4x1', '2x2']) assert.ok(bills.sizes.includes(s), s);
 });
 

@@ -1,0 +1,60 @@
+<%
+    var sc = data.scene;
+    var money = function (v) { return sc.baht + fmt(v); };
+%>
+<ol class="w-qrf w-qrf-<%= settings.palette === 'accent' ? 'accent' : 'colorful' %><%= data.scenes ? ' has-scenes' : '' %><%= settings.show_desc ? '' : ' no-desc' %><%= settings.show_numbers ? '' : ' no-numbers' %>"
+    data-animate="<%= data.animate ? '1' : '0' %>" data-interval="<%= data.interval %>">
+    <% data.steps.forEach(function (st) { %>
+    <li class="w-qrf-step is-<%= st.key %>">
+        <div class="w-qrf-band">
+            <span class="w-qrf-no" aria-hidden="true"><%= st.no %></span>
+            <span class="w-qrf-label"><span class="lp-sr-only"><%= data.stepWord %> <%= st.no %>: </span><%= st.label %></span>
+        </div>
+        <% if (data.scenes) { %>
+        <div class="w-qrf-scene" aria-hidden="true">
+            <% if (st.key === 'scan') { %>
+            <div class="w-qrf-phone">
+                <div class="w-qrf-phone-top"><i class="bi bi-qr-code"></i> <%= data.table %></div>
+                <% data.items.forEach(function (i) { %>
+                <div class="w-qrf-menu-row"><span class="w-qrf-thumb"></span><span class="w-qrf-ellipsis"><%= i.name %></span><b class="w-qrf-plus"><i class="bi bi-plus"></i></b></div>
+                <% }) %>
+                <div class="w-qrf-phone-btn"><%= sc.order %> · <%= data.count %> <%= sc.items %></div>
+            </div>
+            <i class="bi bi-qr-code-scan w-qrf-scan-icon"></i>
+            <% } else if (st.key === 'received') { %>
+            <div class="w-qrf-screen">
+                <div class="w-qrf-popup">
+                    <div class="w-qrf-popup-head"><i class="bi bi-bell-fill"></i> <%= sc.new_order %></div>
+                    <div class="w-qrf-popup-table"><%= data.table %></div>
+                    <% data.items.forEach(function (i) { %><div class="w-qrf-line"><span class="w-qrf-ellipsis"><%= i.qty %>× <%= i.name %></span></div><% }) %>
+                    <div class="w-qrf-popup-btn"><i class="bi bi-check2"></i> <%= sc.confirm %></div>
+                </div>
+            </div>
+            <% } else if (st.key === 'kitchen') { %>
+            <div class="w-qrf-kds">
+                <div class="w-qrf-kds-head"><span><%= data.table %></span><span class="w-qrf-chip"><span class="w-qrf-chip-a"><%= sc.pending %></span><span class="w-qrf-chip-b"><%= sc.cooking %></span></span></div>
+                <% data.items.forEach(function (i) { %><div class="w-qrf-line"><b><%= i.qty %>×</b> <span class="w-qrf-ellipsis"><%= i.name %></span></div><% }) %>
+                <div class="w-qrf-kds-done"><i class="bi bi-check2-circle"></i> <%= sc.done %></div>
+            </div>
+            <% } else { %>
+            <div class="w-qrf-serve">
+                <div class="w-qrf-dish"><i class="bi bi-cup-hot-fill"></i></div>
+                <% if (data.pay) { %>
+                <div class="w-qrf-receipt">
+                    <div class="w-qrf-line"><span><%= data.table %></span><b><%= money(data.total) %></b></div>
+                    <div class="w-qrf-paid"><span><i class="bi bi-qr-code"></i> <%= sc.promptpay %></span><span><i class="bi bi-check-circle-fill"></i> <%= sc.paid %></span></div>
+                </div>
+                <% } else { %>
+                <div class="w-qrf-receipt"><div class="w-qrf-paid"><i class="bi bi-check-circle-fill"></i> <%= data.table %> · <%= sc.served %></div></div>
+                <% } %>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+        <div class="w-qrf-text">
+            <h3 class="w-qrf-title"><%= st.title %></h3>
+            <p class="w-qrf-desc"><%= st.desc %></p>
+        </div>
+    </li>
+    <% }) %>
+</ol>

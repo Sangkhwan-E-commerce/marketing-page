@@ -18,7 +18,7 @@
 
 สร้างโฟลเดอร์ `widgets/<id>/` (id แบบ kebab-case ตรงกับชื่อโฟลเดอร์):
 
-- `widget.js` — `id`, `category`, `sizes` (จาก `1x1 2x1 1x2 2x2 3x1 4x1`), `defaultSize`, `dataSources` (`mock` / `live`), `docPath` (บทความใน `/doc`), `tone` (`light dark blue green orange`), `settings` (ช่องตั้งค่าที่หน้า Admin จะสร้างฟอร์มให้: `text select boolean number`), `text.th` / `text.en` (ต้องมี `name`), `getData({ mock, locale, settings, source, size })`
+- `widget.js` — `id`, `category`, `sizes` (จาก `1x1 2x1 1x2 2x2 3x1 4x1 4x2`), `defaultSize`, `dataSources` (`mock` / `live`), `docPath` (บทความใน `/doc`), `tone` (`light dark blue green orange`), `settings` (ช่องตั้งค่าที่หน้า Admin จะสร้างฟอร์มให้: `text select boolean number`), `text.th` / `text.en` (ต้องมี `name`), `getData({ mock, locale, settings, source, size })`
 - `view.ejs` — หน้าตาข้างในการ์ด ได้ตัวแปร `data text locale settings size fmt pick`
 - `style.css` (ถ้ามี) — ขึ้นต้นคลาสด้วย `w-<ชื่อสั้น>-` กันชนกับการ์ดอื่น · ปรับตามขนาดด้วย `.lp-size-2x1 ...` และตามสีด้วย `.lp-tone-dark ...`
 - `script.js` (ถ้ามี) — `LP.widget('<id>', function (card, ctx) { ... })` เริ่มเมื่อการ์ดเลื่อนเข้าจอ · `ctx.reducedMotion` = ห้ามขยับ
@@ -126,6 +126,13 @@
 - การ์ดสถิติสามใบใช้ `v2/stat-card.js` ร่วมกัน (ช่องตั้งค่า/ช่วงเวลา/กราฟเหมือนกัน) · หน้าตา `widgets/bills-total/view.ejs` (sales-total include ไฟล์นี้) · `text.prefix` (฿) / `text.unit` (บิล)
 - ชนิดช่องตั้งค่า: `text select boolean number color date` · `showIf: { key, value }` = แสดงช่องเฉพาะเมื่ออีกช่องเป็นค่านั้น (หน้า Admin)
 - ⚠️ ห้ามคูณ/แต่งตัวเลขจริง (เจ้าของตกลง 2026-11-22)
+
+## การ์ดอธิบายขั้นตอน
+
+- `qr-ordering-flow` (เจ้าของ 2026-11-23 ตามภาพตัวอย่าง 4 ขั้น): สแกนและสั่ง → ร้านรับออเดอร์ (ป๊อปอัปทุกหน้า / ยืนยัน หรือส่งเข้าครัวเอง) → จอครัว (KDS) → เสิร์ฟและชำระ (PromptPay ที่โต๊ะ/เคาน์เตอร์ หรือเลือก "เสิร์ฟอย่างเดียว") · ข้อความต้องตรงกับสิ่งที่ระบบทำได้จริง
+  - ภาพประกอบเป็น HTML/CSS + Bootstrap Icons (ไม่ใช้รูป) รายการอาหาร = `mock-data.js` `QR_ORDER` · ขนาด 4x2 (ตั้งต้น — ขนาดใหม่ เพิ่ม 2026-11-23) / 2x2 มีภาพ · 4x1 / 1x2 ไม่มีภาพ · แท็บเล็ต 4x2 = จัด 2x2 · มือถือมีภาพ = 2 คอลัมน์
+  - ตั้งค่า: ไฮไลต์ทีละขั้น + วินาที · แสดงภาพ/คำอธิบาย/เลขขั้น · สีหลายสี/สีเดียว (`--w-accent`) · ขั้นสุดท้าย · เลขโต๊ะ · แก้หัวข้อ/คำอธิบายแต่ละขั้นแยกภาษา
+  - ตรวจด้วยภาพหน้าจอ Chrome headless ในเครื่อง (1280 / 800 / 390 ผ่าน iframe) 2026-11-23 · ยังไม่ได้ดูบน Render
 
 ## ยังไม่ได้ทำ
 

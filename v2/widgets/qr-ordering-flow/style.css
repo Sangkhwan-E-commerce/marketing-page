@@ -1,0 +1,148 @@
+/* ขั้นตอน QR Ordering — 4 ขั้น แต่ละขั้นมีแถบสีหัว + ภาพประกอบ (HTML/CSS) + หัวข้อ/คำอธิบาย
+   ขนาด: 4x2 = 4 คอลัมน์มีภาพ · 2x2 (และ 4x2 บนแท็บเล็ต) = 2x2 มีภาพ ไม่มีคำอธิบาย · 4x1 = 4 คอลัมน์ หัวข้อเท่านั้น · 1x2 = รายการแนวตั้ง
+   มือถือ: ความสูงตามเนื้อหา · มีภาพ = 2 คอลัมน์ · ไม่มีภาพ = รายการ
+   ⚠️ ไม่ใช้ color-mix() — สีอ่อนของแต่ละขั้นเขียนเป็น rgba ตรงๆ */
+.w-qrf { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); min-height: 0; }
+.w-qrf.has-scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.w-qrf-colorful .is-scan { --s: #3b82f6; --s-soft: rgba(59, 130, 246, 0.1); }
+.w-qrf-colorful .is-received { --s: #10b981; --s-soft: rgba(16, 185, 129, 0.1); }
+.w-qrf-colorful .is-kitchen { --s: #f59e0b; --s-soft: rgba(245, 158, 11, 0.12); }
+.w-qrf-colorful .is-serve { --s: #ef4444; --s-soft: rgba(239, 68, 68, 0.1); }
+.w-qrf-accent .w-qrf-step { --s: var(--w-accent, var(--lp-primary)); --s-soft: rgba(100, 116, 139, 0.1); }
+
+.w-qrf-step {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease;
+}
+.w-qrf-band { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--s); color: #fff; flex-shrink: 0; min-width: 0; }
+.w-qrf-no {
+    width: 26px; height: 26px; border-radius: 999px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; color: var(--s); font-weight: 800; font-size: 0.85rem; font-variant-numeric: tabular-nums;
+}
+.w-qrf.no-numbers .w-qrf-no { display: none; }
+.w-qrf-label { font-weight: 700; font-size: 0.82rem; line-height: 1.25; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.w-qrf-text { padding: 8px 10px 10px; min-width: 0; }
+.w-qrf-title { margin: 0; font-size: 0.86rem; font-weight: 700; line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.w-qrf-desc { margin: 3px 0 0; font-size: 0.76rem; line-height: 1.45; opacity: 0.72; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.w-qrf.no-desc .w-qrf-desc { display: none; }
+
+/* ---------- ภาพประกอบ ---------- */
+.w-qrf-scene {
+    position: relative; flex: 1 1 auto; min-height: 110px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 10px; background: var(--s-soft); overflow: hidden; font-size: 0.62rem; line-height: 1.35; color: #0f172a;
+}
+.w-qrf-ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-qrf-line { display: flex; align-items: center; gap: 4px; justify-content: space-between; min-width: 0; }
+.w-qrf-line b { flex-shrink: 0; }
+
+/* 1 มือถือ */
+.w-qrf-phone {
+    width: 112px; max-width: 76%; padding: 8px 7px; border-radius: 14px;
+    background: #fff; border: 3px solid #1e293b; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+    display: flex; flex-direction: column; gap: 5px;
+}
+.w-qrf-phone-top { font-weight: 700; color: var(--s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-qrf-menu-row { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.w-qrf-thumb { width: 14px; height: 14px; border-radius: 4px; background: #fde68a; flex-shrink: 0; }
+.w-qrf-plus { margin-left: auto; width: 14px; height: 14px; border-radius: 999px; background: var(--s); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.w-qrf-phone-btn { margin-top: 2px; text-align: center; font-weight: 700; color: #fff; background: var(--s); border-radius: 999px; padding: 3px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-qrf-scan-icon { position: absolute; right: 10px; bottom: 8px; font-size: 1.5rem; color: var(--s); opacity: 0.85; }
+
+/* 2 จอร้าน + ป๊อปอัปออเดอร์ใหม่ */
+.w-qrf-screen {
+    width: 132px; max-width: 92%; height: 96px; border-radius: 10px; padding: 8px;
+    background: #e2e8f0; border: 3px solid #334155; display: flex; align-items: flex-start;
+}
+.w-qrf-popup { margin-left: auto; width: 86%; padding: 6px 7px; border-radius: 8px; background: #fff; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18); display: flex; flex-direction: column; gap: 2px; }
+.w-qrf-popup-head { font-weight: 700; color: var(--s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-qrf-popup-table { font-weight: 800; font-size: 0.72rem; }
+.w-qrf-popup-btn { margin-top: 2px; align-self: flex-start; font-weight: 700; color: #fff; background: var(--s); border-radius: 999px; padding: 1px 7px; }
+
+/* 3 จอครัว */
+.w-qrf-kds {
+    width: 132px; max-width: 92%; padding: 8px; border-radius: 10px;
+    background: #0f172a; color: #f8fafc; border: 3px solid #334155; display: flex; flex-direction: column; gap: 3px;
+}
+.w-qrf-kds-head { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-weight: 800; font-size: 0.7rem; }
+.w-qrf-chip { position: relative; font-size: 0.56rem; font-weight: 700; white-space: nowrap; }
+.w-qrf-chip > span { display: inline-block; padding: 1px 6px; border-radius: 999px; background: var(--s); color: #1f2937; }
+.w-qrf-chip-b { display: none !important; }
+.w-qrf-kds .w-qrf-line { justify-content: flex-start; }
+.w-qrf-kds-done { margin-top: 2px; font-weight: 700; color: #34d399; }
+
+/* 4 เสิร์ฟ + จ่าย */
+.w-qrf-serve { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.w-qrf-dish { width: 46px; height: 46px; border-radius: 999px; background: #fff; color: var(--s); display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12); }
+.w-qrf-receipt { width: 140px; max-width: 92%; padding: 6px 8px; border-radius: 8px; background: #fff; border: 1px dashed #cbd5e1; display: flex; flex-direction: column; gap: 3px; }
+.w-qrf-paid { font-weight: 700; color: #059669; display: flex; flex-wrap: wrap; gap: 0 6px; }
+.w-qrf-paid > span { white-space: nowrap; }
+
+/* ---------- การ์ดสีเข้ม ---------- */
+.lp-tone-dark .w-qrf-step, .lp-tone-blue .w-qrf-step, .lp-tone-green .w-qrf-step, .lp-tone-orange .w-qrf-step { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.14); }
+.lp-tone-dark .w-qrf-scene, .lp-tone-blue .w-qrf-scene, .lp-tone-green .w-qrf-scene, .lp-tone-orange .w-qrf-scene { background: rgba(255, 255, 255, 0.08); }
+
+/* ---------- ไฮไลต์ทีละขั้น (script.js ใส่ is-playing / is-active · ไม่มี JS หรือผู้ชมลดการเคลื่อนไหว = ภาพนิ่งครบทุกขั้น) ---------- */
+.w-qrf.is-playing .w-qrf-step { opacity: 0.86; }
+.w-qrf.is-playing .w-qrf-step.is-active { opacity: 1; transform: translateY(-3px); box-shadow: 0 0 0 2px var(--s), 0 10px 22px rgba(15, 23, 42, 0.12); }
+.w-qrf.is-playing .is-active .w-qrf-plus { animation: w-qrf-pulse 0.9s ease-in-out 2; }
+.w-qrf.is-playing .is-active .w-qrf-scan-icon { animation: w-qrf-blink 1s ease-in-out 2; }
+.w-qrf.is-playing .is-active .w-qrf-popup { animation: w-qrf-pop 0.5s ease-out both; }
+.w-qrf.is-playing .is-active .w-qrf-chip-a { animation: w-qrf-hide 0s linear 1.2s forwards; }
+.w-qrf.is-playing .is-active .w-qrf-chip-b { display: inline-block !important; position: absolute; right: 0; top: 0; opacity: 0; animation: w-qrf-show 0.3s ease-out 1.2s forwards; }
+.w-qrf.is-playing .is-active .w-qrf-paid { animation: w-qrf-pop 0.5s ease-out 0.4s both; }
+@keyframes w-qrf-pulse { 50% { transform: scale(1.35); } }
+@keyframes w-qrf-blink { 50% { opacity: 0.25; } }
+@keyframes w-qrf-pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes w-qrf-hide { to { visibility: hidden; } }
+@keyframes w-qrf-show { to { opacity: 1; } }
+
+/* ---------- ตามขนาดการ์ด (แท็บเล็ตขึ้นไป ความสูงคงที่) ---------- */
+@media (min-width: 640px) {
+    .w-qrf { height: 100%; grid-auto-rows: minmax(0, 1fr); }
+    .lp-size-4x2 .w-qrf, .lp-size-2x2 .w-qrf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* 2x2 ที่มีภาพ: แต่ละขั้นสูงราว 150px — เหลือหัวข้อบรรทัดเดียว */
+    .lp-size-4x2 .w-qrf.has-scenes .w-qrf-desc, .lp-size-2x2 .w-qrf.has-scenes .w-qrf-desc { display: none; }
+    .lp-size-4x2 .w-qrf.has-scenes .w-qrf-title, .lp-size-2x2 .w-qrf.has-scenes .w-qrf-title { -webkit-line-clamp: 1; }
+    .lp-size-4x2 .w-qrf-scene, .lp-size-2x2 .w-qrf-scene { min-height: 0; padding: 6px; }
+    .lp-size-4x2 .w-qrf-text, .lp-size-2x2 .w-qrf-text { padding: 5px 10px 7px; }
+    /* ภาพประกอบย่อให้พอดีช่องสูงราว 75px (ไม่ย่อ = ตัดหัวท้าย) */
+    .lp-size-2x2 .w-qrf-phone, .lp-size-4x2 .w-qrf-phone { transform: scale(0.6); }
+    .lp-size-2x2 .w-qrf-screen, .lp-size-4x2 .w-qrf-screen, .lp-size-2x2 .w-qrf-kds, .lp-size-4x2 .w-qrf-kds { transform: scale(0.68); }
+    .lp-size-2x2 .w-qrf-receipt, .lp-size-4x2 .w-qrf-receipt { transform: scale(0.85); }
+    .lp-size-2x2 .w-qrf-dish, .lp-size-4x2 .w-qrf-dish { display: none; }
+
+    .lp-size-4x1 .w-qrf { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .lp-size-4x1 .w-qrf-desc { display: none; }
+
+    .lp-size-1x2 .w-qrf { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .lp-size-1x2 .w-qrf-step { flex-direction: row; align-items: stretch; }
+    .lp-size-1x2 .w-qrf-band { padding: 6px; }
+    .lp-size-1x2 .w-qrf-label { display: none; }
+    .lp-size-1x2 .w-qrf-text { align-self: center; padding: 6px 10px; }
+    .lp-size-1x2 .w-qrf-desc { display: none; }
+}
+
+/* จอคอม: 4x2 = 4 คอลัมน์ ภาพเต็มขนาด + คำอธิบาย */
+@media (min-width: 1024px) {
+    .lp-size-4x2 .w-qrf { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .lp-size-4x2 .w-qrf.has-scenes .w-qrf-desc { display: -webkit-box; }
+    .lp-size-4x2 .w-qrf.has-scenes .w-qrf-title { -webkit-line-clamp: 2; }
+    .lp-size-4x2 .w-qrf-scene { padding: 10px; }
+    .lp-size-4x2 .w-qrf-text { padding: 9px 12px 12px; }
+    .lp-size-4x2 .w-qrf-phone, .lp-size-4x2 .w-qrf-screen, .lp-size-4x2 .w-qrf-kds, .lp-size-4x2 .w-qrf-receipt { transform: none; }
+    .lp-size-4x2 .w-qrf-dish { display: inline-flex; }
+    .lp-size-4x2 .w-qrf-label { font-size: 0.88rem; }
+    .lp-size-4x2 .w-qrf-title { font-size: 0.92rem; }
+    .lp-size-4x2 .w-qrf-desc { font-size: 0.8rem; }
+}
