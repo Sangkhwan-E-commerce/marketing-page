@@ -7,22 +7,24 @@
     <link rel="stylesheet" href="<%= base %>/assets/css/v2.css">
     <link rel="stylesheet" href="<%= base %>/assets/widgets.css">
 </head>
-<body class="lp-body<%= pageDark ? ' lp-page-dark' : '' %>" style="--lp-bg: <%= pageBg %>">
+<%# ส่วนบน/ส่วนท้าย/Footer แก้ได้ที่ Admin > Marketing web > ตั้งค่าเว็บไซต์ (กลุ่ม hero / cta / footer) — ค่าตั้งต้นอยู่ที่ v2/site-settings.js %>
+<% var hero = sections.hero, cta = sections.cta; %>
+<body class="lp-body<%= pageDark ? ' lp-page-dark' : '' %>" style="--lp-bg: <%= pageBg %>; --lp-primary: <%= primary %>; --lp-primary-ink: <%= primaryInk %>">
     <% if (preview) { %><div class="lp-preview-bar" role="status"><i class="bi bi-eye" aria-hidden="true"></i> <%= t('preview.banner') %></div><% } %>
     <header class="lp-topbar">
         <a class="lp-brand" href="<%= selfUrl %>"><img src="<%= logo %>" alt="<%= texts.site_name %>" style="height: <%= site.brand.logo_height %>px"></a>
         <nav class="lp-topbar-actions">
-            <a class="lp-link" href="<%= altUrl %>" hreflang="<%= altLocale %>"><i class="bi bi-translate" aria-hidden="true"></i> <%= t('nav.lang') %></a>
-            <a class="lp-btn lp-btn-dark" href="<%= appUrl %>"><%= t('nav.cta') %></a>
+            <% if (hero.show_lang_switch) { %><a class="lp-link" href="<%= altUrl %>" hreflang="<%= altLocale %>"><i class="bi bi-translate" aria-hidden="true"></i> <%= t('nav.lang') %></a><% } %>
+            <% if (hero.show_nav_button) { %><a class="lp-btn lp-btn-dark" href="<%= hero.nav_button_url %>"><%= hero.nav_button_text %></a><% } %>
         </nav>
     </header>
 
     <main class="lp-main">
         <section class="lp-hero">
-            <p class="lp-eyebrow"><%= t('hero.eyebrow') %></p>
-            <h1 class="lp-title"><%= t('hero.title') %></h1>
-            <p class="lp-subtitle"><%= t('hero.subtitle') %></p>
-            <a class="lp-btn lp-btn-primary lp-btn-lg" href="<%= appUrl %>"><%= t('hero.cta') %> <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            <% if (hero.show_eyebrow) { %><p class="lp-eyebrow"><%= hero.eyebrow %></p><% } %>
+            <h1 class="lp-title"><%= hero.title %></h1>
+            <% if (hero.show_subtitle) { %><p class="lp-subtitle"><%= hero.subtitle %></p><% } %>
+            <% if (hero.show_button) { %><a class="lp-btn lp-btn-primary lp-btn-lg" href="<%= hero.button_url %>"><%= hero.button_text %> <i class="bi bi-arrow-right" aria-hidden="true"></i></a><% } %>
         </section>
 
         <% if (!cards.length) { %>
@@ -53,11 +55,13 @@
         </section>
         <% } %>
 
-        <section class="lp-cta">
-            <h2><%= t('footer.cta_title') %></h2>
-            <a class="lp-btn lp-btn-primary lp-btn-lg" href="<%= appUrl %>"><%= t('footer.cta') %> <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
-            <p class="lp-note"><%= t('footer.note') %></p>
+        <% if (cta.show) { %>
+        <section class="lp-cta<%= cta.bg_color ? ' lp-band' : '' %><%= ctaDark ? ' lp-band-dark' : '' %>"<% if (cta.bg_color) { %> style="background-color: <%= cta.bg_color %>"<% } %>>
+            <h2><%= cta.title %></h2>
+            <a class="lp-btn lp-btn-primary lp-btn-lg" href="<%= cta.button_url %>"><%= cta.button_text %> <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            <% if (cta.show_note) { %><p class="lp-note"><%= cta.note %></p><% } %>
         </section>
+        <% } %>
     </main>
 
 <%- include('_footer') %>

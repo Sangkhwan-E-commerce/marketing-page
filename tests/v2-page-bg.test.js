@@ -14,8 +14,8 @@ async function page(site) {
 
 test('page background colour: default, light custom, dark custom switches page text to light', async () => {
     assert.ok(FIELDS.brand.some(f => f.key === 'page_bg_color' && f.type === 'color'));
-    assert.match(await page(null), /<body class="lp-body" style="--lp-bg: #dfe6ef">/);
-    assert.match(await page({ brand: { page_bg_color: '#FEF3C7' } }), /<body class="lp-body" style="--lp-bg: #fef3c7">/);
-    assert.match(await page({ brand: { page_bg_color: '#0f172a' } }), /<body class="lp-body lp-page-dark" style="--lp-bg: #0f172a">/);
+    assert.match(await page(null), /<body class="lp-body" style="--lp-bg: #dfe6ef;/);
+    assert.match(await page({ brand: { page_bg_color: '#FEF3C7' } }), /<body class="lp-body" style="--lp-bg: #fef3c7;/);
+    assert.match(await page({ brand: { page_bg_color: '#0f172a' } }), /<body class="lp-body lp-page-dark" style="--lp-bg: #0f172a;/);
     assert.equal(normalizeSiteSettings({ brand: { page_bg_color: 'url(javascript:x)' } }).brand.page_bg_color, '#dfe6ef', 'bad value → default');
 });

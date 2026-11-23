@@ -19,6 +19,18 @@ const TONES = ['light', 'dark', 'blue', 'green', 'orange'];
 
 const trimSlash = url => url.replace(/\/+$/, '');
 
+// ค่าของกลุ่มส่วนบน/ส่วนท้าย/Footer สำหรับภาษาหนึ่ง: key_th/key_en → key · ลิงก์ว่าง → ลิงก์ตั้งต้น
+function pickSection(group, locale, defaultUrls = {}) {
+    const out = {};
+    for (const [k, v] of Object.entries(group || {})) {
+        const m = /^(.+)_(th|en)$/.exec(k);
+        if (m) { if (m[2] === locale) out[m[1]] = v; continue; }
+        out[k] = v;
+    }
+    for (const [k, url] of Object.entries(defaultUrls)) if (!out[k]) out[k] = url;
+    return out;
+}
+
 // สีพื้นเป็นโค้ดสี → ใช้ชุดสีตัวอักษรของ tone "dark" (ตัวอักษรขาว) หรือ "light" (ตัวอักษรเข้ม) แล้วแต่แบบไหนอ่านง่ายกว่า (WCAG contrast)
 function luminance(hex) {
     const [r, g, b] = [1, 3, 5]
@@ -211,6 +223,17 @@ function createV2App({
                 year: new Date().getFullYear(),
                 // สีพื้นหลังหน้าเว็บ (ตั้งค่าเว็บไซต์ > แบรนด์) — สีเข้ม = ตัวหนังสือนอกการ์ดเป็นสีอ่อน
                 pageBg: site.brand.page_bg_color,
+                // สีหลัก (ปุ่ม ข้อความเล็กบนหัว ลิงก์) + สีตัวหนังสือบนปุ่มเลือกให้ตามความต่างของสี
+                primary: site.brand.primary_color,
+                primaryInk: toneForBackground(site.brand.primary_color) === 'dark' ? '#ffffff' : '#0f172a',
+                // ข้อความของภาษานี้ + ลิงก์ (ว่าง = ลิงก์ตั้งต้น) · แถบส่วนท้าย/Footer สีเข้ม = ตัวหนังสือสีอ่อน
+                sections: {
+                    hero: pickSection(site.hero, locale, { button_url: appUrl, nav_button_url: appUrl }),
+                    cta: pickSection(site.cta, locale, { button_url: appUrl }),
+                    footer: pickSection(site.footer, locale, { manual_url: `${appUrl}/doc` })
+                },
+                ctaDark: !!site.cta.bg_color && toneForBackground(site.cta.bg_color) === 'dark',
+                footerDark: !!site.footer.bg_color && toneForBackground(site.footer.bg_color) === 'dark',
                 pageDark: toneForBackground(site.brand.page_bg_color) === 'dark',
                 preview: !!preview
             });

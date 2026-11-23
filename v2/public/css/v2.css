@@ -208,3 +208,14 @@ a { color: inherit; }
 .lp-page-dark .lp-link:hover, .lp-page-dark .lp-footer-meta a:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
 .lp-page-dark .lp-btn-dark { background: #f8fafc; color: var(--lp-ink); }
 .lp-page-dark .lp-eyebrow { color: #93c5fd; }
+
+/* ---------- ส่วนท้าย/Footer ที่ตั้งสีพื้น (Admin > ตั้งค่าเว็บไซต์) ---------- */
+.lp-band { border-radius: var(--lp-radius); padding-left: 16px; padding-right: 16px; }
+.lp-cta.lp-band { margin-top: 32px; padding-bottom: 40px; padding-top: 40px; }
+.lp-footer-wrap.lp-band { border-radius: 0; margin-top: 24px; padding-top: 24px; }
+/* ตัวหนังสือสีอ่อนเฉพาะที่อยู่บนแถบสีเข้มโดยตรง — ไม่รวมกล่องขาว "Lullapos คืออะไร" ใน Footer */
+.lp-cta.lp-band-dark, .lp-cta.lp-band-dark h2 { color: #f8fafc; }
+.lp-band-dark .lp-about { color: var(--lp-ink); }
+.lp-band-dark .lp-note, .lp-band-dark .lp-footer-meta, .lp-band-dark .lp-footer-meta a { color: rgba(248, 250, 252, 0.78); }
+.lp-band-dark .lp-footer-meta a:hover { color: #ffffff; }
+.lp-band-dark .lp-social a { background: rgba(255, 255, 255, 0.12); color: #f8fafc; }

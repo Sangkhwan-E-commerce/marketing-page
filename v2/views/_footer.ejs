@@ -3,11 +3,15 @@
     var SOCIAL_NAMES = { line: 'LINE', facebook: 'Facebook', youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram', x: 'X' };
     var socials = Object.keys(SOCIAL_ICONS).filter(function (k) { return site.social[k]; });
 %>
+    <% var foot = sections.footer; %>
+    <div class="lp-footer-wrap<%= foot.bg_color ? ' lp-band' : '' %><%= footerDark ? ' lp-band-dark' : '' %>"<% if (foot.bg_color) { %> style="background-color: <%= foot.bg_color %>"<% } %>>
     <footer class="lp-footer">
+        <% if (foot.show_about) { %>
         <section class="lp-about" aria-labelledby="lp-about-title">
             <h2 id="lp-about-title"><%= t('about.title').replace('{name}', texts.site_name) %></h2>
             <p><%= texts.about %></p>
         </section>
+        <% } %>
         <div class="lp-footer-row">
             <img src="<%= logo %>" alt="<%= texts.site_name %>" class="lp-footer-logo" loading="lazy">
             <% if (socials.length) { %>
@@ -19,9 +23,10 @@
             <% } %>
         </div>
         <div class="lp-footer-row lp-footer-meta">
-            <span>© <%= year %> <%= texts.site_name %></span>
+            <span><%= foot.copyright.replace(/\{year\}/g, year).replace(/\{name\}/g, texts.site_name) %></span>
             <% if (site.contact.email) { %><a href="mailto:<%= site.contact.email %>"><i class="bi bi-envelope" aria-hidden="true"></i> <%= site.contact.email %></a><% } %>
             <% if (site.contact.phone) { %><a href="tel:<%= site.contact.phone.replace(/[^0-9+]/g, '') %>"><i class="bi bi-telephone" aria-hidden="true"></i> <%= site.contact.phone %></a><% } %>
-            <a href="<%= appUrl %>/doc"><%= t('footer.manual') %></a>
+            <% if (foot.show_manual) { %><a href="<%= foot.manual_url %>"><%= foot.manual_text %></a><% } %>
         </div>
     </footer>
+    </div>
